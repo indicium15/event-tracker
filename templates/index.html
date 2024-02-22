@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static',filename='index.css') }}"
+/>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Soccer Match Analysis</title>
+  </head>
+  <body>
+    <div class="pitch-container">
+      <div id="pitch" onClick="addShot(event)">
+        <div class="goal left"></div>
+        <div class="goal right"></div>
+        <div class="center-circle"></div>
+        <div class="center-spot"></div>
+      </div>
+    </div>
+    <div class="button-group">
+      <button class="event-button" onclick="setActionType.call(this, 'Shot');">
+        Shot
+      </button>
+      <button
+        class="event-button"
+        onclick="setActionType.call(this, 'Shot Assist');"
+      >
+        Shot Assist
+      </button>
+      <button
+        class="event-button"
+        onclick="setActionType.call(this, 'Dribble');"
+      >
+        Dribble
+      </button>
+      <button class="event-button" onclick="setActionType.call(this, 'Cross');">
+        Cross
+      </button>
+      <button class="event-button" onclick="setActionType.call(this, 'Pass');">
+        Pass
+      </button>
+    </div>
+    <script>
+      function setActionType(actionType) {
+        // Set the current action type
+        currentActionType = actionType;
+
+        // Get all action buttons
+        var buttons = document.querySelectorAll(".event-button");
+
+        // Remove the active class from all buttons
+        buttons.forEach(function (button) {
+          button.classList.remove("active");
+        });
+        // This assumes that this function is called with 'this' bound to the clicked button
+        this.classList.add("active");
+      }
+      function setTeam(team) {
+        // Set the current action type
+        currentTeam = team;
+
+        // Get all team buttons
+        var buttons = document.querySelectorAll(".team-button");
+
+        // Remove the active class from all buttons
+        buttons.forEach(function (button) {
+          button.classList.remove("active");
+        });
+
+        // Add the active class to the clicked button
+        this.classList.add("active");
+      }
+    </script>
+    <div class="button-group">
+      <button class="team-button" onclick="setTeam.call(this, 'Home');">
+        Home
+      </button>
+      <button class="team-button" onclick="setTeam.call(this, 'Away');">
+        Away
+      </button>
+    </div>
+    <table id="event-table">
+      <thead>
+        <tr>
+          <th>Team</th>
+          <th>Player</th>
+          <th>Event</th>
+          <th>X Coordinate</th>
+          <th>Y Coordinate</th>
+          <th>xG</th>
+          <th>X</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be added here by JavaScript -->
+      </tbody>
+    </table>
+    <script>
+      var currentActionType = "Shot";
+      var currentTeam = "Home";
+      var currentPlayer = "";
+
+      function addShot(event) {
+        var rect = event.target.getBoundingClientRect();
+        var pitch = document.getElementById("pitch");
+        var clickX = event.clientX - rect.left;
+        var clickY = event.clientY - rect.top;
+        if (event.target !== document.getElementById("pitch")) {
+          clickX += event.target.offsetLeft;
+          clickY += event.target.offsetTop;
+        }
+        var clickX = clickX / pitch.offsetWidth;
+        var clickY = clickY / pitch.offsetHeight;
+        // Normalize coordinates
+        var x = Math.round(clickX * 105);
+        var y = Math.round(clickY * 68);
+        var actionType = currentActionType;
+        var team = currentTeam;
+        var player = currentPlayer;
+        var xG = actionType == "Shot" ? distanceAnglexG(x, y) : "N/A";
+        var table = document
+          .getElementById("event-table")
+          .getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow(table.rows.length);
+        var teamCell = newRow.insertCell(0);
+        var playerCell = newRow.insertCell(1);
+        var actionCell = newRow.insertCell(2);
+        var xCell = newRow.insertCell(3);
+        var yCell = newRow.insertCell(4);
+        var xgCell = newRow.insertCell(5); // Adjust the index if you have more columns
+        var deleteCell = newRow.insertCell(6); // Adjust the index if you have more columns
+        var deleteButton = document.createElement("button");
+        deleteButton.textContent = "X";
+        deleteButton.onclick = function () {
+          data = {
+            x: x,
+            y: y,
+            action: actionType,
+            player: player,
+          };
+          removeShot(newRow, data); // Pass the row and data to the removeShot function
+        };
+        //Populate content
+        teamCell.innerHTML = currentTeam;
+        playerCell.innerHTML = currentPlayer;
+        actionCell.innerHTML = currentActionType;
+        xCell.innerHTML = x;
+        yCell.innerHTML = y;
+        xgCell.innerHTML = xG;
+        deleteCell.appendChild(deleteButton);
+        fetch("/add_shot", {
+          method: "POST",
+          body: JSON.stringify({
+            //TODO: update sending and deleting of data to the server
+            x: x,
+            y: y,
+            action: actionType,
+            player: player,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Handle response data
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+      function removeShot(row, shotData) {
+        // Send a request to the server to remove the shot
+        fetch("/remove_shot", {
+          method: "POST",
+          body: JSON.stringify(shotData),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Remove the row from the table
+              row.parentNode.removeChild(row);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+      function calculateDistance(pos_x, pos_y) {
+        const midGoalX = 0.0;
+        const midGoalY = 34.0;
+        const goalCoordinates = [midGoalX, midGoalY];
+        const shotCoordinates = [pos_x, pos_y];
+        const distance = Math.hypot(
+          shotCoordinates[0] - goalCoordinates[0],
+          shotCoordinates[1] - goalCoordinates[1]
+        );
+        return distance;
+      }
+
+      function calculateAngle(pos_x, pos_y) {
+        const deltaY = Math.pow(pos_y - 34.0, 2);
+        const deltaX = Math.pow(pos_x - 0.0, 2);
+        const radian = Math.atan2(deltaY, deltaX);
+        const degrees = radian * (180 / Math.PI);
+        return degrees;
+      }
+      function distanceAnglexG(pos_x, pos_y) {
+        if (pos_x >= 52) {
+          pos_x = 105 - pos_x;
+          pos_y = 68 - pos_y;
+        }
+        let distance = calculateDistance(pos_x, pos_y);
+        let angle = calculateAngle(pos_x, pos_y);
+        // console.log("DISTANCE AND ANGLE");
+        // console.log(distance, angle);
+        let p =
+          1 /
+          (1 +
+            Math.exp(
+              -(
+                0.2204 -
+                0.0281 * pos_x -
+                0.0062 * pos_y -
+                0.0998 * distance -
+                0.0081 * angle
+              )
+            ));
+        // console.log("RAW VALUE");
+        // console.log(p);
+        // TODO: check if we output percentage or decimal
+        // p = p*100;
+        p = p.toFixed(2);
+        // console.log(p);
+        return p;
+      }
+    </script>
+    <div class="button-group">
+      <button id="download-csv" onclick="downloadCSV()">Download CSV</button>
+    </div>
+    <script>
+      function downloadCSV() {
+        window.location.href = "/export_csv";
+      }
+    </script>
+  </body>
+</html>

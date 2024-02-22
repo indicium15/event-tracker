@@ -1,0 +1,84 @@
+body {
+    font-family: Arial, sans-serif;
+}
+.pitch-container{
+    width:100% !important;
+}
+#pitch {
+    /* Height needs to be a multiple of 68px */
+    height: 400px; /* Now taller */
+    /* Width needs to be a multiple of 105px */
+    /* width: 620px; Now narrower */
+    width: 50%;
+    background: #228B22; /* Field green */
+    position: relative;
+    border: 1px solid #fff;
+}
+#pitch:before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px; /* Now a vertical line */
+    background: #fff;
+    transform: translateX(-50%);
+}
+.goal {
+    position: absolute;
+    height: 28%; /* Adjusted for vertical orientation */
+    width: 5.23%; /* Narrower to be more realistic */
+    top: 35%;
+    background: none;
+    border: 2px solid #fff;
+}
+.goal.left {
+    left: 0;
+}
+.goal.right {
+    right: 0;
+}
+.center-circle {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: none;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.center-spot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.button-group {
+    margin: 10px;
+}
+.button-group button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+.active{
+    border: 2px solid #1449d0;
+    border-radius: 4px;
+}
+
+#event-table {
+    width: 100%;
+    margin-top: 20px;
+}
+#event-table th, #event-table td {
+    padding: 5px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
