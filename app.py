@@ -1,16 +1,14 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory, abort
+from flask import Flask, render_template, request, jsonify, Response
 import csv
-import os
+import io
 
 app = Flask(__name__)
-
 # This will store our shots data
-shots = []
 
 @app.route('/')
 def index():
     # Render the main page with the shots data
-    return render_template('index.html', shots=shots)
+    return render_template('index.html')
 
 @app.route('/add_shot', methods=['POST'])
 def add_shot():
@@ -31,27 +29,35 @@ def remove_shot():
     print(shots)
     return jsonify({"success": True, "message": "Shot removed successfully"})
 
-@app.route('/export_csv', methods=['GET'])
-def export_csv():
-    # Logic to export the shots data as a CSV file
-    # Send the CSV file to the browser
-    csv_filename = 'shots_data.csv'
-    # Create CSV file
-    with open(csv_filename, 'w', newline='') as csvfile:
-        fieldnames = ['x', 'y', 'action', 'player']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+@app.route('/download_csv', methods=['POST'])
+def download_csv():
+    # Retrieve shot data from the request's JSON payload
+    shots = request.json
 
-        writer.writeheader()
-        for shot in shots:
-            writer.writerow(shot)
+    # Create a buffer to hold the CSV data
+    proxy = io.StringIO()
 
-    # Send the CSV file to the browser
-    try:
-        return send_from_directory(directory=os.getcwd(),
-                               path="shots_data.csv",
-                               as_attachment=True)
-    except FileNotFoundError:
-        abort(404)
+    # Create a CSV writer object using the buffer as the file
+    fieldnames = ['team', 'player', 'action', 'x', 'y', 'xG']
+    writer = csv.DictWriter(proxy, fieldnames=fieldnames)
+
+    # Write the header and data to the CSV writer
+    writer.writeheader()
+    for shot in shots:
+        writer.writerow(shot)
+
+    # Seek to the start so `proxy` contains the entire content
+    proxy.seek(0)
+    output = proxy.getvalue()
+    proxy.close()
+
+    # Create a Flask response
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={"Content-Disposition": "attachment;filename=shots_data.csv"}
+    )
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
