@@ -68,6 +68,12 @@ body {
     margin-right: 5px;
     cursor: pointer;
 }
+
+.dot{
+    width: 10px;
+    display: block;
+}
+
 .active{
     border: 2px solid #1449d0;
     border-radius: 4px;
