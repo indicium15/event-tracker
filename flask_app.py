@@ -38,7 +38,7 @@ def download_csv():
     proxy = io.StringIO()
 
     # Create a CSV writer object using the buffer as the file
-    fieldnames = ['player', 'action', 'x', 'y', 'xG', 'xSave']
+    fieldnames = ['player', 'action', 'x', 'y', 'x2', 'y2', 'xG', 'xSave']
     writer = csv.DictWriter(proxy, fieldnames=fieldnames)
 
     # Write the header and data to the CSV writer
