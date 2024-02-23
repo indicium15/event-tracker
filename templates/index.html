@@ -134,12 +134,8 @@
           .getElementById("event-table")
           .getElementsByTagName("tbody")[0];
         var newRow = table.insertRow(table.rows.length);
-        newRow.onmouseenter = function () {
-          showDot(dotX, dotY);
-        };
-        newRow.onmouseleave = function () {
-          removeDot();
-        };
+        newRow.setAttribute("dotx", dotX);
+        newRow.setAttribute("doty", dotY);
         var playerCell = newRow.insertCell(0);
         var actionCell = newRow.insertCell(1);
         var xCell = newRow.insertCell(2);
@@ -170,8 +166,16 @@
           xG: xG,
           xSave: xSave,
         });
+        newRow.onmouseenter = function () {
+          removeDot();
+          showDot(this);
+        };
+        newRow.onmouseleave = function () {
+          removeDot();
+        };
+        // Show the point of the latest clicked event
+        showDot(newRow);
       }
-
       function removeShot(deleteButton) {
         // Retrieve the index of the shot from the delete button
         var shotIndex = parseInt(
@@ -185,20 +189,18 @@
         // Remove the table row
         var row = deleteButton.parentNode.parentNode; // Assuming the button is within a cell of the row
         row.parentNode.removeChild(row);
+        removeDot();
       }
 
-      function showDot(x, y) {
-        // Convert the normalized x and y values to pixel positions on the pitch
-        //var dotX = x / 105 * pitch.offsetWidth;
-        //var dotY = y / 68 * pitch.offsetHeight;
-    
+      function showDot(row) {
+        var x = parseInt(row.getAttribute("dotx"));
+        var y = parseInt(row.getAttribute("doty"));
         // Create the dot and position it
         var dot = document.createElement('div');
         dot.id = 'hover-dot'; // Assign an ID for easy removal
         dot.className = 'dot';
         dot.style.left = `${x}px`;
         dot.style.top = `${y}px`;
-    
         pitch.appendChild(dot); 
       }
 

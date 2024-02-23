@@ -69,10 +69,16 @@ body {
     cursor: pointer;
 }
 
-.dot{
-    width: 10px;
-    display: block;
+.dot {
+    position: absolute; 
+    width: 0.75rem;
+    height: 0.75rem; 
+    background-color: white; 
+    border-radius: 50%; 
+    z-index: 1; 
+    transform: translate(-50%, -50%); 
 }
+
 
 .active{
     border: 2px solid #1449d0;
