@@ -134,6 +134,17 @@ body {
 }
 
 
+#cumulative-table {
+  width: 100%;
+  margin-top: 20px;
+}
+#cumulative-table th,
+#cumulative-table td {
+  padding: 5px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
 #event-table {
   width: 100%;
   margin-top: 20px;
@@ -157,4 +168,12 @@ body {
   overflow-y: scroll;
   max-height: 25%;
   height: 25%;
+}
+
+.table-scrollable {
+  display: inline-block;
+  width: 100%;
+  overflow-x: auto; /* Scroll on X-axis */
+  overflow-y: auto; /* Scroll on Y-axis */
+  max-height: 400px; /* Adjust based on your needs */
 }
