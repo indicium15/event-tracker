@@ -1,5 +1,5 @@
 var currentActionType = "Shot";
-var currentPlayer = "";
+var currentPlayer = "N/A";
 var cumulativeData = {
     'xG': 0,
     'xSave': 0,
@@ -226,7 +226,7 @@ function addShot(event, startX, startY, endX, endY, time, player) {
     // Show the point of the latest clicked event
     showDot(newRow);
     updateCumulative(xG, xSave, actionType, "add");
-    populateDropdown();
+    // populateDropdown();
 }
 
 function updateCumulative(xG, xSave, action, operation) {
@@ -316,7 +316,7 @@ function removeShot(deleteButton) {
     var xGContent = row.cells[7].textContent; // xG column
     var xSaveContent = row.cells[8].textContent; // xSave column
     updateCumulative(xGContent, xSaveContent, eventContent, "subtract");
-    populateDropdown();
+    // populateDropdown();
 }
 
 function showDot(row) {
@@ -502,37 +502,37 @@ function downloadCSV() {
         .catch((error) => console.error("Error:", error));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    populateDropdown();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     populateDropdown();
+// });
 
-function populateDropdown() {
-    const events = new Set();
-    const rows = document.querySelectorAll('#event-table tbody tr');
-    rows.forEach(row => {
-        const event = row.cells[2].textContent; // Assuming "Event" is in the 3rd column
-        events.add(event);
-    });
-    console.log("Events ");
-    console.log(events);
-    const dropdown = document.getElementById('event-filter');
-    dropdown.innerHTML = '<option value="">All Events</option>';
-    events.forEach(event => {
-        const option = document.createElement('option');
-        option.value = option.textContent = event;
-        dropdown.appendChild(option);
-    });
-}
+// function populateDropdown() {
+//     const events = new Set();
+//     const rows = document.querySelectorAll('#event-table tbody tr');
+//     rows.forEach(row => {
+//         const event = row.cells[2].textContent; // Assuming "Event" is in the 3rd column
+//         events.add(event);
+//     });
+//     console.log("Events ");
+//     console.log(events);
+//     const dropdown = document.getElementById('event-filter');
+//     dropdown.innerHTML = '<option value="">All Events</option>';
+//     events.forEach(event => {
+//         const option = document.createElement('option');
+//         option.value = option.textContent = event;
+//         dropdown.appendChild(option);
+//     });
+// }
 
-function filterTable() {
-    const filterValue = document.getElementById('event-filter').value;
-    const rows = document.querySelectorAll('#event-table tbody tr');
-    rows.forEach(row => {
-        const event = row.cells[2].textContent; // Assuming "Event" is in the 3rd column
-        if(filterValue === "" || event === filterValue) {
-            row.style.display = ""; // Show row
-        } else {
-            row.style.display = "none"; // Hide row
-        }
-    });
-}
+// function filterTable() {
+//     const filterValue = document.getElementById('event-filter').value;
+//     const rows = document.querySelectorAll('#event-table tbody tr');
+//     rows.forEach(row => {
+//         const event = row.cells[2].textContent; // Assuming "Event" is in the 3rd column
+//         if(filterValue === "" || event === filterValue) {
+//             row.style.display = ""; // Show row
+//         } else {
+//             row.style.display = "none"; // Hide row
+//         }
+//     });
+// }
