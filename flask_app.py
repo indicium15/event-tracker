@@ -3,7 +3,6 @@ import csv
 import io
 
 app = Flask(__name__)
-# This will store our shots data
 
 @app.route('/')
 def index():
@@ -60,4 +59,4 @@ def download_csv():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

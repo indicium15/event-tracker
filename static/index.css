@@ -1,95 +1,160 @@
 body {
-    font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
-.pitch-container{
-    width:100% !important;
+
+.app-container {
+  display: inline-flex;
+  width: 100%;
 }
+
+
 #pitch {
-    /* Height needs to be a multiple of 68px */
-    height: 400px; /* Now taller */
-    /* Width needs to be a multiple of 105px */
-    /* width: 620px; Now narrower */
-    width: 50%;
-    background: #228B22; /* Field green */
-    position: relative;
-    border: 1px solid #fff;
+  /* Height needs to be a multiple of 68px */
+  height: 400px; /* Now taller */
+  /* Width needs to be a multiple of 105px */
+  /* width: 620px; Now narrower */
+  width: 100%;
+  background: #228b22; /* Field green */
+  position: relative;
+  border: 1px solid #fff;
 }
 #pitch:before {
-    content: '';
-    display: block;
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px; /* Now a vertical line */
-    background: #fff;
-    transform: translateX(-50%);
+  content: "";
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px; /* Now a vertical line */
+  background: #fff;
+  transform: translateX(-50%);
 }
 .goal {
-    position: absolute;
-    height: 28%; /* Adjusted for vertical orientation */
-    width: 5.23%; /* Narrower to be more realistic */
-    top: 35%;
-    background: none;
-    border: 2px solid #fff;
+  position: absolute;
+  height: 28%; /* Adjusted for vertical orientation */
+  width: 5.23%; /* Narrower to be more realistic */
+  top: 35%;
+  background: none;
+  border: 2px solid #fff;
 }
 .goal.left {
-    left: 0;
+  left: 0;
 }
 .goal.right {
-    right: 0;
+  right: 0;
 }
 .center-circle {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: none;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: none;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .center-spot {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: #fff;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
 }
+
+.arrow-container {
+  display: flex;
+  align-items: center;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.button-container {
+  display: grid;
+}
+
+.right-arrow {
+  display: inline-block;
+  margin-left: 2.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-top: 2px solid black;
+  border-left: 2px solid black;
+  transform-origin: center;
+  transform: rotate(135deg);
+}
+
+.right-arrow::after {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 45px;
+  background-color: black;
+  transform: rotate(-45deg) translate(15px, 4px);
+}
+
 .button-group {
-    margin: 10px;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
 }
+
 .button-group button {
-    padding: 5px 10px;
-    margin-right: 5px;
-    cursor: pointer;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.event-button{
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.player-button{
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.remove-button{
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .dot {
-    position: absolute; 
-    width: 0.75rem;
-    height: 0.75rem; 
-    background-color: white; 
-    border-radius: 50%; 
-    z-index: 1; 
-    transform: translate(-50%, -50%); 
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: white;
+  border-radius: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
 }
 
-.active{
-    border: 2px solid #1449d0;
-    border-radius: 4px;
-}
 
 #event-table {
-    width: 100%;
-    margin-top: 20px;
+  width: 100%;
+  margin-top: 20px;
 }
-#event-table th, #event-table td {
-    padding: 5px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+#event-table th,
+#event-table td {
+  padding: 5px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.heading{
+  margin-bottom: 0!important;
+}
+
+.tracked-events{
+  margin-top: 1rem !important;
+}
+
+.table-container{
+  overflow-y: scroll;
+  max-height: 25%;
+  height: 25%;
 }

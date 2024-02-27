@@ -1,60 +1,221 @@
-<!DOCTYPE html>
+<!doctype html>
 <link
   rel="stylesheet"
   type="text/css"
   href="{{ url_for('static',filename='index.css') }}"
 />
+
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Soccer Match Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <title>Football Event Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   </head>
   <body>
-    <div class="pitch-container">
-      <div id="pitch">
-        <div class="goal left"></div>
-        <div class="goal right"></div>
-        <div class="center-circle"></div>
-        <div class="center-spot"></div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-md-6">
+          <h5 class="heading">Pitch</h5>
+          <p class="arrow-container">
+            Direction of Attack <span class="right-arrow"></span>
+          </p>
+          <div class="pitch-container">
+            <div id="pitch">
+              <div class="goal left"></div>
+              <div class="goal right"></div>
+              <div class="center-circle"></div>
+              <div class="center-spot"></div>
+            </div>
+          </div>
+          
+        </div>
+      <div class="button-container col-sm-12 col-md-6">
+        <div class="row">
+          <h5 class="heading">Event</h5>
+          <div class="btn-group-vertical col" role="group">
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Shot');"
+            >
+              Shot
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Shot-Save');"
+            >
+              Shot - Save
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Shot-Goal');"
+            >
+              Shot - Goal
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Shot Assist');"
+            >
+              Shot Assist
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Dribble');"
+            >
+              Dribble
+            </button>
+          </div>
+          <div class="btn-group-vertical col" role="group">
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Cross');"
+            >
+              Cross
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Pass');"
+            >
+              Pass
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Tackle');"
+            >
+              Tackle
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Free Kick');"
+            >
+              Free Kick
+            </button>
+            <button
+              class="btn btn-primary event-button"
+              onclick="setActionType.call(this, 'Corner');"
+            >
+              Corner
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <h5 class="heading">Player</h5>
+          <div class="btn-group" role="group">
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player1');"
+            >
+              P01 
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player2');"
+            >
+              P02 
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player3');"
+            >
+              P03 
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player4');"
+            >
+              P04
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player5');"
+            >
+              P05
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player6');"
+            >
+              P06
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player7');"
+            >
+              P07
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player8');"
+            >
+              P08
+          </div>
+          <div class="btn-group" role="group">
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player9');"
+            >
+              P9
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player10');"
+            >
+              P10
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player11');"
+            >
+              P11
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player12');"
+            >
+              P12
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player13');"
+            >
+              P13
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player14');"
+            >
+              P14
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player15');"
+            >
+              P15
+            </button>
+            <button
+              class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 'Player16');"
+            >
+              P16
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="button-group">
-      <button class="event-button" onclick="setActionType.call(this, 'Shot');">
-        Shot
-      </button>
-      <button
-        class="event-button"
-        onclick="setActionType.call(this, 'Shot-Save');"
-      >
-        Shot - Save
-      </button>
-      <button
-        class="event-button"
-        onclick="setActionType.call(this, 'Shot-Goal');"
-      >
-        Shot - Goal
-      </button>
-      <button
-        class="event-button"
-        onclick="setActionType.call(this, 'Shot Assist');"
-      >
-        Shot Assist
-      </button>
-      <button
-        class="event-button"
-        onclick="setActionType.call(this, 'Dribble');"
-      >
-        Dribble
-      </button>
-      <button class="event-button" onclick="setActionType.call(this, 'Cross');">
-        Cross
-      </button>
-      <button class="event-button" onclick="setActionType.call(this, 'Pass');">
-        Pass
-      </button>
+      
     </div>
     <script>
       function setActionType(actionType) {
+        if(currentActionType == actionType){
+          //Undo button active style
+          var buttons = document.querySelectorAll(".event-button");
+          // Remove the active class from all buttons
+          buttons.forEach(function (button) {
+            button.classList.remove("active");
+          });
+          currentActionType = "";
+          return
+        }
         // Set the current action type
         currentActionType = actionType;
 
@@ -68,12 +229,23 @@
         // This assumes that this function is called with 'this' bound to the clicked button
         this.classList.add("active");
       }
-      function setTeam(team) {
-        // Set the current action type
-        currentTeam = team;
+
+      function setPlayer(player) {
+        // Set the current player type
+        if(currentPlayer == player){
+          //If player already pressed toggle the button
+          currentPlayer = "";
+          var buttons = document.querySelectorAll(".player-button");
+          // Remove the active class from all buttons
+          buttons.forEach(function (button) {
+            button.classList.remove("active");
+          });
+          return;
+        }
+        currentPlayer = player;
 
         // Get all team buttons
-        var buttons = document.querySelectorAll(".team-button");
+        var buttons = document.querySelectorAll(".player-button");
 
         // Remove the active class from all buttons
         buttons.forEach(function (button) {
@@ -84,36 +256,52 @@
         this.classList.add("active");
       }
     </script>
-    <table id="event-table">
-      <thead>
-        <tr>
-          <th>Player</th>
-          <th>Event</th>
-          <th>X1</th>
-          <th>Y1</th>
-          <th>X2</th>
-          <th>Y2</th>
-          <th>xG</th>
-          <th>xSave</th>
-          <th>X</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Rows will be added here by JavaScript -->
-      </tbody>
-    </table>
+    <div class="row tracked-events flex-fill">
+      <div class="col-12 table-container container-fluid">
+        <h5>Tracked Events</h5>
+        <table id="event-table" class="table table-sm table-hover table-bordered">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Player</th>
+              <th scope="col">Event</th>
+              <th scope="col">X1</th>
+              <th scope="col">Y1</th>
+              <th scope="col">X2</th>
+              <th scope="col">Y2</th>
+              <th scope="col">xG</th>
+              <th scope="col">xSave</th>
+              <th scope="col">X</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be added here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
     <script>
       var currentActionType = "Shot";
       var currentPlayer = "";
-      var shotsData = [];
+      if(sessionStorage.getItem('rawShots')){
+        var rawShots = JSON.parse(sessionStorage.getItem('rawShots'));
+        var shotsData = [];
+        for(var i = 0; i < rawShots.length; i++){
+          addShot(rawShots[i]['event'],rawShots[i]['startX'], rawShots[i]['startY'],rawShots[i]['endX'],rawShots[i]['endY'], rawShots[i]['time']);
+        }
+        const pitch = document.getElementById("pitch");
+      }
+      else{
+        var shotsData = [];
+        var rawShots = [];
+        const pitch = document.getElementById("pitch");
+      }
 
       let isDragging = false;
       let startX = null;
       let startY = null;
       let endX = null;
       let endY = null;
-
-      const pitch = document.getElementById("pitch");
 
       pitch.addEventListener("mousedown", function (event) {
         if (startX === null || startY === null) {
@@ -139,7 +327,17 @@
       pitch.addEventListener("mouseup", function (event) {
         if (isDragging) {
           isDragging = false;
-          addShot(event, startX, startY, endX, endY); // Pass start and end coordinates to addShot
+          var currentTime = getCurrentDateTime();
+          addShot(event, startX, startY, endX, endY, currentTime); // Pass start and end coordinates to addShot
+          rawShots.push({
+            event: event,
+            startX: startX,
+            startY: startY,
+            endX: endX,
+            endY: endY,
+            time: currentTime,
+          })
+          sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
           startX = null;
           startY = null;
           endX = null;
@@ -147,7 +345,19 @@
         }
       });
 
-      function addShot(event, startX, startY, endX, endY) {
+      function getCurrentDateTime() {
+        let now = new Date();
+        let day = ("0" + now.getDate()).slice(-2);
+        let month = ("0" + (now.getMonth() + 1)).slice(-2);
+        let year = now.getFullYear().toString().slice(-2);
+        let hours = ("0" + now.getHours()).slice(-2);
+        let minutes = ("0" + now.getMinutes()).slice(-2);
+        let seconds = ("0" + now.getSeconds()).slice(-2);
+    
+        return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds;
+      }
+
+      function addShot(event, startX, startY, endX, endY, time) {
         // Logic to determine if this was a click or a drag action
         let wasDragged =
           startX !== null &&
@@ -164,29 +374,32 @@
             ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
             : "N/A";
         var xSave = actionType == "Shot-Save" ? +(1.0 - xG).toFixed(2) : "N/A";
-
         // Add a new row to the table
         var table = document
           .getElementById("event-table")
           .getElementsByTagName("tbody")[0];
         var newRow = table.insertRow();
+        console.log((startX * 1.0) / 105);
+        console.log((startY * 1.0) / 68);
         // Set attributes for hover effect
-        newRow.setAttribute("dotx", (startX * pitch.offsetWidth) / 105);
-        newRow.setAttribute("doty", (startY * pitch.offsetHeight) / 68);
+        newRow.setAttribute("dotx", (startX * 1.0) / 105);
+        newRow.setAttribute("doty", (startY * 1.0) / 68);
         if (wasDragged) {
-          newRow.setAttribute("dotx2", (endX * pitch.offsetWidth) / 105);
-          newRow.setAttribute("doty2", (endY * pitch.offsetHeight) / 68);
+          newRow.setAttribute("dotx2", (endX * 1.0) / 105);
+          newRow.setAttribute("doty2", (endY * 1.0) / 68);
         }
-        var playerCell = newRow.insertCell(0);
-        var actionCell = newRow.insertCell(1);
-        var xCell = newRow.insertCell(2);
-        var yCell = newRow.insertCell(3);
-        var x2Cell = newRow.insertCell(4);
-        var y2Cell = newRow.insertCell(5);
-        var xgCell = newRow.insertCell(6); // Adjust the index if you have more columns
-        var xSaveCell = newRow.insertCell(7); // Adjust the index if you have more columns
-        var deleteCell = newRow.insertCell(8); // Adjust the index if you have more columns
+        var timeCell = newRow.insertCell(0);
+        var playerCell = newRow.insertCell(1);
+        var actionCell = newRow.insertCell(2);
+        var xCell = newRow.insertCell(3);
+        var yCell = newRow.insertCell(4);
+        var x2Cell = newRow.insertCell(5);
+        var y2Cell = newRow.insertCell(6);
+        var xgCell = newRow.insertCell(7); // Adjust the index if you have more columns
+        var xSaveCell = newRow.insertCell(8); // Adjust the index if you have more columns
+        var deleteCell = newRow.insertCell(9); // Adjust the index if you have more columns
         //Populate content
+        timeCell.innerHTML = time;
         playerCell.innerHTML = currentPlayer;
         actionCell.innerHTML = currentActionType;
         xCell.innerHTML = startX;
@@ -198,13 +411,15 @@
         var shotIndex = shotsData.length - 1;
         var deleteButton = document.createElement("button");
         deleteButton.textContent = "X";
+        deleteButton.className = "btn btn-outline-danger remove-button";
         deleteButton.setAttribute("data-shot-index", shotIndex);
         deleteButton.onclick = function () {
           removeShot(this);
         };
         deleteCell.appendChild(deleteButton);
         shotsData.push({
-          player: player,
+          time: time, 
+          player: getCurrentDateTime,
           action: actionType,
           x: startX,
           y: startY,
@@ -213,6 +428,7 @@
           xG: xG,
           xSave: xSave,
         });
+        console.log("stored")
         newRow.onmouseenter = function () {
           removeDot();
           showDot(this);
@@ -229,10 +445,9 @@
           deleteButton.getAttribute("data-shot-index"),
           10
         );
-
         // Remove the shot from the shotsData array
         shotsData.splice(shotIndex, 1);
-
+        localStorage.setItem("shotsData", JSON.stringify(shotsData));
         // Remove the table row
         var row = deleteButton.parentNode.parentNode; // Assuming the button is within a cell of the row
         row.parentNode.removeChild(row);
@@ -242,21 +457,25 @@
       function showDot(row) {
         // Always remove existing dots first to prevent duplicates
         removeDot();
-        var x1 = parseInt(row.getAttribute("dotx"));
-        var y1 = parseInt(row.getAttribute("doty"));
+        var xPercent = parseFloat(row.getAttribute("dotx"));
+        var yPercent = parseFloat(row.getAttribute("doty"));
+        console.log("xp");
+        console.log(xPercent);
+        console.log("yp");
+        console.log(yPercent);
+        var x1 = xPercent * pitch.offsetWidth;
+        var y1 = yPercent * pitch.offsetHeight;
+        console.log("x1");
+        console.log(x1);
+        console.log("y1");
+        console.log(y1);
         // Attempt to parse x2 and y2, they might not exist or be empty
-        var x2 = row.hasAttribute("dotx2")
-          ? parseInt(row.getAttribute("dotx2"))
-          : null;
-        var y2 = row.hasAttribute("doty2")
-          ? parseInt(row.getAttribute("doty2"))
-          : null;
-
-        // Create and append the first dot
         createDot(x1, y1, "hover-dot-1"); // Use a unique ID for each dot
-
-        // If x2 and y2 coordinates exist, create and append the second dot
-        if (x2 !== null && y2 !== null && !isNaN(x2) && !isNaN(y2)) {
+        if (row.hasAttribute("dotx2") && row.hasAttribute("doty2")) {
+          var x2Percent = parseFloat(row.getAttribute("dotx2"));
+          var y2Percent = parseFloat(row.getAttribute("doty2"));
+          var x2 = x2Percent * pitch.offsetWidth;
+          var y2 = y2Percent * pitch.offsetHeight;
           createDot(x2, y2, "hover-dot-2");
           createArrow(x1, y1, x2, y2, "hover-arrow");
         }
@@ -334,7 +553,7 @@
 
         // Create the line for the arrow
         var line = document.createElementNS(svgns, "line");
-        line.setAttribute("x1", x1 - minX + 10); 
+        line.setAttribute("x1", x1 - minX + 10);
         line.setAttribute("y1", y1 - minY + 10);
         line.setAttribute("x2", x2 - minX + 10);
         line.setAttribute("y2", y2 - minY + 10);
@@ -396,8 +615,10 @@
         return p;
       }
     </script>
-    <div class="button-group">
-      <button id="download-csv" onclick="downloadCSV()">Download CSV</button>
+    <div class="row">
+      <div class="col">
+        <button id="download-csv" class="btn col-12 btn-success" onclick="downloadCSV()" type="button">Download CSV</button>
+      </div>
     </div>
     <script>
       function downloadCSV() {
@@ -422,5 +643,6 @@
           .catch((error) => console.error("Error:", error));
       }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </body>
 </html>
