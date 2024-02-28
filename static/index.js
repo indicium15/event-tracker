@@ -1,29 +1,17 @@
 var currentActionType = "Shot";
 var currentPlayer = "N/A";
 var cumulativeData = {
-    'xG': 0,
-    'xSave': 0,
-    'shots': 0,
-    'passes': 0,
-    'corners': 0,
-    'freeKicks': 0,
-    'tackles': 0,
+    xG: 0,
+    xSave: 0,
+    shots: 0,
+    passes: 0,
+    corners: 0,
+    freeKicks: 0,
+    tackles: 0,
 };
 if (sessionStorage.getItem("rawShots")) {
     var rawShots = JSON.parse(sessionStorage.getItem("rawShots"));
     var shotsData = [];
-    for (var i = 0; i < rawShots.length; i++) {
-        addShot(
-            rawShots[i]["event"],
-            rawShots[i]["startX"],
-            rawShots[i]["startY"],
-            rawShots[i]["endX"],
-            rawShots[i]["endY"],
-            rawShots[i]["time"],
-            rawShots[i]["player"]
-        );
-    }
-    const pitch = document.getElementById("pitch");
 } else {
     var shotsData = [];
     var rawShots = [];
@@ -34,6 +22,35 @@ let startX = null;
 let startY = null;
 let endX = null;
 let endY = null;
+
+var table;
+
+$(document).ready(function () {
+    table = $('#event-table').DataTable({
+        paging: false,
+        info: false,
+    });
+    console.log("table");
+    console.log(table);
+    if (rawShots.length > 0) {
+        for (var i = 0; i < rawShots.length; i++) {
+            addShot(
+                rawShots[i]["event"],
+                rawShots[i]["startX"],
+                rawShots[i]["startY"],
+                rawShots[i]["endX"],
+                rawShots[i]["endY"],
+                rawShots[i]["time"],
+                rawShots[i]["player"]
+            );
+        }
+    }
+});
+
+
+
+console.log("table");
+console.log(table);
 
 function setActionType(actionType) {
     if (currentActionType == actionType) {
@@ -85,7 +102,6 @@ function setPlayer(player) {
     // Add the active class to the clicked button
     this.classList.add("active");
 }
-
 
 pitch.addEventListener("mousedown", function (event) {
     if (startX === null || startY === null) {
@@ -188,7 +204,6 @@ function getCurrentDateTime() {
 }
 
 function addShot(event, startX, startY, endX, endY, time, player) {
-    // Logic to determine if this was a click or a drag action
     let wasDragged =
         startX !== null &&
         startY !== null &&
@@ -196,60 +211,55 @@ function addShot(event, startX, startY, endX, endY, time, player) {
         endY !== null &&
         (startX !== endX || startY !== endY);
     var actionType = currentActionType;
-    var player = player;
     var xG =
-        actionType == "Shot" ||
-            actionType == "Shot-Goal" ||
-            actionType == "Shot-Save"
+        actionType === "Shot" ||
+            actionType === "Shot-Goal" ||
+            actionType === "Shot-Save"
             ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
             : "N/A";
-    var xSave = actionType == "Shot-Save" ? +(1.0 - xG).toFixed(2) : "N/A";
-    // Add a new row to the table
-    var table = document
-        .getElementById("event-table")
-        .getElementsByTagName("tbody")[0];
-    var newRow = table.insertRow();
-    console.log((startX * 1.0) / 105);
-    console.log((startY * 1.0) / 68);
-    // Set attributes for hover effect
-    newRow.setAttribute("dotx", (startX * 1.0) / 105);
-    newRow.setAttribute("doty", (startY * 1.0) / 68);
+    var xSave = actionType === "Shot-Save" ? +(1.0 - xG).toFixed(2) : "N/A";
+
+    var newRowData = [
+        time,
+        player,
+        actionType,
+        startX,
+        startY,
+        wasDragged ? endX : "N/A",
+        wasDragged ? endY : "N/A",
+        xG,
+        xSave,
+        "<button class='btn btn-outline-danger remove-button' onclick='removeShot(this)'>X</button>",
+    ];
+
+    // Add new row data with DataTables API
+    var rowIndex = table.row.add(newRowData).draw().index();
+
+    // Store additional data using row().data() for easy access
+    table.row(rowIndex).data().dotx = (startX * 1.0) / 105;
+    table.row(rowIndex).data().doty = (startY * 1.0) / 68;
     if (wasDragged) {
-        newRow.setAttribute("dotx2", (endX * 1.0) / 105);
-        newRow.setAttribute("doty2", (endY * 1.0) / 68);
+        table.row(rowIndex).data().dotx2 = (endX * 1.0) / 105;
+        table.row(rowIndex).data().doty2 = (endY * 1.0) / 68;
     }
-    var timeCell = newRow.insertCell(0);
-    var playerCell = newRow.insertCell(1);
-    var actionCell = newRow.insertCell(2);
-    var xCell = newRow.insertCell(3);
-    var yCell = newRow.insertCell(4);
-    var x2Cell = newRow.insertCell(5);
-    var y2Cell = newRow.insertCell(6);
-    var xgCell = newRow.insertCell(7); // Adjust the index if you have more columns
-    var xSaveCell = newRow.insertCell(8); // Adjust the index if you have more columns
-    var deleteCell = newRow.insertCell(9); // Adjust the index if you have more columns
-    //Populate content
-    timeCell.innerHTML = time;
-    playerCell.innerHTML = player;
-    actionCell.innerHTML = currentActionType;
-    xCell.innerHTML = startX;
-    yCell.innerHTML = startY;
-    x2Cell.innerHTML = wasDragged ? endX : "N/A"; // Only populate if it was a drag action
-    y2Cell.innerHTML = wasDragged ? endY : "N/A";
-    xgCell.innerHTML = xG;
-    xSaveCell.innerHTML = xSave;
-    var shotIndex = shotsData.length - 1;
-    var deleteButton = document.createElement("button");
-    deleteButton.textContent = "X";
-    deleteButton.className = "btn btn-outline-danger remove-button";
-    deleteButton.setAttribute("data-shot-index", shotIndex);
-    deleteButton.onclick = function () {
-        removeShot(this);
-    };
-    deleteCell.appendChild(deleteButton);
+
+    // Assign mouseenter and mouseleave events to show and remove dots
+    $(table.row(rowIndex).node())
+        .on("mouseenter", function () {
+            showDot(this);
+        })
+        .on("mouseleave", function () {
+            removeDot();
+        });
+
+    // Manually trigger the mouseenter event to show the dot for the new row
+    $(table.row(rowIndex).node()).mouseenter();
+
+    // Update any additional data or UI elements as needed
+    updateCumulative(xG, xSave, actionType, "add");
     shotsData.push({
         time: time,
-        player: getCurrentDateTime,
+        player: player,
         action: actionType,
         x: startX,
         y: startY,
@@ -258,79 +268,62 @@ function addShot(event, startX, startY, endX, endY, time, player) {
         xG: xG,
         xSave: xSave,
     });
-    console.log("stored");
-    newRow.onmouseenter = function () {
-        removeDot();
-        showDot(this);
-    };
-    newRow.onmouseleave = function () {
-        removeDot();
-    };
-    // Show the point of the latest clicked event
-    showDot(newRow);
-    updateCumulative(xG, xSave, actionType, "add");
+    localStorage.setItem("shotsData", JSON.stringify(shotsData));
     // populateDropdown();
 }
 
 function updateCumulative(xG, xSave, action, operation) {
-    if(xG !="N/A"){
-        var updatedXg = cumulativeData['xG'];
-        if(operation == "add"){
+    if (xG != "N/A") {
+        var updatedXg = cumulativeData["xG"];
+        if (operation == "add") {
             updatedXg += parseFloat(xG);
-        }
-        else{
+        } else {
             updatedXg -= parseFloat(xG);
         }
-        cumulativeData['xG'] = parseFloat(updatedXg.toFixed(2));
+        cumulativeData["xG"] = parseFloat(updatedXg.toFixed(2));
     }
-    if(xSave !="N/A"){
-        var updatedXsave= cumulativeData['xSave'];
-        if(operation == "add"){
+    if (xSave != "N/A") {
+        var updatedXsave = cumulativeData["xSave"];
+        if (operation == "add") {
             updatedXsave += parseFloat(xSave);
-        }
-        else{
+        } else {
             updatedXsave -= parseFloat(xSave);
         }
-        cumulativeData['xSave'] = parseFloat(updatedXsave.toFixed(2));
+        cumulativeData["xSave"] = parseFloat(updatedXsave.toFixed(2));
     }
-    if(action.includes("Shot")){
-        if(operation == "add"){
-            cumulativeData['shots'] += 1;
-        }
-        else{
-            cumulativeData['shots'] -= 1;
-        }
-    }
-    if(action == "Pass"){
-        if(operation == "add"){
-            cumulativeData['passes'] += 1;
-        }
-        else{
-            cumulativeData['passes'] -= 1;
+    if (action.includes("Shot")) {
+        if (operation == "add") {
+            cumulativeData["shots"] += 1;
+        } else {
+            cumulativeData["shots"] -= 1;
         }
     }
-    if(action == "Free Kick"){
-        if(operation == "add"){
-            cumulativeData['freeKicks'] += 1;
-        }
-        else{
-            cumulativeData['freeKicks'] -= 1;
-        }
-    }
-    if(action == "Corner"){
-        if(operation == "add"){
-            cumulativeData['corners'] += 1;
-        }
-        else{
-            cumulativeData['corners'] -= 1;
+    if (action == "Pass") {
+        if (operation == "add") {
+            cumulativeData["passes"] += 1;
+        } else {
+            cumulativeData["passes"] -= 1;
         }
     }
-    if(action == "Tackle"){
-        if(operation == "add"){
-            cumulativeData['tackles'] += 1;
+    if (action == "Free Kick") {
+        if (operation == "add") {
+            cumulativeData["freeKicks"] += 1;
+        } else {
+            cumulativeData["freeKicks"] -= 1;
         }
-        else{
-            cumulativeData['tackles'] -= 1;
+    }
+    if (action == "Corner") {
+        if (operation == "add") {
+            cumulativeData["corners"] += 1;
+        } else {
+            cumulativeData["corners"] -= 1;
+        }
+    }
+    if (action == "Tackle") {
+        if (operation == "add") {
+            cumulativeData["tackles"] += 1;
+        } else {
+            cumulativeData["tackles"] -= 1;
         }
     }
     //console.log(cumulativeData);
@@ -346,42 +339,49 @@ function updateCumulative(xG, xSave, action, operation) {
 }
 
 function removeShot(deleteButton) {
-    // Retrieve the index of the shot from the delete button
-    var shotIndex = parseInt(deleteButton.getAttribute("data-shot-index"), 10);
-    // Remove the shot from the shotsData array
-    shotsData.splice(shotIndex, 1);
-    localStorage.setItem("shotsData", JSON.stringify(shotsData));
-    // Remove the table row
-    var row = deleteButton.parentNode.parentNode; // Assuming the button is within a cell of the row
-    row.parentNode.removeChild(row);
+    // Retrieve the DataTables row for the delete button
+    var row = $(deleteButton).closest("tr");
+    var rowIndex = table.row(row).index();
+
+    // Remove the shot from the shotsData array if storing shot data separately
+    if (shotsData && rowIndex !== undefined) {
+        shotsData.splice(rowIndex, 1);
+        localStorage.setItem("shotsData", JSON.stringify(shotsData));
+    }
+    // Remove the row from the DataTable
     removeDot();
-    var eventContent = row.cells[2].textContent; // Event column
-    var xGContent = row.cells[7].textContent; // xG column
-    var xSaveContent = row.cells[8].textContent; // xSave column
+    // Assuming the table structure is consistent with the addShot function
+    // If shotsData is not used to track each shot, you might need to retrieve values directly from the row before it's removed
+    var rowData = table.row(row).data();
+    var eventContent = rowData[2]; // Assuming the 3rd column is the event type
+    var xGContent = rowData[7]; // Assuming the 8th column is xG
+    var xSaveContent = rowData[8]; // Assuming the 9th column is xSave
+    console.log("eventcontent ", eventContent);
+    console.log("xgcontent ", xGContent);
+    console.log("xsave ", xSaveContent);
     updateCumulative(xGContent, xSaveContent, eventContent, "subtract");
-    // populateDropdown();
+    table.row(row).remove().draw();
 }
 
-function showDot(row) {
-    // Always remove existing dots first to prevent duplicates
+function showDot(rowNode) {
     removeDot();
-    var xPercent = parseFloat(row.getAttribute("dotx"));
-    var yPercent = parseFloat(row.getAttribute("doty"));
-    console.log("xp");
-    console.log(xPercent);
-    console.log("yp");
-    console.log(yPercent);
+
+    // Access row data using DataTables API
+    var rowData = table.row(rowNode).data();
+
+    var xPercent = parseFloat(rowData.dotx);
+    var yPercent = parseFloat(rowData.doty);
+
     var x1 = xPercent * pitch.offsetWidth;
     var y1 = yPercent * pitch.offsetHeight;
-    console.log("x1");
-    console.log(x1);
-    console.log("y1");
-    console.log(y1);
-    // Attempt to parse x2 and y2, they might not exist or be empty
-    createDot(x1, y1, "hover-dot-1"); // Use a unique ID for each dot
-    if (row.hasAttribute("dotx2") && row.hasAttribute("doty2")) {
-        var x2Percent = parseFloat(row.getAttribute("dotx2"));
-        var y2Percent = parseFloat(row.getAttribute("doty2"));
+    
+    console.log("showdot x1 ", x1);
+    console.log("showdot y1 ", y1);
+    createDot(x1, y1, "hover-dot-1");
+
+    if (rowData.dotx2 && rowData.doty2) {
+        var x2Percent = parseFloat(rowData.dotx2);
+        var y2Percent = parseFloat(rowData.doty2);
         var x2 = x2Percent * pitch.offsetWidth;
         var y2 = y2Percent * pitch.offsetHeight;
         createDot(x2, y2, "hover-dot-2");
@@ -524,6 +524,7 @@ function distanceAnglexG(pos_x, pos_y) {
 }
 
 function downloadCSV() {
+    console.log(shotsData);
     fetch("/download_csv", {
         method: "POST",
         body: JSON.stringify(shotsData),

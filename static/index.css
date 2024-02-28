@@ -102,10 +102,9 @@ body {
   flex-direction: column;
 }
 
-@media (max-width: 768px) {
-  .button-container{
-      display: inline !important;
-  }
+.button-container{
+  display: inline;
+  padding-top: 1rem;
 }
 
 .button-group button {
@@ -163,7 +162,6 @@ body {
 }
 
 .heading{
-  margin-bottom: 0!important;
 }
 
 .tracked-events{
@@ -182,4 +180,8 @@ body {
   overflow-x: auto; /* Scroll on X-axis */
   overflow-y: auto; /* Scroll on Y-axis */
   max-height: 400px; /* Adjust based on your needs */
+}
+
+.dt-search{
+  text-align: left !important;
 }
