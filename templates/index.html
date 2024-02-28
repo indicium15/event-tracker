@@ -14,6 +14,8 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
     <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -222,18 +224,18 @@
           </thead>
           <tbody>
             <tr>
-              <td>0</td>
-              <td>0</td>
-              <td>0</td>
-              <td>0</td>
-              <td>0</td>
-              <td>0</td>
-              <td>0</td>
+              <td id="cumulative-xg">0</td>
+              <td id="cumulative-xsave">0</td>
+              <td id="cumulative-shots">0</td>
+              <td id="cumulative-passes">0</td>
+              <td id="cumulative-corners">0</td>
+              <td id="cumulative-free-kicks">0</td>
+              <td id="cumulative-tackles">0</td>
             </tr>
           </tbody>
         </table>
         <h5>Tracked Events</h5>
-        <table id="event-table" class="tablesorter table table-sm table-hover table-bordered table-responsive">
+        <table id="event-table" class="table table-sm table-hover table-bordered dt-responsive">
             <thead class="table-dark">
               <tr>
                 <th scope="col">Time</th>

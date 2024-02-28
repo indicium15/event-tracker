@@ -29,6 +29,7 @@ $(document).ready(function () {
     table = $('#event-table').DataTable({
         paging: false,
         info: false,
+        responsive: true,
     });
     console.log("table");
     console.log(table);
@@ -45,8 +46,52 @@ $(document).ready(function () {
             );
         }
     }
+    table.on('draw', function() {
+        updateCumulativeValues();
+    });
+    updateCumulativeValues();
 });
 
+function updateCumulativeValues(){
+    var filteredData = table.rows({ search: 'applied' }).data();
+    console.log("filteredData");
+    console.log(filteredData[0]);
+    // Initialize your cumulative values
+    var totalXG = 0;
+    var totalXSave = 0;
+    var totalShots = 0;
+    var totalFreeKicks = 0;
+    var totalPasses = 0;
+    var totalCorners = 0;
+    var totalTackles = 0;
+
+    // Calculate cumulative values
+    filteredData.each(function(value, index) {
+        totalXG += parseFloat(value[7]) || 0;
+        totalXSave += parseFloat(value[8]) || 0;
+        // Update the counts based on your data structure and what constitutes a shot, free kick, etc.
+        if (value[2].includes('Shot')) {
+            totalShots++;
+        } else if (value[2] == 'Free Kick') {
+            totalFreeKicks++;
+        } else if (value[2] == "Pass"){
+            totalPasses++;
+        } else if (value[2] == "Corner"){
+            totalCorners++;
+        } else if (value[2] == "Tackle"){
+            totalTackles++;
+        }
+    });
+
+    // Update the cumulative table
+    $('#cumulative-xg').text(totalXG.toFixed(2));
+    $('#cumulative-xsave').text(totalXSave.toFixed(2));
+    $('#cumulative-shots').text(totalShots);
+    $('#cumulative-passes').text(totalPasses);
+    $('#cumulative-corners').text(totalCorners);
+    $('#cumulative-free-kicks').text(totalFreeKicks);
+    $('#cumulative-tackles').text(totalTackles);
+}
 
 
 console.log("table");
@@ -256,7 +301,7 @@ function addShot(event, startX, startY, endX, endY, time, player) {
     $(table.row(rowIndex).node()).mouseenter();
 
     // Update any additional data or UI elements as needed
-    updateCumulative(xG, xSave, actionType, "add");
+    //updateCumulative(xG, xSave, actionType, "add");
     shotsData.push({
         time: time,
         player: player,
@@ -270,72 +315,6 @@ function addShot(event, startX, startY, endX, endY, time, player) {
     });
     localStorage.setItem("shotsData", JSON.stringify(shotsData));
     // populateDropdown();
-}
-
-function updateCumulative(xG, xSave, action, operation) {
-    if (xG != "N/A") {
-        var updatedXg = cumulativeData["xG"];
-        if (operation == "add") {
-            updatedXg += parseFloat(xG);
-        } else {
-            updatedXg -= parseFloat(xG);
-        }
-        cumulativeData["xG"] = parseFloat(updatedXg.toFixed(2));
-    }
-    if (xSave != "N/A") {
-        var updatedXsave = cumulativeData["xSave"];
-        if (operation == "add") {
-            updatedXsave += parseFloat(xSave);
-        } else {
-            updatedXsave -= parseFloat(xSave);
-        }
-        cumulativeData["xSave"] = parseFloat(updatedXsave.toFixed(2));
-    }
-    if (action.includes("Shot")) {
-        if (operation == "add") {
-            cumulativeData["shots"] += 1;
-        } else {
-            cumulativeData["shots"] -= 1;
-        }
-    }
-    if (action == "Pass") {
-        if (operation == "add") {
-            cumulativeData["passes"] += 1;
-        } else {
-            cumulativeData["passes"] -= 1;
-        }
-    }
-    if (action == "Free Kick") {
-        if (operation == "add") {
-            cumulativeData["freeKicks"] += 1;
-        } else {
-            cumulativeData["freeKicks"] -= 1;
-        }
-    }
-    if (action == "Corner") {
-        if (operation == "add") {
-            cumulativeData["corners"] += 1;
-        } else {
-            cumulativeData["corners"] -= 1;
-        }
-    }
-    if (action == "Tackle") {
-        if (operation == "add") {
-            cumulativeData["tackles"] += 1;
-        } else {
-            cumulativeData["tackles"] -= 1;
-        }
-    }
-    //console.log(cumulativeData);
-    var table = document.querySelector("#cumulative-table tbody");
-    var firstRow = table.querySelectorAll("tr")[0].cells;
-    firstRow[0].textContent = cumulativeData["xG"];
-    firstRow[1].textContent = cumulativeData["xSave"];
-    firstRow[2].textContent = cumulativeData["shots"];
-    firstRow[3].textContent = cumulativeData["passes"];
-    firstRow[4].textContent = cumulativeData["corners"];
-    firstRow[5].textContent = cumulativeData["freeKicks"];
-    firstRow[6].textContent = cumulativeData["tackles"];
 }
 
 function removeShot(deleteButton) {
@@ -359,7 +338,7 @@ function removeShot(deleteButton) {
     console.log("eventcontent ", eventContent);
     console.log("xgcontent ", xGContent);
     console.log("xsave ", xSaveContent);
-    updateCumulative(xGContent, xSaveContent, eventContent, "subtract");
+    //updateCumulative(xGContent, xSaveContent, eventContent, "subtract");
     table.row(row).remove().draw();
 }
 
