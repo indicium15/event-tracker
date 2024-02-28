@@ -130,6 +130,49 @@ pitch.addEventListener("mouseup", function (event) {
     }
 });
 
+pitch.addEventListener("touchstart", function (event) {
+    if (startX === null || startY === null) {
+        isDragging = true;
+        let rect = pitch.getBoundingClientRect();
+        startX = ((event.clientX - rect.left) / pitch.offsetWidth) * 105;
+        startY = ((event.clientY - rect.top) / pitch.offsetHeight) * 68;
+        startX = Math.round(startX);
+        startY = Math.round(startY);
+    }
+});
+
+pitch.addEventListener("touchmove", function (event) {
+    if (isDragging) {
+        let rect = pitch.getBoundingClientRect();
+        endX = ((event.clientX - rect.left) / pitch.offsetWidth) * 105;
+        endY = ((event.clientY - rect.top) / pitch.offsetHeight) * 68;
+        endX = Math.round(endX);
+        endY = Math.round(endY);
+    }
+});
+
+pitch.addEventListener("touchend", function (event) {
+    if (isDragging) {
+        isDragging = false;
+        var currentTime = getCurrentDateTime();
+        addShot(event, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
+        rawShots.push({
+            event: event,
+            startX: startX,
+            startY: startY,
+            endX: endX,
+            endY: endY,
+            time: currentTime,
+            player: currentPlayer,
+        });
+        sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+        startX = null;
+        startY = null;
+        endX = null;
+        endY = null;
+    }
+});
+
 function getCurrentDateTime() {
     let now = new Date();
     let day = ("0" + now.getDate()).slice(-2);

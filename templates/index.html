@@ -15,7 +15,7 @@
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-sm-12 col-md-6">
+        <div class="col xs-12 col-sm-12 col-md-12 col-lg-6">
           <h5 class="heading">Pitch</h5>
           <p class="arrow-container">
             Direction of Attack <span class="right-arrow"></span>
@@ -28,9 +28,8 @@
               <div class="center-spot"></div>
             </div>
           </div>
-          
         </div>
-      <div class="button-container col-sm-12 col-md-6">
+      <div class="button-container col-sm-12 col-md-12 col-lg-6">
         <div class="row">
           <h5 class="heading">Event</h5>
           <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
@@ -100,7 +99,7 @@
         </div>
         <div class="row">
           <h5 class="heading">Player</h5>
-          <div class="btn-group" role="group">
+          <div class="btn-group button-container" role="group">
             <button
               class="btn btn-outline-primary player-button"
               onclick="setPlayer.call(this, 'Player1');"
@@ -149,7 +148,7 @@
             >
               P08
           </div>
-          <div class="btn-group" role="group">
+          <div class="btn-group button-container" role="group">
             </button>
             <button
               class="btn btn-outline-primary player-button"
@@ -204,7 +203,7 @@
       </div>
     </div>
     <div class="row tracked-events flex-fill">
-      <div class="col-12 table-container container-fluid">
+      <div class="col-12">
         <h5>Cumulative Statistics</h5>
         <table id="cumulative-table" class="table table-sm table-bordered table-responsive">
           <thead class="table-dark">
@@ -261,6 +260,7 @@
       <div class="col">
         <button id="download-csv" class="btn col-12 btn-success" onclick="downloadCSV()" type="button">Download CSV</button>
       </div>
+    </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="{{url_for('static', filename='index.js')}}"></script>
