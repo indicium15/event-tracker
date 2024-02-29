@@ -46,19 +46,21 @@ $(document).ready(function () {
             );
         }
     }
-    table.on('draw', function() {
+    table.on('draw', function () {
         updateCumulativeValues();
     });
     updateCumulativeValues();
 });
 
-function updateCumulativeValues(){
+function updateCumulativeValues() {
     var filteredData = table.rows({ search: 'applied' }).data();
     console.log("filteredData");
     console.log(filteredData[0]);
     // Initialize your cumulative values
     var totalXG = 0;
+    var totalGoals = 0;
     var totalXSave = 0;
+    var totalSaves = 0;
     var totalShots = 0;
     var totalFreeKicks = 0;
     var totalPasses = 0;
@@ -66,26 +68,33 @@ function updateCumulativeValues(){
     var totalTackles = 0;
 
     // Calculate cumulative values
-    filteredData.each(function(value, index) {
+    filteredData.each(function (value, index) {
         totalXG += parseFloat(value[7]) || 0;
         totalXSave += parseFloat(value[8]) || 0;
         // Update the counts based on your data structure and what constitutes a shot, free kick, etc.
         if (value[2].includes('Shot')) {
             totalShots++;
+            if (value[2] == "Shot-Goal") {
+                totalGoals++;
+            } else if (value[2] == "Shot-Save") {
+                totalSaves++;
+            }
         } else if (value[2] == 'Free Kick') {
             totalFreeKicks++;
-        } else if (value[2] == "Pass"){
+        } else if (value[2] == "Pass") {
             totalPasses++;
-        } else if (value[2] == "Corner"){
+        } else if (value[2] == "Corner") {
             totalCorners++;
-        } else if (value[2] == "Tackle"){
+        } else if (value[2] == "Tackle") {
             totalTackles++;
         }
     });
 
     // Update the cumulative table
     $('#cumulative-xg').text(totalXG.toFixed(2));
+    $('#cumulative-goals').text(totalGoals);
     $('#cumulative-xsave').text(totalXSave.toFixed(2));
+    $('#cumulative-saves').text(totalSaves);
     $('#cumulative-shots').text(totalShots);
     $('#cumulative-passes').text(totalPasses);
     $('#cumulative-corners').text(totalCorners);
@@ -353,7 +362,7 @@ function showDot(rowNode) {
 
     var x1 = xPercent * pitch.offsetWidth;
     var y1 = yPercent * pitch.offsetHeight;
-    
+
     console.log("showdot x1 ", x1);
     console.log("showdot y1 ", y1);
     createDot(x1, y1, "hover-dot-1");
