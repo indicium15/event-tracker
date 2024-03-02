@@ -30,6 +30,9 @@ $(document).ready(function () {
         paging: false,
         info: false,
         responsive: true,
+        "language": {
+            searchPlaceholder: 'Filter by Player and Event'
+        }
     });
     console.log("table");
     console.log(table);

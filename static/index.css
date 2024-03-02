@@ -161,7 +161,12 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-.heading{
+#download-csv{
+  margin-top:1rem;
+}
+
+.footer{
+  margin-top:1rem;
 }
 
 .tracked-events{
