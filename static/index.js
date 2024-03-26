@@ -1,4 +1,4 @@
-var currentActionType = "Shot";
+var currentActionType = "";
 var currentPlayer = "N/A";
 var cumulativeData = {
     xG: 0,
@@ -536,6 +536,63 @@ function downloadCSV() {
         })
         .catch((error) => console.error("Error:", error));
 }
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', function(event) {
+    // Player Selection
+    const playerButtons = document.querySelectorAll('.player-button');
+    const eventButtons = document.querySelectorAll('.event-button');
+    if (event.key >= '1' && event.key <= '9') {
+        // Calculate the index to select the right button
+        const index = event.key - '1'; // Convert from string to number and adjust for 0-based indexing
+        if (index < playerButtons.length) {
+            // If the calculated button exists, simulate a click on it
+            playerButtons[index].click();
+        }
+    }
+    const playerkeyMap = {
+        '0': 9, // Index of P10 
+        'Q': 10, // Index of P11 
+        'W': 11, // Index of P12
+        'E': 12, // Index of P13
+        'R': 13, // Index of P14
+        'T': 14, // Index of P15
+        'Y': 15, // Index of P16
+    };
+    
+    // Check if the pressed key is in our map
+    if (playerkeyMap.hasOwnProperty(event.key.toUpperCase())) {
+        // Get the index from the map
+        const index = playerkeyMap[event.key.toUpperCase()];
+        const playerButtons = document.querySelectorAll('.player-button');
+        if (index < playerButtons.length) {
+            // If the calculated button exists, simulate a click on it
+            playerButtons[index].click();
+        }
+    }
+
+    const eventKeyMap = {
+        'A': 0, // Index of Shot
+        'S': 1, // Index of Shot(Save) 
+        'D': 2, // Index of Shot(Goal)
+        'F': 3, // Index of Shot Assist
+        'G': 4, // Index of Dribble
+        'H': 5, // Index of Cross
+        'J': 6, // Index of Pass
+        'K': 7, // Index of Tackle
+        'L': 8, // Index of Free Kick
+        ';': 9, // Index of Corner
+    };
+    if (eventKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+        // Get the index from the map
+        const index = eventKeyMap[event.key.toUpperCase()];
+        if (index < eventButtons.length) {
+            // If the calculated button exists, simulate a click on it
+            eventButtons[index].click();
+        }
+    }
+});
+
 
 // document.addEventListener('DOMContentLoaded', function() {
 //     populateDropdown();
