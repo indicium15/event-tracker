@@ -150,6 +150,11 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
+.dt-layout-table{
+  overflow-y: scroll;
+  max-height: 10rem;
+}
+
 #event-table {
   width: 100%;
   margin-top: 20px;
@@ -163,6 +168,10 @@ body {
 
 #download-csv{
   margin-top:1rem;
+}
+
+#graphics-redirect{
+  margin-top: 1rem;
 }
 
 .footer{
@@ -191,6 +200,3 @@ body {
   text-align: left !important;
 }
 
-#graphics-redirect{
-  margin-top: 1rem;
-}

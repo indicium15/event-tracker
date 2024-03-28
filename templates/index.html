@@ -210,7 +210,7 @@
     <div class="row tracked-events flex-fill">
       <div class="col-12">
         <h5>Cumulative Statistics</h5>
-        <table id="cumulative-table" class="table table-sm table-bordered table-responsive">
+        <table id="cumulative-table" class="table table-sm table-bordered">
           <thead class="table-dark">
             <tr>
               <th scope="col">xG</th>
@@ -239,6 +239,7 @@
           </tbody>
         </table>
         <h5>Tracked Events</h5>
+        <div class="event-table-wrapper">
         <table id="event-table" class="table table-sm table-hover table-bordered dt-responsive">
             <thead class="table-dark">
               <tr>
@@ -259,10 +260,11 @@
                 <th scope="col">X</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="events">
               <!-- Rows will be added here by JavaScript -->
             </tbody>
           </table>
+        </div>
       </div>
     </div>
     <div class="row">
