@@ -190,3 +190,7 @@ body {
 .dt-search{
   text-align: left !important;
 }
+
+#graphics-redirect{
+  margin-top: 1rem;
+}
