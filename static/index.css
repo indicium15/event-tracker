@@ -7,6 +7,22 @@ body {
   width: 100%;
 }
 
+.github-link{
+  margin-right: 1rem;
+}
+
+.instructions-button{
+  margin-right: 0.75rem;
+}
+
+.navbar-brand{
+  margin-left: 0.75rem;
+}
+
+.pitch-heading{
+  margin-bottom: 0 !important;
+  margin-top: 0.75rem !important;
+}
 
 #pitch {
   /* Height needs to be a multiple of 68px */
