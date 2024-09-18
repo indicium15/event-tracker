@@ -1,9 +1,9 @@
 <!doctype html>
-
 <html lang="en">
 
 <head>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" />
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -67,7 +67,7 @@
               </hr>
               <h5>Contributing and Feedback</h5>
               <p>Pull requests are welcome! Check out the GitHub Repository for this app <a
-                  href="https://github.com/indicium15/xg-web-app">here.</a>Lastly, if you have any feedback, feel free
+                  href="https://github.com/indicium15/xg-web-app">here.</a> Lastly, if you have any feedback, feel free
                 to <a href="mailto:chaitanya.jadhav15@hotmail.com">send me an email.</a>
               </p>
             </div>
@@ -78,22 +78,44 @@
         </div>
       </div>
       <div class="col xs-12 col-sm-12 col-md-12 col-lg-6">
-        <h5 class="pitch-heading">Pitch</h5>
-        <p class="arrow-container">
-          Direction of Attack <span class="right-arrow"></span>
-        </p>
+        <div class="row-container">
+          <div class="row">
+            <h5 class="pitch-heading">Pitch</h5>
+            <p class="arrow-container">
+              Direction of Attack <span class="right-arrow"></span>
+            </p>
+          </div>
+          <div class="row">
+            <div class="zoom-controls">
+              <button class="btn btn-outline-primary" onclick="zoomIn()">Zoom In</button>
+              <button class="btn btn-outline-primary" onclick="zoomOut()">Zoom Out</button>
+            </div>
+          </div>
+        </div>
         <div class="pitch-container">
-          <div id="pitch">
-            <div class="goal left"></div>
-            <div class="goal right"></div>
-            <div class="center-circle"></div>
-            <div class="center-spot"></div>
+          <div class="pitch-wrapper">
+            <div id="pitch">
+              <div class="goal-area left"></div>
+              <div class="goal-area right"></div>
+              <div class="center-circle"></div>
+              <div class="center-spot"></div>
+              <div class="eighteen-yard-box left"></div>
+              <div class="eighteen-yard-box right"></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="button-container col-sm-12 col-md-12 col-lg-6">
         <div class="row">
           <h5 class="heading">Event</h5>
+          <div class="event-buttons-container">
+            <div class="col-md-6" id="event-column-1">
+              <!-- Buttons for the first column will go here -->
+            </div>
+            <div class="col-md-6" id="event-column-2">
+              <!-- Buttons for the second column will go here -->
+            </div>
+          </div>
           <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
             <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this, 'Shot');">
               Shot (A)
@@ -137,56 +159,171 @@
           </div>
         </div>
         <div class="row">
-          <h5 class="heading">Player</h5>
+          <!-- Modal for Editing Player Names -->
+          <div class="modal fade" id="editPlayerNamesModal" tabindex="-1" aria-labelledby="editPlayerNamesModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editPlayerNamesModalLabel">Edit Player Names</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="editPlayerNamesForm">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Jersey Number</th>
+                          <th scope="col">Player Name</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Statically defined rows for 16 players -->
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey1" placeholder="P01"></td>
+                          <td><input type="text" class="form-control" id="player1" placeholder="Player1"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey2" placeholder="P02"></td>
+                          <td><input type="text" class="form-control" id="player2" placeholder="Player2"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey3" placeholder="P03"></td>
+                          <td><input type="text" class="form-control" id="player3" placeholder="Player3"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey4" placeholder="P04"></td>
+                          <td><input type="text" class="form-control" id="player4" placeholder="Player4"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey5" placeholder="P05"></td>
+                          <td><input type="text" class="form-control" id="player5" placeholder="Player5"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey6" placeholder="P06"></td>
+                          <td><input type="text" class="form-control" id="player6" placeholder="Player6"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey7" placeholder="P07"></td>
+                          <td><input type="text" class="form-control" id="player7" placeholder="Player7"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey8" placeholder="P08"></td>
+                          <td><input type="text" class="form-control" id="player8" placeholder="Player8"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey9" placeholder="P09"></td>
+                          <td><input type="text" class="form-control" id="player9" placeholder="Player9"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey10" placeholder="P10"></td>
+                          <td><input type="text" class="form-control" id="player10" placeholder="Player10"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey11" placeholder="P11"></td>
+                          <td><input type="text" class="form-control" id="player11" placeholder="Player11"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey12" placeholder="P12"></td>
+                          <td><input type="text" class="form-control" id="player12" placeholder="Player12"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey13" placeholder="P13"></td>
+                          <td><input type="text" class="form-control" id="player13" placeholder="Player13"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey14" placeholder="P14"></td>
+                          <td><input type="text" class="form-control" id="player14" placeholder="Player14"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey15" placeholder="P15"></td>
+                          <td><input type="text" class="form-control" id="player15" placeholder="Player15"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="jersey16" placeholder="P16"></td>
+                          <td><input type="text" class="form-control" id="player16" placeholder="Player16"></td>
+                        </tr>
+
+                      </tbody>
+                    </table>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" onclick="updatePlayerNames()">Save</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="row align-items-center">
+            <div class="col-auto align-items-center d-flex">
+              <h5 class="heading mb-0">Player</h5>
+            </div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
+                data-bs-target="#editPlayerNamesModal">
+                Edit
+              </button>
+            </div>
+          </div>
           <div class="btn-group button-container" role="group">
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player1');">
+            <button id="playerButton1" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 1);">
               P01 (1)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player2');">
+            <button id="playerButton2" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 2);">
               P02 (2)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player3');">
+            <button id="playerButton3" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 3);">
               P03 (3)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player4');">
+            <button id="playerButton4" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 4);">
               P04 (4)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player5');">
+            <button id="playerButton5" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 5);">
               P05 (5)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player6');">
+            <button id="playerButton6" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 6);">
               P06 (6)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player7');">
+            <button id="playerButton7" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 7);">
               P07 (7)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player8');">
+            <button id="playerButton8" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 8);">
               P08 (8)
             </button>
           </div>
           <div class="btn-group button-container" role="group">
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player9');">
+            <button id="playerButton9" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 9);">
               P09 (9)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player10');">
+            <button id="playerButton10" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 10);">
               P10 (0)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player11');">
+            <button id="playerButton11" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 11);">
               P11 (Q)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player12');">
+            <button id="playerButton12" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 12);">
               P12 (W)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player13');">
+            <button id="playerButton13" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 13);">
               P13 (E)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player14');">
+            <button id="playerButton14" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 14);">
               P14 (R)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player15');">
+            <button id="playerButton15" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 15);">
               P15 (T)
             </button>
-            <button class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 'Player16');">
+            <button id="playerButton16" class="btn btn-outline-primary player-button"
+              onclick="setPlayer.call(this, 16);">
               P16 (Y)
             </button>
           </div>
@@ -230,7 +367,7 @@
             <thead class="table-dark">
               <tr>
                 <th scope="col">Time</th>
-                <th scope="col">Player</th>
+                <th scope="col">Shirt Number</th>
                 <th scope="col">
                   Event
                   <!--TODO: Add filtering-->
@@ -253,10 +390,8 @@
     </div>
     <div class="row">
       <div class="col">
-        <button id="download-csv" class="btn col-12 btn-success" onclick="downloadCSV()" type="button">Download
-          CSV</button>
-        <a href="https://graphics-jkomar.pythonanywhere.com/football/" class="btn col-12 btn-success" role="button"
-          id="graphics-redirect">Generate PDF Report (Requires Downloaded CSV)</a>
+        <button id="download-csv" class="btn col-12 btn-success" onclick="downloadCSVandPDF()" type="button">Download
+          CSV and Report</button>
       </div>
     </div>
   </div>
@@ -266,7 +401,7 @@
         <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
           <h5 class="text-uppercase text-white">Author</h5>
           <p class="text-white">
-            Developed by <strong>Chaitanya Jadhav</strong>
+            Developed by <strong>Chaitanya Jadhav</strong> and <strong>John Komar</strong>
           </p>
         </div>
         <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
@@ -274,6 +409,10 @@
           <p class="text-white">
             <a href="mailto:chaitanya.jadhav15@hotmail.com" class="text-white">
               <i class="fas fa-envelope"></i> chaitanya.jadhav15@hotmail.com
+            </a>
+            /
+            <a href="mailto:john.komar@nie.edu.sg" class="text-white">
+              <i class="fas fa-envelope"></i> john.komar@nie.edu.sg
             </a>
           </p>
         </div>

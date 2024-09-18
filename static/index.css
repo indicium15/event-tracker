@@ -7,6 +7,12 @@ body {
   width: 100%;
 }
 
+.row-container {
+  display: flex;
+  align-items: center; /* Vertically center the content within the container */
+  justify-content: space-between; /* Add space between elements */
+}
+
 .github-link{
   margin-right: 1rem;
 }
@@ -33,7 +39,17 @@ body {
   background: #228b22; /* Field green */
   position: relative;
   border: 1px solid #fff;
+  transition: transform 0.2s ease;
 }
+
+.pitch-wrapper {
+  overflow: auto;
+}
+
+.zoom-controls {
+  margin-top: 10px;
+}
+
 #pitch:before {
   content: "";
   display: block;
@@ -45,7 +61,8 @@ body {
   background: #fff;
   transform: translateX(-50%);
 }
-.goal {
+
+.goal-area {
   position: absolute;
   height: 28%; /* Adjusted for vertical orientation */
   width: 5.23%; /* Narrower to be more realistic */
@@ -53,16 +70,19 @@ body {
   background: none;
   border: 2px solid #fff;
 }
-.goal.left {
+
+.goal-area.left {
   left: 0;
 }
-.goal.right {
+
+.goal-area.right {
   right: 0;
 }
+
 .center-circle {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 120px;
+  height: 120px;
   background: none;
   border-radius: 50%;
   border: 2px solid #fff;
@@ -70,6 +90,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 .center-spot {
   position: absolute;
   width: 4px;
@@ -79,6 +100,54 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
+}
+
+/* 18-yard box */
+.eighteen-yard-box {
+  position: absolute;
+  height: 64%; /* Adjust to match the proportions */
+  width: 16%; /* Adjust the width */
+  top: 17%; /* Centered vertically */
+  background: none;
+  border: 2px solid #fff;
+}
+
+.eighteen-yard-box.left {
+  left: 0;
+}
+
+.eighteen-yard-box.right {
+  right: 0;
+}
+
+.eighteen-yard-box.right::before {
+  content: "";
+  position: absolute;
+  width: 50px; /* Diameter of the semi-circle; change this to modify the size */
+  height: 25px; /* Radius of the semi-circle */
+  border-top-left-radius: 25px; /* Makes the left side of the arc rounded */
+  border-top-right-radius: 25px; /* Makes the right side of the arc rounded */
+  border: 2px solid #fff; /* Semi-circle border */
+  border-bottom: none; /* Removes the bottom border to form a semi-circle */
+  background: none;
+  top: 49%; /* Positions the semi-circle correctly above the 18-yard box */
+  left: 50%;
+  transform: translateX(-185%) translateY(-40%) rotate(-90deg); /* Centers the semi-circle horizontally */
+}
+
+.eighteen-yard-box.left::before {
+  content: "";
+  position: absolute;
+  width: 50px; /* Diameter of the semi-circle; change this to modify the size */
+  height: 25px; /* Radius of the semi-circle */
+  border-top-left-radius: 25px; /* Makes the left side of the arc rounded */
+  border-top-right-radius: 25px; /* Makes the right side of the arc rounded */
+  border: 2px solid #fff; /* Semi-circle border */
+  border-bottom: none; /* Removes the bottom border to form a semi-circle */
+  background: none;
+  top: 49%; /* Positions the semi-circle correctly above the 18-yard box */
+  left: 50%;
+  transform: translateX(85%) translateY(-40%) rotate(90deg); /* Centers the semi-circle horizontally */
 }
 
 .arrow-container {

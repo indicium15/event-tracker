@@ -1,3 +1,4 @@
 xgwebapp/
 __pycache__/
 .vscode/
+*.png
