@@ -13,21 +13,20 @@ body {
   justify-content: space-between; /* Add space between elements */
 }
 
-.github-link{
+.github-link {
   margin-right: 1rem;
 }
 
-.instructions-button{
+.instructions-button {
   margin-right: 0.75rem;
 }
 
-.navbar-brand{
+.navbar-brand {
   margin-left: 0.75rem;
 }
 
-.pitch-heading{
+.pitch-heading {
   margin-bottom: 0 !important;
-  margin-top: 0.75rem !important;
 }
 
 #pitch {
@@ -73,10 +72,12 @@ body {
 
 .goal-area.left {
   left: 0;
+  border-left: 0;
 }
 
 .goal-area.right {
   right: 0;
+  border-right: 0;
 }
 
 .center-circle {
@@ -114,19 +115,21 @@ body {
 
 .eighteen-yard-box.left {
   left: 0;
+  border-left: 0;
 }
 
 .eighteen-yard-box.right {
   right: 0;
+  border-right: 0;
 }
 
 .eighteen-yard-box.right::before {
   content: "";
   position: absolute;
-  width: 50px; /* Diameter of the semi-circle; change this to modify the size */
-  height: 25px; /* Radius of the semi-circle */
-  border-top-left-radius: 25px; /* Makes the left side of the arc rounded */
-  border-top-right-radius: 25px; /* Makes the right side of the arc rounded */
+  width: 3.5vw; /* Diameter of the semi-circle; change this to modify the size */
+  height: 1.5vw; /* Radius of the semi-circle */
+  border-top-left-radius: 2.5vw; /* Makes the left side of the arc rounded */
+  border-top-right-radius: 2.5vw; /* Makes the right side of the arc rounded */
   border: 2px solid #fff; /* Semi-circle border */
   border-bottom: none; /* Removes the bottom border to form a semi-circle */
   background: none;
@@ -138,16 +141,16 @@ body {
 .eighteen-yard-box.left::before {
   content: "";
   position: absolute;
-  width: 50px; /* Diameter of the semi-circle; change this to modify the size */
-  height: 25px; /* Radius of the semi-circle */
-  border-top-left-radius: 25px; /* Makes the left side of the arc rounded */
-  border-top-right-radius: 25px; /* Makes the right side of the arc rounded */
+  width: 3.5vw; /* Diameter of the semi-circle; change this to modify the size */
+  height: 1.5vw; /* Radius of the semi-circle */
+  border-top-left-radius: 2.5vw; /* Makes the left side of the arc rounded */
+  border-top-right-radius: 2.5vw; /* Makes the right side of the arc rounded */
   border: 2px solid #fff; /* Semi-circle border */
   border-bottom: none; /* Removes the bottom border to form a semi-circle */
   background: none;
   top: 49%; /* Positions the semi-circle correctly above the 18-yard box */
   left: 50%;
-  transform: translateX(85%) translateY(-40%) rotate(90deg); /* Centers the semi-circle horizontally */
+  transform: translateX(83%) translateY(-40%) rotate(90deg); /* Centers the semi-circle horizontally */
 }
 
 .arrow-container {
@@ -155,10 +158,6 @@ body {
   align-items: center;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-}
-
-.button-container {
-  display: grid;
 }
 
 .right-arrow {
@@ -187,9 +186,9 @@ body {
   flex-direction: column;
 }
 
-.button-container{
-  display: inline;
-  padding-top: 1rem;
+.button-container {
+  padding-top: 0.5rem;
+  width: 100%;
 }
 
 .button-group button {
@@ -198,17 +197,17 @@ body {
   cursor: pointer;
 }
 
-.event-button{
+.event-button {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.player-button{
+.player-button {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.remove-button{
+.remove-button {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
@@ -223,7 +222,6 @@ body {
   transform: translate(-50%, -50%);
 }
 
-
 #cumulative-table {
   width: 100%;
   margin-top: 20px;
@@ -236,7 +234,7 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-.dt-layout-table{
+.dt-layout-table {
   overflow-y: scroll !important;
   max-height: 10rem !important;
 }
@@ -252,23 +250,23 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-#download-csv{
-  margin-top:1rem;
-}
-
-#graphics-redirect{
+#download-csv {
   margin-top: 1rem;
 }
 
-.footer{
-  margin-top:1rem;
+#graphics-redirect {
+  margin-top: 1rem;
 }
 
-.tracked-events{
+.footer {
+  margin-top: 1rem;
+}
+
+.tracked-events {
   margin-top: 1rem !important;
 }
 
-.table-container{
+.table-container {
   overflow-y: scroll;
   max-height: 25%;
   height: 25%;
@@ -282,7 +280,6 @@ body {
   max-height: 400px; /* Adjust based on your needs */
 }
 
-.dt-search{
+.dt-search {
   text-align: left !important;
 }
-

@@ -18,64 +18,142 @@ function zoomOut() {
 }
 
 // Create an object to store jersey numbers and player names
-let playerMap = {};
+// Create objects to store jersey numbers and player names for both teams
+let homePlayerMap = {};
+let awayPlayerMap = {};
 
-// Initialize playerMap with default values for 16 players
-function initializePlayerMap() {
-  for (let i = 1; i <= 16; i++) {
-    playerMap[i] = {
-      jersey: `P${i.toString().padStart(2, "0")}`, // Default to 'P01', 'P02', etc.
-      name: `Player${i}`, // Default to 'Player1', 'Player2', etc.
-    };
+// Map of keyboard shortcuts based on player index
+let homeShortcutMap = {
+  1: "(1)",
+  2: "(2)",
+  3: "(3)",
+  4: "(4)",
+  5: "(5)",
+  6: "(6)",
+  7: "(7)",
+  8: "(8)",
+  9: "(9)",
+  10: "(0)",
+  11: "(Q)",
+  12: "(W)",
+  13: "(E)",
+  14: "(R)",
+  15: "(T)",
+  16: "(Y)",
+};
+
+let awayShortcutMap = {
+  1: "(U)",
+  2: "(I)",
+  3: "(O)",
+  4: "(P)",
+  5: "([)",
+  6: "(])",
+  7: "(A)",
+  8: "(S)",
+  9: "(D)",
+  10: "(F)",
+  11: "(G)",
+  12: "(H)",
+  13: "(J)",
+  14: "(K)",
+  15: "(L)",
+  16: "(;)",
+};
+
+// Initialize playerMap with default values for 16 players for both teams
+function initializePlayerMaps() {
+  // Check if player maps are already in localStorage
+  const storedHomePlayerMap = localStorage.getItem('homePlayerMap');
+  const storedAwayPlayerMap = localStorage.getItem('awayPlayerMap');
+
+  // Load from localStorage if available, else initialize with default values
+  if (storedHomePlayerMap) {
+    homePlayerMap = JSON.parse(storedHomePlayerMap);
+    console.log("stored home map:");
+    console.log(homePlayerMap);
+    for (let i = 1; i <= 16; i++) {
+      let button = document.getElementById(`homePlayerButton${i}`);
+      if (button) {
+        let jerseyNumber = homePlayerMap[i].jersey;
+        let shortcut = homeShortcutMap[i]; // Get the shortcut based on the player's index
+        button.innerHTML = `${jerseyNumber} ${shortcut}`;
+      }
+    }
+  } else {
+    for (let i = 1; i <= 16; i++) {
+      homePlayerMap[i] = {
+        jersey: `A${i.toString().padStart(2, "0")}`,
+        name: `HomePlayer${i}`,
+      };
+    }
+    localStorage.setItem('homePlayerMap', JSON.stringify(homePlayerMap));
+  }
+
+  if (storedAwayPlayerMap) {
+    awayPlayerMap = JSON.parse(storedAwayPlayerMap);
+    console.log("stored away map:");
+    console.log(awayPlayerMap);
+    for (let i = 1; i <= 16; i++) {
+      let button = document.getElementById(`awayPlayerButton${i}`);
+      if (button) {
+        let jerseyNumber = awayPlayerMap[i].jersey;
+        let shortcut = awayShortcutMap[i]; // Get the shortcut based on the player's index
+        button.innerHTML = `${jerseyNumber} ${shortcut}`;
+      }
+    }
+  } else {
+    for (let i = 1; i <= 16; i++) {
+      awayPlayerMap[i] = {
+        jersey: `B${i.toString().padStart(2, "0")}`,
+        name: `AwayPlayer${i}`,
+      };
+    }
+    localStorage.setItem('awayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
 // Call initializePlayerMap when the script loads
-initializePlayerMap();
+initializePlayerMaps();
 
 // Function to update player names and jersey numbers from the input fields in the modal
-// Function to update player names and jersey numbers from the input fields in the modal
-function updatePlayerNames() {
+function updatePlayerNames(team) {
+  const playerMap = team === "home" ? homePlayerMap : awayPlayerMap;
+  const shortcutMap = team === "home" ? homeShortcutMap : awayShortcutMap;
+  const prefix = team === "home" ? "home" : "away"; // No prefix for home, "away" for away team
+
   for (let i = 1; i <= 16; i++) {
-    let jerseyInput = document.getElementById(`jersey${i}`);
-    let playerInput = document.getElementById(`player${i}`);
+    let jerseyInput = document.getElementById(`${prefix}Jersey${i}`); // Use "awayJersey1" for away team
+    let playerInput = document.getElementById(`${prefix}Player${i}`); // Use "awayPlayer1" for away team
     if (jerseyInput && playerInput) {
       playerMap[i] = {
-        jersey: jerseyInput.value || `P${i.toString().padStart(2, "0")}`, // Use the input value or default to 'P01', 'P02', etc.
-        name: playerInput.value || `Player${i}`, // Use the input value or default to 'PlayerX'
+        jersey: jerseyInput.value || `P${i.toString().padStart(2, "0")}`, // Default to 'P01', 'P02', etc.
+        name: playerInput.value || `Player${i}`, // Default to 'PlayerX'
       };
     }
   }
 
-  // Map of keyboard shortcuts based on player index
-  let shortcutMap = {
-    1: "(1)",
-    2: "(2)",
-    3: "(3)",
-    4: "(4)",
-    5: "(5)",
-    6: "(6)",
-    7: "(7)",
-    8: "(8)",
-    9: "(9)",
-    10: "(0)",
-    11: "(Q)",
-    12: "(W)",
-    13: "(E)",
-    14: "(R)",
-    15: "(T)",
-    16: "(Y)",
-  };
-
-  // Update the button labels to reflect the new jersey numbers
-  document.querySelectorAll(".player-button").forEach((button, index) => {
-    let jerseyNumber = playerMap[index + 1].jersey;
-    let shortcut = shortcutMap[index + 1]; // Get the shortcut based on the player's index
-    button.innerHTML = `${jerseyNumber} ${shortcut}`;
-  });
-
-  // Close the modal
-  $("#editPlayerNamesModal").modal("hide");
+  for (let i = 1; i <= 16; i++) {
+    let button = document.getElementById(`${prefix}PlayerButton${i}`);
+    if (button) {
+      let jerseyNumber = playerMap[i].jersey;
+      let shortcut = shortcutMap[i]; // Get the shortcut based on the player's index
+      button.innerHTML = `${jerseyNumber} ${shortcut}`;
+    }
+  }
+  // Persist changes to localStorage
+  if (team === "home") {
+    localStorage.setItem("homePlayerMap", JSON.stringify(homePlayerMap));
+  } else {
+    localStorage.setItem("awayPlayerMap", JSON.stringify(awayPlayerMap));
+  }
+  //Close the modal
+  if(prefix == "home"){
+    $(`#editHomePlayerNamesModal`).modal('hide');
+  }
+  else{
+    $(`#editAwayPlayerNamesModal`).modal('hide');
+  }
 }
 
 var currentActionType = "";
@@ -117,6 +195,8 @@ $(document).ready(function () {
   });
   console.log("table");
   console.log(table);
+  console.log("rawShots");
+  console.log(rawShots);
   if (rawShots.length > 0) {
     for (var i = 0; i < rawShots.length; i++) {
       addShot(
@@ -158,9 +238,9 @@ function updateCumulativeValues() {
     // Update the counts based on your data structure and what constitutes a shot, free kick, etc.
     if (value[2].includes("Shot")) {
       totalShots++;
-      if (value[2] == "Shot-Goal") {
+      if (value[2] == "Shot - Goal") {
         totalGoals++;
-      } else if (value[2] == "Shot-Save") {
+      } else if (value[2] == "Shot - Save") {
         totalSaves++;
       }
     } else if (value[2] == "Free Kick") {
@@ -189,8 +269,8 @@ function updateCumulativeValues() {
 console.log("table");
 console.log(table);
 
-function setActionType(actionType) {
-  if (currentActionType == actionType) {
+function setActionType(index) {
+  if (currentActionType == eventNames[index]) {
     //Undo button active style
     var buttons = document.querySelectorAll(".event-button");
     // Remove the active class from all buttons
@@ -201,7 +281,7 @@ function setActionType(actionType) {
     return;
   }
   // Set the current action type
-  currentActionType = actionType;
+  currentActionType = eventNames[index];
 
   // Get all action buttons
   var buttons = document.querySelectorAll(".event-button");
@@ -214,8 +294,13 @@ function setActionType(actionType) {
   this.classList.add("active");
 }
 
-function setPlayer(playerIndex) {
+function setPlayer(team, playerIndex) {
   // Set the current player type
+  const playerMap = team === "home" ? homePlayerMap : awayPlayerMap;
+  console.log("selected playerMap");
+  console.log(playerMap);
+
+  const prefix = team === "home" ? "home" : "away";
   console.log("playerIndex:");
   console.log(playerIndex);
   if (currentPlayer == playerMap[playerIndex].jersey) {
@@ -236,13 +321,22 @@ function setPlayer(playerIndex) {
   // Get all player buttons
   var buttons = document.querySelectorAll(".player-button");
 
-  // Remove the active class from all buttons
-  buttons.forEach(function (button) {
-    button.classList.remove("active");
-  });
-
-  // Add the active class to the clicked button
-  this.classList.add("active");
+  for (let i = 1; i <= 16; i++) {
+    let homeButton = document.getElementById(`homePlayerButton${i}`);
+    let awayButton = document.getElementById(`awayPlayerButton${i}`);
+    
+    // Remove 'active' class if the button exists
+    if (homeButton) {
+      homeButton.classList.remove("active");
+    }
+    
+    if (awayButton) {
+      awayButton.classList.remove("active");
+    }
+  } 
+  document
+    .getElementById(`${prefix}PlayerButton${playerIndex}`)
+    .classList.add("active");
 }
 
 pitch.addEventListener("mousedown", function (event) {
@@ -276,10 +370,10 @@ pitch.addEventListener("mousemove", function (event) {
 pitch.addEventListener("mouseup", function (event) {
   if (isDragging) {
     isDragging = false;
-    var currentTime = getCurrentDateTime();
-    addShot(event, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
+    var currentTime = getCurrentTime();
+    addShot(currentActionType, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
     rawShots.push({
-      event: event,
+      event: currentActionType,
       startX: startX,
       startY: startY,
       endX: endX,
@@ -331,10 +425,10 @@ pitch.addEventListener("touchmove", function (event) {
 pitch.addEventListener("touchend", function (event) {
   if (isDragging) {
     isDragging = false;
-    var currentTime = getCurrentDateTime();
-    addShot(event, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
+    var currentTime = getCurrentTime();
+    addShot(currentActionType, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
     rawShots.push({
-      event: event,
+      event: currentActionType,
       startX: startX,
       startY: startY,
       endX: endX,
@@ -364,6 +458,25 @@ function getCurrentDateTime() {
   );
 }
 
+function getCurrentTime() {
+  if (elapsedTime > 0) {
+    // Use the timer's value
+    const totalSeconds = Math.floor(elapsedTime / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+      2,
+      "0"
+    );
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+
+    // Return the timer time in the format you prefer
+    return `${hours}:${minutes}:${seconds}`;
+  } else {
+    // Fall back to system time if the timer hasn't been used
+    return getCurrentDateTime();
+  }
+}
+
 function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   let wasDragged =
     startX !== null &&
@@ -371,23 +484,24 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     endX !== null &&
     endY !== null &&
     (startX !== endX || startY !== endY);
-  var actionType = currentActionType;
+  // var actionType = currentActionType;
+  var actionType = event;
   var xG =
     actionType === "Shot" ||
-    actionType === "Shot-Goal" ||
-    actionType === "Shot-Save"
+    actionType === "Shot - Goal" ||
+    actionType === "Shot - Save"
       ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
       : "N/A";
-  var xSave = actionType === "Shot-Save" ? +(1.0 - xG).toFixed(2) : "N/A";
+  var xSave = actionType === "Shot - Save" ? +(1.0 - xG).toFixed(2) : "N/A";
   if (currentPlayer == "") {
     var playerJerseyNumber = "";
   } else {
     var playerJerseyNumber = currentPlayer;
   }
-  console.log("playerMap");
-  console.log(playerMap);
-  console.log("playerJerseyNumber");
-  console.log(playerJerseyNumber);
+  // console.log("playerMap");
+  // console.log(playerMap);
+  // console.log("playerJerseyNumber");
+  // console.log(playerJerseyNumber);
 
   var newRowData = [
     time,
@@ -692,47 +806,74 @@ document.addEventListener("keydown", function (event) {
   // Player Selection
   const playerButtons = document.querySelectorAll(".player-button");
   const eventButtons = document.querySelectorAll(".event-button");
-  if (event.key >= "1" && event.key <= "9") {
-    // Calculate the index to select the right button
-    const index = event.key - "1"; // Convert from string to number and adjust for 0-based indexing
-    if (index < playerButtons.length) {
-      // If the calculated button exists, simulate a click on it
-      playerButtons[index].click();
-    }
+  
+  const homePlayerKeyMap = {
+    '1': 0,
+    '2': 1,
+    '3': 2,
+    '4': 3,
+    '5': 4,
+    '6': 5,
+    '7': 6,
+    '8': 7,
+    '9': 8,
+    '0': 9,
+    'Q': 10,
+    'W': 11,
+    'E': 12,
+    'R': 13,
+    'T': 14,
+    'Y': 15,
   }
-  const playerkeyMap = {
-    0: 9, // Index of P10
-    Q: 10, // Index of P11
-    W: 11, // Index of P12
-    E: 12, // Index of P13
-    R: 13, // Index of P14
-    T: 14, // Index of P15
-    Y: 15, // Index of P16
-  };
+
+  const awayPlayerKeyMap = {
+    'U': 0,
+    'I': 1,
+    'O': 2,
+    'P': 3,
+    '[': 4,
+    ']': 5,
+    'A': 6,
+    'S': 7,
+    'D': 8,
+    'F': 9,
+    'G': 10,
+    'H': 11,
+    'J': 12,
+    'K': 13,
+    'L': 14,
+    ';': 15,
+  }
 
   // Check if the pressed key is in our map
-  if (playerkeyMap.hasOwnProperty(event.key.toUpperCase())) {
+  if (homePlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
     // Get the index from the map
-    const index = playerkeyMap[event.key.toUpperCase()];
-    const playerButtons = document.querySelectorAll(".player-button");
-    if (index < playerButtons.length) {
-      // If the calculated button exists, simulate a click on it
-      playerButtons[index].click();
-    }
+    let index = homePlayerKeyMap[event.key.toUpperCase().toString()];
+    let button = document.getElementById(`homePlayerButton${index}`);
+    button.click();
+  }
+  if (awayPlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+    // Get the index from the map
+    let index = awayPlayerKeyMap[event.key.toUpperCase()];
+    let button = document.getElementById(`awayPlayerButton${index}`);
+    button.click();
   }
 
   const eventKeyMap = {
-    A: 0, // Index of Shot
-    S: 1, // Index of Shot(Save)
-    D: 2, // Index of Shot(Goal)
-    F: 3, // Index of Shot Assist
-    G: 4, // Index of Dribble
-    H: 5, // Index of Cross
-    J: 6, // Index of Pass
-    K: 7, // Index of Tackle
-    L: 8, // Index of Free Kick
-    ";": 9, // Index of Corner
+    Z: 0, // Index of Shot
+    X: 1, // Index of Shot(Save)
+    C: 2, // Index of Shot(Goal)
+    V: 3, // Index of Shot Assist
+    B: 4, // Index of Dribble
+    "<": 5, // Index of Dribble
+    N: 6, // Index of Cross
+    M: 7, // Index of Pass
+    ",": 8, // Index of Tackle
+    ".": 9, // Index of Free Kick
+    "?": 10, // Index of Corner
+    ">": 11, // Index of Corner
   };
+
   if (eventKeyMap.hasOwnProperty(event.key.toUpperCase())) {
     // Get the index from the map
     const index = eventKeyMap[event.key.toUpperCase()];
@@ -742,3 +883,117 @@ document.addEventListener("keydown", function (event) {
     }
   }
 });
+
+//Timer Code
+let timerInterval;
+let elapsedTime = 0; // Time in milliseconds
+let isRunning = false;
+
+function startTimer() {
+  if (!isRunning) {
+    isRunning = true;
+    const startTime = Date.now() - elapsedTime;
+
+    timerInterval = setInterval(() => {
+      elapsedTime = Date.now() - startTime;
+      updateDisplay();
+    }, 1000);
+  }
+}
+
+function pauseTimer() {
+  if (isRunning) {
+    clearInterval(timerInterval);
+    isRunning = false;
+  }
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  elapsedTime = 0;
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const totalSeconds = Math.floor(elapsedTime / 1000);
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+    2,
+    "0"
+  );
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+
+  document.getElementById(
+    "timerDisplay"
+  ).textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+//Event name customization
+// Initialize default event names
+let defaultEventNames = [
+  "Shot", "Shot - Save", "Shot - Goal", "Shot Assist", 
+  "Dribble", "Location", "Cross", "Pass", 
+  "Tackle", "Foul", "Free Kick", "Corner"
+];
+
+// Load event names from localStorage if available
+function initializeEventNames() {
+  let storedEventNames = localStorage.getItem('eventNames');
+  if (storedEventNames) {
+    eventNames = JSON.parse(storedEventNames);
+  } else {
+    eventNames = [...defaultEventNames];
+  }
+  displayEventNames();
+}
+
+// Display event names on buttons
+function displayEventNames() {
+  const eventShortcuts = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
+  const eventButtons = document.querySelectorAll(".event-button");
+  for (let i = 0; i < eventNames.length; i++) {
+    let button = eventButtons[i];
+    if (button) {
+      button.innerHTML = `${eventNames[i]} (${eventShortcuts[i]})`;
+    }
+  }
+}
+
+// Save event names from modal into localStorage
+function saveEventNames() {
+  const textarea = document.getElementById('eventNamesTextarea');
+  let eventLines = textarea.value.split('\n').slice(0, 12).map(name => name.trim()).filter(name => name.length > 0);
+
+  // If less than 12 names are provided, fill in the remaining with default names
+  for (let i = eventLines.length; i < 12; i++) {
+    eventLines.push(defaultEventNames[i]);
+  }
+
+  localStorage.setItem('eventNames', JSON.stringify(eventLines));
+  eventNames = eventLines;
+  
+  // Update buttons with new event names
+  displayEventNames();
+  
+  // Close the modal
+  $('#editEventNamesModal').modal('hide');
+}
+
+// Load saved event names into the textarea
+function loadEventNamesToTextarea() {
+  let storedEventNames = localStorage.getItem('eventNames');
+  const textarea = document.getElementById('eventNamesTextarea');
+  
+  if (storedEventNames) {
+    textarea.value = JSON.parse(storedEventNames).join('\n');
+  } else {
+    textarea.value = defaultEventNames.join('\n');
+  }
+}
+
+// Call this function when the modal opens to populate the textarea
+document.getElementById('editEventNamesModal').addEventListener('show.bs.modal', loadEventNamesToTextarea);
+
+// Initialize event names on page load
+initializeEventNames();

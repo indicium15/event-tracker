@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, Response, send_file
+from flask import Flask, render_template, request, jsonify, Response
 import csv
 import io
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 app = Flask(__name__)
-plt.switch_backend('Agg') 
+# plt.switch_backend('Agg')
 
 @app.route("/")
 def index():
@@ -92,15 +92,15 @@ def download_csv():
 @app.route("/download_pdf", methods=["POST"])
 def download_pdf():
     shots = request.json
-
     # Create the PDF file in-memory
     pdf_buffer = create_pdf_report(shots)
-
-    return send_file(
+    pdf_buffer.seek(0)
+    return Response(
         pdf_buffer,
-        mimetype="application/pdf",
-        as_attachment=True,
-        download_name="report.pdf",
+        mimetype='application/pdf',
+        headers={
+            'Content-Disposition': 'attachment; filename=report.pdf'
+        }
     )
 
 def create_pdf_report(shots):
@@ -197,7 +197,7 @@ def create_pdf_report(shots):
 
         # Add a new page for each player
         pdf.showPage()
-    
+
     # Save the PDF to the buffer
     pdf.save()
     buffer.seek(0)

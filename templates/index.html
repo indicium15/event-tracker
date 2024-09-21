@@ -53,22 +53,22 @@
               </ol>
               <hr>
               </hr>
-              <h5>Export to CSV</h5>
-              <p>After recording the events, click on the "Download CSV" button to get a csv file containing the tracked
-                events.</p>
+              <h5>Customize Player Details</h5>
+              <p>Click on the "Edit" button next to the Home Player or Away Player heading to open a pop-up. Add
+                additional information
+                (jersey numbers, player names) to customize the exported CSV and PDF files.</p>
               <hr>
               </hr>
-              <h5>Generate PDF Reports</h5>
-              <p>With the downloaded CSV file, you can also use another web app to generate a PDF report containing the
-                actions taken by each player. Click on the "Generate PDF Report" button or <a
-                  href="https://graphics-jkomar.pythonanywhere.com/football/">this link</a> to navigate to the
-                application.</p>
+              <h5>Generate CSV and PDF Reports</h5>
+              <p>After tagging the events, click on the "Download CSV and Report" button to obtain a CSV file of the
+                table and a PDF report that details the actions taken by each player.</p>
               <hr>
               </hr>
               <h5>Contributing and Feedback</h5>
               <p>Pull requests are welcome! Check out the GitHub Repository for this app <a
-                  href="https://github.com/indicium15/xg-web-app">here.</a> Lastly, if you have any feedback, feel free
-                to <a href="mailto:chaitanya.jadhav15@hotmail.com">send me an email.</a>
+                  href="https://github.com/indicium15/xg-web-app">here</a>. Lastly, if you have any feedback, feel free
+                to send us an email <a href="mailto:chaitanya.jadhav15@hotmail.com">here</a> or <a
+                  href="mailto:john.komar@nie.edu.sg">here</a>.
               </p>
             </div>
             <div class="modal-footer">
@@ -78,10 +78,24 @@
         </div>
       </div>
       <div class="col xs-12 col-sm-12 col-md-12 col-lg-6">
+        <div class="row align-items-center">
+          <div class="row mt-2">
+            <h5 class="heading">Timer</h5>
+          </div>
+          <div class="col-md-6 mt-1">
+            <h4 id="timerDisplay">00:00:00</h4>
+          </div>
+          <div class="col-md-6 text-end mt-1">
+            <button class="btn btn-success me-1" onclick="startTimer()">Start</button>
+            <button class="btn btn-warning me-1" onclick="pauseTimer()">Pause</button>
+            <button class="btn btn-danger" onclick="stopTimer()">Stop</button>
+          </div>
+        </div>
+        <hr />
         <div class="row-container">
-          <div class="row">
+          <div class="row mt-1">
             <h5 class="pitch-heading">Pitch</h5>
-            <p class="arrow-container">
+            <p class="arrow-container mt-2">
               Direction of Attack <span class="right-arrow"></span>
             </p>
           </div>
@@ -92,7 +106,7 @@
             </div>
           </div>
         </div>
-        <div class="pitch-container">
+        <div class="pitch-container mt-3">
           <div class="pitch-wrapper">
             <div id="pitch">
               <div class="goal-area left"></div>
@@ -104,72 +118,109 @@
             </div>
           </div>
         </div>
+
+
       </div>
       <div class="button-container col-sm-12 col-md-12 col-lg-6">
+
+        <!-- Modal for Editing Event Names -->
+        <div class="modal fade" id="editEventNamesModal" tabindex="-1" aria-labelledby="editEventNamesModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editEventNamesModalLabel">Edit Event Names</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="editEventNamesForm">
+                  <div class="mb-3">
+                    <label for="eventNamesTextarea" class="form-label">Enter Event Names (One per Line, max 12)</label>
+                    <textarea class="form-control" id="eventNamesTextarea" rows="12"
+                      placeholder="Enter event names here..."></textarea>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveEventNames()">Save</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="row">
-          <h5 class="heading">Event</h5>
-          <div class="event-buttons-container">
-            <div class="col-md-6" id="event-column-1">
-              <!-- Buttons for the first column will go here -->
-            </div>
-            <div class="col-md-6" id="event-column-2">
-              <!-- Buttons for the second column will go here -->
-            </div>
+          <div class="col-auto align-items-center d-flex">
+            <h5 class="heading">Event</h5>
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-outline-secondary edit-event-button" data-bs-toggle="modal" data-bs-target="#editEventNamesModal">
+              Edit
+            </button>          
+          </div>
+        </div>
+        <div class="row">
+          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
+            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,0);">
+              Shot (Z)
+            </button>
+            <button class="btn btn-outline-primary btn-small event-button"
+              onclick="setActionType.call(this,1);">
+              Shot - Save (X)
+            </button>
+            <button class="btn btn-outline-primary btn-small event-button"
+              onclick="setActionType.call(this,2);">
+              Shot - Goal (C)
+            </button>
+            <button class="btn btn-outline-primary btn-small event-button"
+              onclick="setActionType.call(this,3);">
+              Shot Assist (V)
+            </button>
+            <button class="btn btn-outline-primary btn-small event-button"
+              onclick="setActionType.call(this,4);">
+              Dribble (B)
+            </button>
+            <button class="btn btn-outline-primary btn-small event-button"
+              onclick="setActionType.call(this,5);">
+              Location (<) </button>
           </div>
           <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this, 'Shot');">
-              Shot (A)
+            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,6);">
+              Cross (N)
+            </button>
+            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,7);">
+              Pass (M)
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Shot-Save');">
-              Shot - Save (S)
+              onclick="setActionType.call(this,8);">
+              Tackle (,)
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Shot-Goal');">
-              Shot - Goal (D)
+              onclick="setActionType.call(this,9);">
+              Foul (.)
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Shot Assist');">
-              Shot Assist (F)
+              onclick="setActionType.call(this,10);">
+              Free Kick (?)
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Dribble');">
-              Dribble (G)
-            </button>
-          </div>
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this, 'Cross');">
-              Cross (H)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this, 'Pass');">
-              Pass (J)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Tackle');">
-              Tackle (K)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Free Kick');">
-              Free Kick (L)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this, 'Corner');">
-              Corner (;)
+              onclick="setActionType.call(this,11);">
+              Corner (>)
             </button>
           </div>
         </div>
         <div class="row">
           <!-- Modal for Editing Player Names -->
-          <div class="modal fade" id="editPlayerNamesModal" tabindex="-1" aria-labelledby="editPlayerNamesModalLabel"
-            aria-hidden="true">
+          <div class="modal fade" id="editHomePlayerNamesModal" tabindex="-1"
+            aria-labelledby="editHomePlayerNamesModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="editPlayerNamesModalLabel">Edit Player Names</h5>
+                  <h5 class="modal-title" id="editHomePlayerNamesModalLabel">Edit Home Team Player Names</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <form id="editPlayerNamesForm">
+                  <form id="editHomePlayerNamesForm">
                     <table class="table">
                       <thead>
                         <tr>
@@ -180,76 +231,75 @@
                       <tbody>
                         <!-- Statically defined rows for 16 players -->
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey1" placeholder="P01"></td>
-                          <td><input type="text" class="form-control" id="player1" placeholder="Player1"></td>
+                          <td><input type="text" class="form-control" id="homeJersey1" placeholder="A01"></td>
+                          <td><input type="text" class="form-control" id="homePlayer1" placeholder="Player1"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey2" placeholder="P02"></td>
-                          <td><input type="text" class="form-control" id="player2" placeholder="Player2"></td>
+                          <td><input type="text" class="form-control" id="homeJersey2" placeholder="A02"></td>
+                          <td><input type="text" class="form-control" id="homePlayer2" placeholder="Player2"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey3" placeholder="P03"></td>
-                          <td><input type="text" class="form-control" id="player3" placeholder="Player3"></td>
+                          <td><input type="text" class="form-control" id="homeJersey3" placeholder="A03"></td>
+                          <td><input type="text" class="form-control" id="homePlayer3" placeholder="Player3"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey4" placeholder="P04"></td>
-                          <td><input type="text" class="form-control" id="player4" placeholder="Player4"></td>
+                          <td><input type="text" class="form-control" id="homeJersey4" placeholder="A04"></td>
+                          <td><input type="text" class="form-control" id="homePlayer4" placeholder="Player4"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey5" placeholder="P05"></td>
-                          <td><input type="text" class="form-control" id="player5" placeholder="Player5"></td>
+                          <td><input type="text" class="form-control" id="homeJersey5" placeholder="A05"></td>
+                          <td><input type="text" class="form-control" id="homePlayer5" placeholder="Player5"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey6" placeholder="P06"></td>
-                          <td><input type="text" class="form-control" id="player6" placeholder="Player6"></td>
+                          <td><input type="text" class="form-control" id="homeJersey6" placeholder="A06"></td>
+                          <td><input type="text" class="form-control" id="homePlayer6" placeholder="Player6"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey7" placeholder="P07"></td>
-                          <td><input type="text" class="form-control" id="player7" placeholder="Player7"></td>
+                          <td><input type="text" class="form-control" id="homeJersey7" placeholder="A07"></td>
+                          <td><input type="text" class="form-control" id="homePlayer7" placeholder="Player7"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey8" placeholder="P08"></td>
-                          <td><input type="text" class="form-control" id="player8" placeholder="Player8"></td>
+                          <td><input type="text" class="form-control" id="homeJersey8" placeholder="A08"></td>
+                          <td><input type="text" class="form-control" id="homePlayer8" placeholder="Player8"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey9" placeholder="P09"></td>
-                          <td><input type="text" class="form-control" id="player9" placeholder="Player9"></td>
+                          <td><input type="text" class="form-control" id="homeJersey9" placeholder="A09"></td>
+                          <td><input type="text" class="form-control" id="homePlayer9" placeholder="Player9"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey10" placeholder="P10"></td>
-                          <td><input type="text" class="form-control" id="player10" placeholder="Player10"></td>
+                          <td><input type="text" class="form-control" id="homeJersey10" placeholder="A10"></td>
+                          <td><input type="text" class="form-control" id="homePlayer10" placeholder="Player10"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey11" placeholder="P11"></td>
-                          <td><input type="text" class="form-control" id="player11" placeholder="Player11"></td>
+                          <td><input type="text" class="form-control" id="homeJersey11" placeholder="A11"></td>
+                          <td><input type="text" class="form-control" id="homePlayer11" placeholder="Player11"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey12" placeholder="P12"></td>
-                          <td><input type="text" class="form-control" id="player12" placeholder="Player12"></td>
+                          <td><input type="text" class="form-control" id="homeJersey12" placeholder="A12"></td>
+                          <td><input type="text" class="form-control" id="homePlayer12" placeholder="Player12"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey13" placeholder="P13"></td>
-                          <td><input type="text" class="form-control" id="player13" placeholder="Player13"></td>
+                          <td><input type="text" class="form-control" id="homeJersey13" placeholder="A13"></td>
+                          <td><input type="text" class="form-control" id="homePlayer13" placeholder="Player13"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey14" placeholder="P14"></td>
-                          <td><input type="text" class="form-control" id="player14" placeholder="Player14"></td>
+                          <td><input type="text" class="form-control" id="homeJersey14" placeholder="A14"></td>
+                          <td><input type="text" class="form-control" id="homePlayer14" placeholder="Player14"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey15" placeholder="P15"></td>
-                          <td><input type="text" class="form-control" id="player15" placeholder="Player15"></td>
+                          <td><input type="text" class="form-control" id="homeJersey15" placeholder="A15"></td>
+                          <td><input type="text" class="form-control" id="homePlayer15" placeholder="Player15"></td>
                         </tr>
                         <tr>
-                          <td><input type="text" class="form-control" id="jersey16" placeholder="P16"></td>
-                          <td><input type="text" class="form-control" id="player16" placeholder="Player16"></td>
+                          <td><input type="text" class="form-control" id="homeJersey16" placeholder="A16"></td>
+                          <td><input type="text" class="form-control" id="homePlayer16" placeholder="Player16"></td>
                         </tr>
-
                       </tbody>
                     </table>
                   </form>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" onclick="updatePlayerNames()">Save</button>
+                  <button type="button" class="btn btn-primary" onclick="updatePlayerNames('home')">Save</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
               </div>
@@ -257,79 +307,263 @@
           </div>
 
 
+          <div class="modal fade" id="editAwayPlayerNamesModal" tabindex="-1"
+            aria-labelledby="editAwayPlayerNamesModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editAwayPlayerNamesModalLabel">Edit Away Team Player Names</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="editAwayPlayerNamesForm">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Jersey Number</th>
+                          <th scope="col">Player Name</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Statically defined rows for 16 players -->
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey1" placeholder="B01"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer1" placeholder="Player1"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey2" placeholder="B02"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer2" placeholder="Player2"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey3" placeholder="B03"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer3" placeholder="Player3"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey4" placeholder="B04"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer4" placeholder="Player4"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey5" placeholder="B05"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer5" placeholder="Player5"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey6" placeholder="B06"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer6" placeholder="Player6"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey7" placeholder="B07"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer7" placeholder="Player7"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey8" placeholder="B08"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer8" placeholder="Player8"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey9" placeholder="B09"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer9" placeholder="Player9"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey10" placeholder="B10"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer10" placeholder="Player10"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey11" placeholder="B11"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer11" placeholder="Player11"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey12" placeholder="B12"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer12" placeholder="Player12"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey13" placeholder="B13"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer13" placeholder="Player13"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey14" placeholder="B14"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer14" placeholder="Player14"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey15" placeholder="B15"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer15" placeholder="Player15"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey16" placeholder="B16"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer16" placeholder="Player16"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" onclick="updatePlayerNames('away');">Save</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="row align-items-center">
             <div class="col-auto align-items-center d-flex">
-              <h5 class="heading mb-0">Player</h5>
+              <h5 class="heading mb-0">Home Player</h5>
             </div>
             <div class="col-auto">
               <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
-                data-bs-target="#editPlayerNamesModal">
+                data-bs-target="#editHomePlayerNamesModal">
                 Edit
               </button>
             </div>
           </div>
           <div class="btn-group button-container" role="group">
-            <button id="playerButton1" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 1);">
-              P01 (1)
+            <button id="homePlayerButton1" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 1);">
+              A01 (1)
             </button>
-            <button id="playerButton2" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 2);">
-              P02 (2)
+            <button id="homePlayerButton2" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 2);">
+              A02 (2)
             </button>
-            <button id="playerButton3" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 3);">
-              P03 (3)
+            <button id="homePlayerButton3" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 3);">
+              A03 (3)
             </button>
-            <button id="playerButton4" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 4);">
-              P04 (4)
+            <button id="homePlayerButton4" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 4);">
+              A04 (4)
             </button>
-            <button id="playerButton5" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 5);">
-              P05 (5)
+            <button id="homePlayerButton5" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 5);">
+              A05 (5)
             </button>
-            <button id="playerButton6" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 6);">
-              P06 (6)
+            <button id="homePlayerButton6" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 6);">
+              A06 (6)
             </button>
-            <button id="playerButton7" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 7);">
-              P07 (7)
+            <button id="homePlayerButton7" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 7);">
+              A07 (7)
             </button>
-            <button id="playerButton8" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 8);">
-              P08 (8)
+            <button id="homePlayerButton8" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 8);">
+              A08 (8)
             </button>
           </div>
           <div class="btn-group button-container" role="group">
-            <button id="playerButton9" class="btn btn-outline-primary player-button" onclick="setPlayer.call(this, 9);">
-              P09 (9)
+            <button id="homePlayerButton9" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 9);">
+              A09 (9)
             </button>
-            <button id="playerButton10" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 10);">
-              P10 (0)
+            <button id="homePlayerButton10" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 10);">
+              A10 (0)
             </button>
-            <button id="playerButton11" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 11);">
-              P11 (Q)
+            <button id="homePlayerButton11" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 11);">
+              A11 (Q)
             </button>
-            <button id="playerButton12" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 12);">
-              P12 (W)
+            <button id="homePlayerButton12" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 12);">
+              A12 (W)
             </button>
-            <button id="playerButton13" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 13);">
-              P13 (E)
+            <button id="homePlayerButton13" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 13);">
+              A13 (E)
             </button>
-            <button id="playerButton14" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 14);">
-              P14 (R)
+            <button id="homePlayerButton14" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 14);">
+              A14 (R)
             </button>
-            <button id="playerButton15" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 15);">
-              P15 (T)
+            <button id="homePlayerButton15" class="btn btn-outline-primary player-button"
+              onclick="setPlayer(this, 15);">
+              A15 (T)
             </button>
-            <button id="playerButton16" class="btn btn-outline-primary player-button"
-              onclick="setPlayer.call(this, 16);">
-              P16 (Y)
+            <button id="homePlayerButton16" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 16);">
+              A16 (Y)
+            </button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-auto align-items-center d-flex">
+              <h5 class="heading mb-0">Away Player</h5>
+            </div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
+                data-bs-target="#editAwayPlayerNamesModal">
+                Edit
+              </button>
+            </div>
+          </div>
+          <div class="btn-group button-container" role="group">
+            <button id="awayPlayerButton1" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 1);">
+              B01 (U)
+            </button>
+            <button id="awayPlayerButton2" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 2);">
+              B02 (I)
+            </button>
+            <button id="awayPlayerButton3" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 3);">
+              B03 (O)
+            </button>
+            <button id="awayPlayerButton4" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 4);">
+              B04 (P)
+            </button>
+            <button id="awayPlayerButton5" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 5);">
+              B05 ([)
+            </button>
+            <button id="awayPlayerButton6" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 6);">
+              B06 (])
+            </button>
+            <button id="awayPlayerButton7" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 7);">
+              B07 (A)
+            </button>
+            <button id="awayPlayerButton8" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 8);">
+              B08 (S)
+            </button>
+          </div>
+          <div class="btn-group button-container" role="group">
+            <button id="awayPlayerButton9" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 9);">
+              B09 (D)
+            </button>
+            <button id="awayPlayerButton10" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 10);">
+              B10 (F)
+            </button>
+            <button id="awayPlayerButton11" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 11);">
+              B11 (G)
+            </button>
+            <button id="awayPlayerButton12" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 12);">
+              B12 (H)
+            </button>
+            <button id="awayPlayerButton13" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 13);">
+              B13 (J)
+            </button>
+            <button id="awayPlayerButton14" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 14);">
+              B14 (K)
+            </button>
+            <button id="awayPlayerButton15" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 15);">
+              B15 (L)
+            </button>
+            <button id="awayPlayerButton16" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 16);">
+              B16 (;)
             </button>
           </div>
         </div>
       </div>
     </div>
+    <hr />
     <div class="row tracked-events flex-fill">
       <div class="col-12">
         <h5>Cumulative Statistics</h5>
@@ -361,6 +595,7 @@
             </tr>
           </tbody>
         </table>
+        <hr />
         <h5>Tracked Events</h5>
         <div class="event-table-wrapper">
           <table id="event-table" class="table table-sm table-hover table-bordered dt-responsive">
