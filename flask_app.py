@@ -9,9 +9,10 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
+import numpy as np
 
 app = Flask(__name__)
-# plt.switch_backend('Agg')
+plt.switch_backend('Agg')
 
 @app.route("/")
 def index():
@@ -158,8 +159,23 @@ def create_pdf_report(shots):
                 # Check if x2 and y2 exist and are not 'N/A'
                 if shot["x2"] != "N/A" and shot["y2"] != "N/A":
                     x2, y2 = float(shot["x2"]), 68 - float(shot["y2"])  # Adjust y2-coordinate
-                    # Draw an arrow from (x, y) to (x2, y2)
-                    pitch.arrows(x, y, x2, y2, width=2, headwidth=5, color="yellow", ax=ax)
+
+                    # Calculate the direction and adjust the length of the arrow
+                    dx = x2 - x
+                    dy = y2 - y
+                    distance = np.hypot(dx, dy)
+
+                    # Shorten the arrow length slightly for better visualization
+                    arrow_length_factor = 0.95  # Scale the arrow length
+                    x2_adj = x + arrow_length_factor * dx
+                    y2_adj = y + arrow_length_factor * dy
+
+                    # Draw an arrow from (x, y) to (x2_adj, y2_adj)
+                    pitch.arrows(x, y, x2_adj, y2_adj, width=2, headwidth=5, color="black", ax=ax)
+
+                    # Draw the start and end points
+                    pitch.scatter(x, y, s=100, color="yellow", edgecolors="black", ax=ax)  # Start point
+                    pitch.scatter(x2, y2, s=100, color="yellow", edgecolors="black", ax=ax)  # End point
                 else:
                     # Draw a single point if x2 or y2 is 'N/A'
                     pitch.scatter(x, y, s=100, color="yellow", edgecolors="black", ax=ax)
