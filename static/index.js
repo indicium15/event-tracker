@@ -63,11 +63,11 @@ let awayShortcutMap = {
 
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
-  // Check if player maps are already in localStorage
-  const storedHomePlayerMap = localStorage.getItem('homePlayerMap');
-  const storedAwayPlayerMap = localStorage.getItem('awayPlayerMap');
+  // Check if player maps are already in sessionStorage
+  const storedHomePlayerMap = sessionStorage.getItem('homePlayerMap');
+  const storedAwayPlayerMap = sessionStorage.getItem('awayPlayerMap');
 
-  // Load from localStorage if available, else initialize with default values
+  // Load from sessionStorage if available, else initialize with default values
   if (storedHomePlayerMap) {
     homePlayerMap = JSON.parse(storedHomePlayerMap);
     console.log("stored home map:");
@@ -87,7 +87,7 @@ function initializePlayerMaps() {
         name: `HomePlayer${i}`,
       };
     }
-    localStorage.setItem('homePlayerMap', JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('homePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAwayPlayerMap) {
@@ -109,7 +109,7 @@ function initializePlayerMaps() {
         name: `AwayPlayer${i}`,
       };
     }
-    localStorage.setItem('awayPlayerMap', JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('awayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -141,11 +141,11 @@ function updatePlayerNames(team) {
       button.innerHTML = `${jerseyNumber} ${shortcut}`;
     }
   }
-  // Persist changes to localStorage
+  // Persist changes to sessionStorage
   if (team === "home") {
-    localStorage.setItem("homePlayerMap", JSON.stringify(homePlayerMap));
+    sessionStorage.setItem("homePlayerMap", JSON.stringify(homePlayerMap));
   } else {
-    localStorage.setItem("awayPlayerMap", JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem("awayPlayerMap", JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -168,8 +168,8 @@ var cumulativeData = {
   freeKicks: 0,
   tackles: 0,
 };
-if (localStorage.getItem("rawShots")) {
-  var rawShots = JSON.parse(localStorage.getItem("rawShots"));
+if (sessionStorage.getItem("rawShots")) {
+  var rawShots = JSON.parse(sessionStorage.getItem("rawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
@@ -381,7 +381,7 @@ pitch.addEventListener("mouseup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    localStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -436,7 +436,7 @@ pitch.addEventListener("touchend", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    localStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -553,7 +553,7 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     xG: xG,
     xSave: xSave,
   });
-  localStorage.setItem("shotsData", JSON.stringify(shotsData));
+  sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
   // populateDropdown();
 }
 
@@ -567,13 +567,13 @@ function removeShot(deleteButton) {
   // Remove the shot from the shotsData array if storing shot data separately
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    localStorage.setItem("shotsData", JSON.stringify(shotsData));
+    sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
     console.log(shotsData);
   }
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    localStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -937,9 +937,9 @@ let defaultEventNames = [
   "Tackle", "Foul", "Free Kick", "Corner"
 ];
 
-// Load event names from localStorage if available
+// Load event names from sessionStorage if available
 function initializeEventNames() {
-  let storedEventNames = localStorage.getItem('eventNames');
+  let storedEventNames = sessionStorage.getItem('eventNames');
   if (storedEventNames) {
     eventNames = JSON.parse(storedEventNames);
   } else {
@@ -960,7 +960,7 @@ function displayEventNames() {
   }
 }
 
-// Save event names from modal into localStorage
+// Save event names from modal into sessionStorage
 function saveEventNames() {
   const textarea = document.getElementById('eventNamesTextarea');
   let eventLines = textarea.value.split('\n').slice(0, 12).map(name => name.trim()).filter(name => name.length > 0);
@@ -970,7 +970,7 @@ function saveEventNames() {
     eventLines.push(defaultEventNames[i]);
   }
 
-  localStorage.setItem('eventNames', JSON.stringify(eventLines));
+  sessionStorage.setItem('eventNames', JSON.stringify(eventLines));
   eventNames = eventLines;
   
   // Update buttons with new event names
@@ -982,7 +982,7 @@ function saveEventNames() {
 
 // Load saved event names into the textarea
 function loadEventNamesToTextarea() {
-  let storedEventNames = localStorage.getItem('eventNames');
+  let storedEventNames = sessionStorage.getItem('eventNames');
   const textarea = document.getElementById('eventNamesTextarea');
   
   if (storedEventNames) {
