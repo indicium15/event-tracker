@@ -3,7 +3,7 @@ let zoomLevel = 1;
 function zoomIn() {
   zoomLevel += 0.1;
   const pitch = document.getElementById("pitch");
-  pitch.style.transformOrigin = "0 0";
+  pitch.style.transformOrigin = "center center";
   pitch.style.transform = `scale(${zoomLevel})`;
 }
 
@@ -12,7 +12,7 @@ function zoomOut() {
     // Prevents excessive zoom out
     zoomLevel -= 0.1;
     const pitch = document.getElementById("pitch");
-    pitch.style.transformOrigin = "0 0";
+    pitch.style.transformOrigin = "center center";
     pitch.style.transform = `scale(${zoomLevel})`;
   }
 }
