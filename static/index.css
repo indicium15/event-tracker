@@ -31,6 +31,7 @@ body {
 
 #pitch {
   /* Height needs to be a multiple of 68px */
+  touch-action: none; /* Add this line to prevent default touch actions */
   height: 400px; /* Now taller */
   /* Width needs to be a multiple of 105px */
   /* width: 620px; Now narrower */

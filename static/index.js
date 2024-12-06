@@ -367,66 +367,50 @@ pitch.addEventListener("mousemove", function (event) {
   }
 });
 
-pitch.addEventListener("mouseup", function (event) {
-  if (isDragging) {
-    isDragging = false;
-    var currentTime = getCurrentTime();
-    addShot(currentActionType, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
-    rawShots.push({
-      event: currentActionType,
-      startX: startX,
-      startY: startY,
-      endX: endX,
-      endY: endY,
-      time: currentTime,
-      player: currentPlayer,
-    });
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
-    startX = null;
-    startY = null;
-    endX = null;
-    endY = null;
-  }
-});
+// Remove existing mouse and touch event listeners
 
-pitch.addEventListener("touchstart", function (event) {
+// Add pointer event listeners
+pitch.addEventListener("pointerdown", function (event) {
+  event.preventDefault(); // Prevent default touch behavior
   if (startX === null || startY === null) {
     isDragging = true;
     let rect = pitch.getBoundingClientRect();
-    // startX = ((event.clientX - rect.left) / pitch.offsetWidth) * 105;
-    // startY = ((event.clientY - rect.top) / pitch.offsetHeight) * 68;
     startX =
-      (((event.touches[0].clientX - rect.left) / pitch.offsetWidth) * 105) /
-      zoomLevel;
+      (((event.clientX - rect.left) / pitch.offsetWidth) * 105) / zoomLevel;
     startY =
-      (((event.touches[0].clientY - rect.top) / pitch.offsetHeight) * 68) /
-      zoomLevel;
+      (((event.clientY - rect.top) / pitch.offsetHeight) * 68) / zoomLevel;
     startX = Math.round(startX);
     startY = Math.round(startY);
   }
 });
 
-pitch.addEventListener("touchmove", function (event) {
+pitch.addEventListener("pointermove", function (event) {
+  event.preventDefault(); // Prevent default touch behavior
   if (isDragging) {
     let rect = pitch.getBoundingClientRect();
-    // endX = ((event.clientX - rect.left) / pitch.offsetWidth) * 105;
-    // endY = ((event.clientY - rect.top) / pitch.offsetHeight) * 68;
     endX =
-      (((event.touches[0].clientX - rect.left) / pitch.offsetWidth) * 105) /
-      zoomLevel;
+      (((event.clientX - rect.left) / pitch.offsetWidth) * 105) / zoomLevel;
     endY =
-      (((event.touches[0].clientY - rect.top) / pitch.offsetHeight) * 68) /
-      zoomLevel;
+      (((event.clientY - rect.top) / pitch.offsetHeight) * 68) / zoomLevel;
     endX = Math.round(endX);
     endY = Math.round(endY);
   }
 });
 
-pitch.addEventListener("touchend", function (event) {
+pitch.addEventListener("pointerup", function (event) {
+  event.preventDefault(); // Prevent default touch behavior
   if (isDragging) {
     isDragging = false;
     var currentTime = getCurrentTime();
-    addShot(currentActionType, startX, startY, endX, endY, currentTime, currentPlayer); // Pass start and end coordinates to addShot
+    addShot(
+      currentActionType,
+      startX,
+      startY,
+      endX,
+      endY,
+      currentTime,
+      currentPlayer
+    );
     rawShots.push({
       event: currentActionType,
       startX: startX,
@@ -443,6 +427,7 @@ pitch.addEventListener("touchend", function (event) {
     endY = null;
   }
 });
+
 
 function getCurrentDateTime() {
   let now = new Date();
