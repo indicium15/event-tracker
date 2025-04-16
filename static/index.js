@@ -343,12 +343,12 @@ pitch.addEventListener("mousedown", function (event) {
   if (startX === null || startY === null) {
     isDragging = true;
     let rect = pitch.getBoundingClientRect();
-    // startX = ((event.clientX - rect.left) / pitch.offsetWidth) * 105;
-    // startY = ((event.clientY - rect.top) / pitch.offsetHeight) * 68;
+    // startX = ((event.clientX - rect.left) / pitch.offsetWidth) * 40;
+    // startY = ((event.clientY - rect.top) / pitch.offsetHeight) * 20;
     startX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 105) / zoomLevel;
+      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
     startY =
-      (((event.clientY - rect.top) / pitch.offsetHeight) * 68) / zoomLevel;
+      (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
     startX = Math.round(startX);
     startY = Math.round(startY);
   }
@@ -357,11 +357,11 @@ pitch.addEventListener("mousedown", function (event) {
 pitch.addEventListener("mousemove", function (event) {
   if (isDragging) {
     let rect = pitch.getBoundingClientRect();
-    // endX = ((event.clientX - rect.left) / pitch.offsetWidth) * 105;
-    // endY = ((event.clientY - rect.top) / pitch.offsetHeight) * 68;
+    // endX = ((event.clientX - rect.left) / pitch.offsetWidth) * 40;
+    // endY = ((event.clientY - rect.top) / pitch.offsetHeight) * 20;
     endX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 105) / zoomLevel;
-    endY = (((event.clientY - rect.top) / pitch.offsetHeight) * 68) / zoomLevel;
+      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
+    endY = (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
     endX = Math.round(endX);
     endY = Math.round(endY);
   }
@@ -376,9 +376,9 @@ pitch.addEventListener("pointerdown", function (event) {
     isDragging = true;
     let rect = pitch.getBoundingClientRect();
     startX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 105) / zoomLevel;
+      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
     startY =
-      (((event.clientY - rect.top) / pitch.offsetHeight) * 68) / zoomLevel;
+      (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
     startX = Math.round(startX);
     startY = Math.round(startY);
   }
@@ -389,9 +389,9 @@ pitch.addEventListener("pointermove", function (event) {
   if (isDragging) {
     let rect = pitch.getBoundingClientRect();
     endX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 105) / zoomLevel;
+      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
     endY =
-      (((event.clientY - rect.top) / pitch.offsetHeight) * 68) / zoomLevel;
+      (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
     endX = Math.round(endX);
     endY = Math.round(endY);
   }
@@ -505,11 +505,11 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   var rowIndex = table.row.add(newRowData).draw().index();
 
   // Store additional data using row().data() for easy access
-  table.row(rowIndex).data().dotx = (startX * 1.0) / 105;
-  table.row(rowIndex).data().doty = (startY * 1.0) / 68;
+  table.row(rowIndex).data().dotx = (startX * 1.0) / 40;
+  table.row(rowIndex).data().doty = (startY * 1.0) / 20;
   if (wasDragged) {
-    table.row(rowIndex).data().dotx2 = (endX * 1.0) / 105;
-    table.row(rowIndex).data().doty2 = (endY * 1.0) / 68;
+    table.row(rowIndex).data().dotx2 = (endX * 1.0) / 40;
+    table.row(rowIndex).data().doty2 = (endY * 1.0) / 20;
   }
 
   // Assign mouseenter and mouseleave events to show and remove dots
@@ -708,8 +708,8 @@ function calculateAngle(pos_x, pos_y) {
 
 function distanceAnglexG(pos_x, pos_y) {
   if (pos_x >= 52) {
-    pos_x = 105 - pos_x;
-    pos_y = 68 - pos_y;
+    pos_x = 40 - pos_x;
+    pos_y = 20 - pos_y;
   }
   let distance = calculateDistance(pos_x, pos_y);
   let angle = calculateAngle(pos_x, pos_y);

@@ -1,4 +1,5 @@
 xgwebapp/
 __pycache__/
 .vscode/
+venv/
 *.png

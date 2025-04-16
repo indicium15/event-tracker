@@ -13,14 +13,14 @@
   <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.min.css" />
   <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.min.js"></script>
-  <title>Football Event Tracker</title>
+  <title>Floorball Event Tracker</title>
 </head>
 
 <body>
   <div class="container-fluid">
     <div class="row">
       <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Football Event Tracker</a>
+        <a class="navbar-brand" href="#">Floorball Event Tracker</a>
         <form class="form-inline">
           <a href="https://github.com/indicium15/xg-web-app" class="github-link"><svg xmlns="http://www.w3.org/2000/svg"
               width="32" height="32" fill="white" class="bi bi-github" viewBox="0 0 16 16">
@@ -109,12 +109,19 @@
         <div class="pitch-container mt-3">
           <div class="pitch-wrapper">
             <div id="pitch">
-              <div class="goal-area left"></div>
-              <div class="goal-area right"></div>
-              <div class="center-circle"></div>
-              <div class="center-spot"></div>
-              <div class="eighteen-yard-box left"></div>
-              <div class="eighteen-yard-box right"></div>
+              <div class="goal-area left">
+                <div class="actual-goal"></div>
+              </div>
+              <div class="goal-area right">
+                <div class="actual-goal"></div>
+              </div>              
+              <!-- Add floorball markings -->
+              <div class="floorball-plus" id="plusTopLeft">+</div>
+              <div class="floorball-plus" id="plusTopCenter">+</div>
+              <div class="floorball-plus" id="plusTopRight">+</div>
+              <div class="floorball-plus" id="plusBottomLeft">+</div>
+              <div class="floorball-plus" id="plusBottomCenter">+</div>
+              <div class="floorball-plus" id="plusBottomRight">+</div>
             </div>
           </div>
         </div>
