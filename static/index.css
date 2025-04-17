@@ -357,3 +357,11 @@ body {
   transform: translate(-50%, -50%);
   border-radius: 50%;
 }
+
+#videoPreview {
+  position: relative;
+  max-height: 400px;
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+

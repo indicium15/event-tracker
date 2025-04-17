@@ -19,7 +19,6 @@ function zoomOut() {
   }
 }
 
-// Create an object to store jersey numbers and player names
 // Create objects to store jersey numbers and player names for both teams
 let homePlayerMap = {};
 let awayPlayerMap = {};
@@ -298,6 +297,8 @@ function setActionType(index) {
 
 function setPlayer(team, playerIndex) {
   // Set the current player type
+  console.log("given team");
+  console.log(team);
   const playerMap = team === "home" ? homePlayerMap : awayPlayerMap;
   console.log("selected playerMap");
   console.log(playerMap);
@@ -855,13 +856,15 @@ document.addEventListener("keydown", function (event) {
   if (homePlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
     // Get the index from the map
     let index = homePlayerKeyMap[event.key.toUpperCase().toString()];
-    let button = document.getElementById(`homePlayerButton${index}`);
+    let button = document.getElementById(`homePlayerButton${index+1}`);
     button.click();
   }
-  if (awayPlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+  else if (awayPlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+    console.log(event.key.toUpperCase);
+    console.log("is being triggered in away key map");
     // Get the index from the map
     let index = awayPlayerKeyMap[event.key.toUpperCase()];
-    let button = document.getElementById(`awayPlayerButton${index}`);
+    let button = document.getElementById(`awayPlayerButton${index+1}`);
     button.click();
   }
 
@@ -1003,3 +1006,86 @@ document.getElementById('editEventNamesModal').addEventListener('show.bs.modal',
 
 // Initialize event names on page load
 initializeEventNames();
+
+// Video stuff
+// Video timer sync
+let videoTimerSyncEnabled = true;
+
+function syncTimerWithVideo(videoElement) {
+  if (!videoElement) return;
+
+  // Sync every time the video is played
+  videoElement.addEventListener("play", () => {
+    if (videoTimerSyncEnabled) {
+      clearInterval(timerInterval);
+      isRunning = true;
+
+      timerInterval = setInterval(() => {
+        elapsedTime = videoElement.currentTime * 1000; // convert to ms
+        updateDisplay();
+      }, 1000);
+    }
+  });
+
+  // Pause sync when video is paused
+  videoElement.addEventListener("pause", () => {
+    clearInterval(timerInterval);
+    isRunning = false;
+  });
+
+  // Sync when video is seeked
+  videoElement.addEventListener("seeked", () => {
+    if (videoTimerSyncEnabled) {
+      elapsedTime = videoElement.currentTime * 1000;
+      updateDisplay();
+    }
+  });
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const uploadVideoButton = document.getElementById('uploadVideoBtn');
+  const videoInput = document.getElementById('videoInput');
+  const videoPreview = document.getElementById('videoPreview');
+  const videoContainer = document.getElementById('videoContainer');
+  const toggleViewBtn = document.getElementById('toggleViewBtn');
+  const viewToggle = document.getElementById('viewToggle');
+  const pitchContainer = document.querySelector('.pitch-container');
+
+  videoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const videoURL = URL.createObjectURL(file);
+      videoPreview.src = videoURL;
+      viewToggle.style.display = 'flex';
+      pitchContainer.style.display = 'block';
+      videoContainer.style.display = 'none';
+      toggleViewBtn.textContent = 'Show Video (\\)';
+      uploadVideoButton.innerText = "Change Video";
+    }
+  });
+
+  function toggleView() {
+    const pitchVisible = pitchContainer.style.display !== 'none';
+    if (pitchVisible) {
+      pitchContainer.style.display = 'none';
+      videoContainer.style.display = 'block';
+      toggleViewBtn.textContent = 'Show Pitch (\\)';
+    } else {
+      pitchContainer.style.display = 'block';
+      videoContainer.style.display = 'none';
+      toggleViewBtn.textContent = 'Show Video (\\)';
+    }
+  }
+
+  toggleViewBtn.addEventListener('click', toggleView);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '\\' && videoPreview.src) {
+      toggleView();
+    }
+  });
+  if (videoPreview){
+    syncTimerWithVideo(videoPreview);
+  }
+});

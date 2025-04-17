@@ -79,6 +79,7 @@
       </div>
       <div class="col xs-12 col-sm-12 col-md-12 col-lg-6">
         <div class="row align-items-center">
+          
           <div class="row mt-2">
             <h5 class="heading">Timer</h5>
           </div>
@@ -126,8 +127,23 @@
             </div>
           </div>
         </div>
-
-
+        <!--New upload video functionality-->
+        <div class="mt-3">
+          <div id="videoContainer" style="display: none;">
+            <video id="videoPreview" width="100%" controls style="border-radius: 6px;"></video>
+          </div>
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2" id="videoControls">
+            <label class="btn btn-outline-primary mb-0" id="uploadVideoBtn">
+              Upload Video
+              <input type="file" id="videoInput" accept="video/*" hidden />
+            </label>
+            <div id="viewToggle" style="display: none;">
+              <button class="btn btn-secondary" id="toggleViewBtn">Show Video (\)</button>
+            </div>
+          </div>
+        
+        </div>
+        
       </div>
       <div class="button-container col-sm-12 col-md-12 col-lg-6">
 
@@ -158,6 +174,7 @@
         </div>
 
         <div class="row">
+          <video id="videoPreview" width="100%" controls style="display: none; border-radius: 6px;"></video>
           <div class="col-auto align-items-center d-flex">
             <h5 class="heading">Event</h5>
           </div>
@@ -481,7 +498,7 @@
               A14 (R)
             </button>
             <button id="homePlayerButton15" class="btn btn-outline-primary player-button"
-              onclick="setPlayer(this, 15);">
+              onclick="setPlayer('home', 15);">
               A15 (T)
             </button>
             <button id="homePlayerButton16" class="btn btn-outline-primary player-button"
