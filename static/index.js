@@ -1,3 +1,5 @@
+const PITCH_W = 40;
+const PITCH_H = 20;
 let zoomLevel = 1;
 
 function zoomIn() {
@@ -345,12 +347,12 @@ pitch.addEventListener("mousedown", function (event) {
     let rect = pitch.getBoundingClientRect();
     // startX = ((event.clientX - rect.left) / pitch.offsetWidth) * 40;
     // startY = ((event.clientY - rect.top) / pitch.offsetHeight) * 20;
-    startX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
-    startY =
-      (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
-    startX = Math.round(startX);
-    startY = Math.round(startY);
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
+    startX = Math.round(centredX);
+    startY = Math.round(centredY);
   }
 });
 
@@ -359,11 +361,17 @@ pitch.addEventListener("mousemove", function (event) {
     let rect = pitch.getBoundingClientRect();
     // endX = ((event.clientX - rect.left) / pitch.offsetWidth) * 40;
     // endY = ((event.clientY - rect.top) / pitch.offsetHeight) * 20;
-    endX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
-    endY = (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
-    endX = Math.round(endX);
-    endY = Math.round(endY);
+    // endX =
+    //   (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
+    // endY = (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
+    // endX = Math.round(endX);
+    // endY = Math.round(endY);
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
+    endX = Math.round(centredX);
+    endY = Math.round(centredY);
   }
 });
 
@@ -375,12 +383,18 @@ pitch.addEventListener("pointerdown", function (event) {
   if (startX === null || startY === null) {
     isDragging = true;
     let rect = pitch.getBoundingClientRect();
-    startX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
-    startY =
-      (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
-    startX = Math.round(startX);
-    startY = Math.round(startY);
+    // startX =
+    //   (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
+    // startY =
+    //   (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
+    // startX = Math.round(startX);
+    // startY = Math.round(startY);
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
+    startX = Math.round(centredX);
+    startY = Math.round(centredY);
   }
 });
 
@@ -388,12 +402,18 @@ pitch.addEventListener("pointermove", function (event) {
   event.preventDefault(); // Prevent default touch behavior
   if (isDragging) {
     let rect = pitch.getBoundingClientRect();
-    endX =
-      (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
-    endY =
-      (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
-    endX = Math.round(endX);
-    endY = Math.round(endY);
+    // endX =
+    //   (((event.clientX - rect.left) / pitch.offsetWidth) * 40) / zoomLevel;
+    // endY =
+    //   (((event.clientY - rect.top) / pitch.offsetHeight) * 20) / zoomLevel;
+    // endX = Math.round(endX);
+    // endY = Math.round(endY);
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
+    endX = Math.round(centredX);
+    endY = Math.round(centredY);
   }
 });
 
@@ -505,11 +525,12 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   var rowIndex = table.row.add(newRowData).draw().index();
 
   // Store additional data using row().data() for easy access
-  table.row(rowIndex).data().dotx = (startX * 1.0) / 40;
-  table.row(rowIndex).data().doty = (startY * 1.0) / 20;
+  table.row(rowIndex).data().dotx = (startX + PITCH_W / 2) / PITCH_W;  // (x + 20) / 40
+  table.row(rowIndex).data().doty = (PITCH_H / 2 - startY) / PITCH_H;  // (10 - y) / 20
+
   if (wasDragged) {
-    table.row(rowIndex).data().dotx2 = (endX * 1.0) / 40;
-    table.row(rowIndex).data().doty2 = (endY * 1.0) / 20;
+    table.row(rowIndex).data().dotx2 = (endX + PITCH_W / 2) / PITCH_W;
+    table.row(rowIndex).data().doty2 = (PITCH_H / 2 - endY) / PITCH_H;
   }
 
   // Assign mouseenter and mouseleave events to show and remove dots

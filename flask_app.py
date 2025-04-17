@@ -2,17 +2,18 @@ from flask import Flask, render_template, request, jsonify, Response
 import csv
 import io
 import matplotlib.pyplot as plt
-from mplsoccer import Pitch
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import A4
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle, FancyBboxPatch
 from reportlab.pdfbase.pdfmetrics import stringWidth
-import numpy as np
 
 app = Flask(__name__)
-plt.switch_backend('Agg')
+plt.switch_backend("Agg")
+
 
 @app.route("/")
 def index():
@@ -98,15 +99,107 @@ def download_pdf():
     pdf_buffer.seek(0)
     return Response(
         pdf_buffer,
-        mimetype='application/pdf',
-        headers={
-            'Content-Disposition': 'attachment; filename=report.pdf'
-        }
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=report.pdf"},
     )
+
+def draw_floorball_pitch(ax, pitch_length=40, pitch_width=20, corner_radius=2):
+    half_len = pitch_length / 2
+    half_wid = pitch_width  / 2
+
+    # 1) new origin centered at (0,0)
+    ax.set_xlim(-half_len, half_len)
+    ax.set_ylim(-half_wid, half_wid)
+    ax.set_aspect("equal")
+
+    # 2) rounded background from bottom‑left = (−half_len, −half_wid)
+    background = FancyBboxPatch(
+        (-half_len, -half_wid),
+        pitch_length,
+        pitch_width,
+        boxstyle=f"round,pad=0,rounding_size={corner_radius}",
+        facecolor="#1e3f66",
+        edgecolor="none",
+        zorder=0,
+    )
+    ax.add_patch(background)
+
+    # 3) outer boundary
+    outer = FancyBboxPatch(
+        (-half_len, -half_wid),
+        pitch_length,
+        pitch_width,
+        boxstyle=f"round,pad=0,rounding_size={corner_radius}",
+        linewidth=2,
+        edgecolor="white",
+        facecolor="none",
+        zorder=1,
+    )
+    ax.add_patch(outer)
+
+    # 4) center line at x=0
+    ax.plot([0, 0], [-half_wid, half_wid], color="white", lw=2, zorder=2)
+
+    # 5) goal areas (still 5×4), centered vertically around y=0
+    goal_w, goal_h = 5, 4
+    goal_y = -goal_h/2
+    left_goal = Rectangle(
+        (-half_len + 3.5, goal_y), goal_w, goal_h,
+        linewidth=2, edgecolor="white", facecolor="none", zorder=3
+    )
+    right_goal = Rectangle(
+        ( half_len - 3.5 - goal_w, goal_y), goal_w, goal_h,
+        linewidth=2, edgecolor="white", facecolor="none", zorder=3
+    )
+    ax.add_patch(left_goal)
+    ax.add_patch(right_goal)
+
+    # 6) inner goals
+    inner_w, inner_h = goal_w * 0.6, goal_h * 0.6
+    inner_y_off = (goal_h - inner_h) / 2
+    left_inner = Rectangle(
+        (-half_len + 3.5 + (goal_w-inner_w)/2, goal_y + inner_y_off),
+        inner_w, inner_h,
+        linewidth=1, edgecolor="white", facecolor="none", zorder=4
+    )
+    right_inner = Rectangle(
+        ( half_len - 3.5 - goal_w + (goal_w-inner_w)/2, goal_y + inner_y_off),
+        inner_w, inner_h,
+        linewidth=1, edgecolor="white", facecolor="none", zorder=4
+    )
+    ax.add_patch(left_inner)
+    ax.add_patch(right_inner)
+
+    # 7) center spot at (0,0)
+    ax.plot(0, 0, "o", markersize=4, color="white", zorder=5)
+
+    # 8) plus‑markers at exactly your new coords
+    #    margin_x = half_len - 3.5 = 20 - 3.5 = 16.5
+    #    margin_y = half_wid - 1.5 = 10 - 1.5 = 8.5
+    mx, my = half_len - 3.5, half_wid - 1.5
+    plus_coords = [
+        (-mx,  my),  # top‑left
+        (   0,  my),  # top‑centre
+        ( mx,  my),  # top‑right
+        (-mx, -my),  # bottom‑left
+        (   0, -my),  # bottom‑centre
+        ( mx, -my),  # bottom‑right
+    ]
+    for x, y in plus_coords:
+        ax.text(x, y, "+", fontsize=12, fontweight="bold",
+                ha="center", va="center", color="white", zorder=6)
+
+    # 9) clean up
+    ax.set_xticks([]); ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    return ax
 
 def create_pdf_report(shots):
     # Register the custom font
-    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    print(shots)
+    pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
 
     # Initialize reportlab canvas
     buffer = io.BytesIO()
@@ -114,10 +207,9 @@ def create_pdf_report(shots):
     pdf.setTitle("Report")
     PAGE_WIDTH, PAGE_HEIGHT = A4
 
-    # Group shots by player and action type
+    # Group shots by player and action type (unchanged)
     player_actions = {}
     for shot in shots:
-        print(shot)
         player_name = shot["playerName"]
         action_type = shot["action"]
         if player_name not in player_actions:
@@ -128,7 +220,6 @@ def create_pdf_report(shots):
 
     # Iterate over each player's actions to create pages in the PDF
     for player, actions in player_actions.items():
-        # Add a new page to the PDF for each player
         pdf.setFont("Vera", 18)
         y = PAGE_HEIGHT - 50
         player_name_text = f"{player}'s Statistics"
@@ -139,9 +230,7 @@ def create_pdf_report(shots):
         ori_height = 6.5
         text_height = 0
 
-        # Iterate over action types for the current player
         for action, action_list in actions.items():
-            # Add a new page if necessary
             if image_count == 7:
                 image_count = 1
                 ori_height = 6.5
@@ -149,61 +238,90 @@ def create_pdf_report(shots):
                 pdf.showPage()
                 pdf.setFont("Vera", 18)
 
-            # Create a pitch instance using mplsoccer
-            pitch = Pitch(pitch_type="custom", pitch_length=105, pitch_width=68)
-            fig, ax = pitch.draw(figsize=(4, 3))
+            # Create a figure and axis for the pitch using matplotlib
+            fig, ax = plt.subplots(figsize=(4, 3))
+            # Draw the floorball pitch using our custom function
+            ax = draw_floorball_pitch(ax, pitch_length=40, pitch_width=20)
 
             for shot in action_list:
-                x, y = float(shot["x"]), 68 - float(shot["y"])  # Adjust y-coordinate
+                x = float(shot["x"])
+                y = float(shot["y"])  # Flip Y for top-left origin
 
-                # Check if x2 and y2 exist and are not 'N/A'
+                # Check if it's a pass/dragged shot with a destination point
                 if shot["x2"] != "N/A" and shot["y2"] != "N/A":
-                    x2, y2 = float(shot["x2"]), 68 - float(shot["y2"])  # Adjust y2-coordinate
+                    x2 = float(shot["x2"])
+                    y2 = float(shot["y2"])
 
-                    # Calculate the direction and adjust the length of the arrow
                     dx = x2 - x
                     dy = y2 - y
-                    distance = np.hypot(dx, dy)
 
-                    # Shorten the arrow length slightly for better visualization
-                    arrow_length_factor = 0.95  # Scale the arrow length
-                    x2_adj = x + arrow_length_factor * dx
-                    y2_adj = y + arrow_length_factor * dy
-
-                    # Draw an arrow from (x, y) to (x2_adj, y2_adj)
-                    pitch.arrows(x, y, x2_adj, y2_adj, width=2, headwidth=5, color="black", ax=ax)
-
-                    # Draw the start and end points
-                    pitch.scatter(x, y, s=100, color="yellow", edgecolors="black", ax=ax)  # Start point
-                    pitch.scatter(x2, y2, s=100, color="yellow", edgecolors="black", ax=ax)  # End point
+                    # Draw the arrow
+                    ax.arrow(
+                        x,
+                        y,
+                        dx,
+                        dy,
+                        length_includes_head=True,
+                        head_width=0.6,
+                        head_length=1.2,
+                        fc="black",
+                        ec="black",
+                        lw=1.5,
+                        zorder=6,
+                    )
+                    # Draw start and end points
+                    ax.plot(
+                        x,
+                        y,
+                        "o",
+                        markersize=8,
+                        color="yellow",
+                        markeredgecolor="black",
+                        zorder=7,
+                    )
+                    ax.plot(
+                        x2,
+                        y2,
+                        "o",
+                        markersize=8,
+                        color="yellow",
+                        markeredgecolor="black",
+                        zorder=7,
+                    )
                 else:
-                    # Draw a single point if x2 or y2 is 'N/A'
-                    pitch.scatter(x, y, s=100, color="yellow", edgecolors="black", ax=ax)
+                    # Single shot/point only
+                    ax.plot(
+                        x,
+                        y,
+                        "o",
+                        markersize=8,
+                        color="yellow",
+                        markeredgecolor="black",
+                        zorder=7,
+                    )
 
-            # Save the plot to a buffer
+            # Save the figure to a buffer
             img_buffer = io.BytesIO()
-            fig.savefig(img_buffer, format="png", bbox_inches='tight')
+            fig.savefig(img_buffer, format="png", bbox_inches="tight")
             plt.close(fig)
             img_buffer.seek(0)
 
-            # Determine the placement of the image
-            if image_count % 2 != 0:  # Left side of the page
+            # Determine placement for the image on the PDF page
+            if image_count % 2 != 0:
                 x_pos = (PAGE_WIDTH / 4.0) - 125
                 text_x_pos = x_pos + 125 - (pdf.stringWidth(action, "Vera", 15) / 2)
-            else:  # Right side of the page
+            else:
                 x_pos = ((PAGE_WIDTH / 4.0) * 3) - 125
                 text_x_pos = x_pos + 125 - (pdf.stringWidth(action, "Vera", 15) / 2)
 
             y_pos = (PAGE_HEIGHT / 10) * ori_height
             text_y_pos = (PAGE_HEIGHT / 10.5) * (ori_height - text_height)
             image = ImageReader(img_buffer)
-            # Insert the plot and text
             pdf.drawImage(image, x=x_pos, y=y_pos, width=250, height=200)
             pdf.setFont("Vera", 15)
             pdf.setFillColor("black")
             pdf.drawString(text_x_pos, text_y_pos, action)
 
-            # Update counters for placement
             image_count += 1
             if image_count % 2 != 0 and image_count != 1:
                 ori_height -= 3
@@ -211,10 +329,8 @@ def create_pdf_report(shots):
 
             img_buffer.close()
 
-        # Add a new page for each player
         pdf.showPage()
 
-    # Save the PDF to the buffer
     pdf.save()
     buffer.seek(0)
     return buffer

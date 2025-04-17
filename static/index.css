@@ -346,3 +346,14 @@ body {
 .dt-search {
   text-align: left !important;
 }
+
+.center-spot {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
