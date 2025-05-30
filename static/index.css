@@ -251,10 +251,6 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-#download-csv {
-  margin-top: 1rem;
-}
-
 #graphics-redirect {
   margin-top: 1rem;
 }
@@ -283,4 +279,9 @@ body {
 
 .dt-search {
   text-align: left !important;
+}
+
+.footer a {
+  word-break: break-word;
+  white-space: normal;
 }

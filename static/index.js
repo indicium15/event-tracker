@@ -735,10 +735,7 @@ function distanceAnglexG(pos_x, pos_y) {
   return p;
 }
 
-function downloadCSVandPDF() {
-  console.log(shotsData);
-
-  // Fetch the CSV file
+function downloadCSV() {
   fetch("/download_csv", {
     method: "POST",
     body: JSON.stringify(shotsData),
@@ -748,18 +745,18 @@ function downloadCSVandPDF() {
   })
     .then((response) => response.blob())
     .then((blob) => {
-      // Create a link element, use it to download the CSV file
-      let csvUrl = window.URL.createObjectURL(blob);
-      let csvLink = document.createElement("a");
-      csvLink.href = csvUrl;
-      csvLink.download = "shots_data.csv";
-      document.body.appendChild(csvLink);
-      csvLink.click();
-      csvLink.remove();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "shots_data.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     })
     .catch((error) => console.error("Error downloading CSV:", error));
+}
 
-  // Fetch the PDF file
+function downloadPDF() {
   fetch("/download_pdf", {
     method: "POST",
     body: JSON.stringify(shotsData),
@@ -769,17 +766,17 @@ function downloadCSVandPDF() {
   })
     .then((response) => response.blob())
     .then((blob) => {
-      // Create a link element, use it to download the PDF file
-      let pdfUrl = window.URL.createObjectURL(blob);
-      let pdfLink = document.createElement("a");
-      pdfLink.href = pdfUrl;
-      pdfLink.download = "report.pdf";
-      document.body.appendChild(pdfLink);
-      pdfLink.click();
-      pdfLink.remove();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     })
     .catch((error) => console.error("Error downloading PDF:", error));
 }
+
 
 // Keyboard Shortcuts
 document.addEventListener("keydown", function (event) {
