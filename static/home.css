@@ -1,0 +1,4 @@
+/* static/home.css */
+body { scroll-behavior: smooth; }
+.card .btn { margin-top: .25rem; }
+header .btn { min-width: 160px; }

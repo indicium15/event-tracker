@@ -1,0 +1,256 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.app-container {
+  display: inline-flex;
+  width: 100%;
+}
+
+.row-container {
+  display: flex;
+  align-items: center; /* Vertically center the content within the container */
+  justify-content: space-between; /* Add space between elements */
+}
+
+.github-link {
+  margin-right: 1rem;
+}
+
+.instructions-button {
+  margin-right: 0.75rem;
+}
+
+.navbar-brand {
+  margin-left: 0.75rem;
+}
+
+.pitch-heading {
+  margin-bottom: 0 !important;
+}
+
+#pitch {
+  touch-action: none;
+  height: 100%;
+  width: 100%;
+  aspect-ratio: 23.77 / 10.97;
+  background: #008000; /* tennis green */
+  position: relative;
+  border: 1px solid #fff;
+  transition: transform 0.2s ease;
+  font-size: 2vw;
+}
+
+/* Singles boundary lines: 1.37m from top/bottom (≈12.48% of 10.97m) */
+.singles-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: white;
+}
+
+.singles-line.top {
+  top: 12.48%;
+}
+
+.singles-line.bottom {
+  bottom: 12.48%;
+}
+
+/* Service boxes: 4.11m high (≈37.45%) and 6.4m wide (≈26.93%) */
+.service-box {
+  position: absolute;
+  width: 26.93%;
+  height: 37.45%;
+  background: none;
+  border: 2px solid white;
+}
+
+.service-box.top {
+  top: 12.48%;
+}
+
+.service-box.bottom {
+  /* bottom: 12.48%; */
+  top: calc(12.48% + 37.45%);
+}
+
+.service-box.left {
+  left: 23.535%; /* (100 - 2×26.93) / 2 */
+}
+
+.service-box.right {
+  right: 23.535%;
+}
+
+  
+.pitch-wrapper {
+  overflow: auto;
+}
+
+.zoom-controls {
+  margin-top: 10px;
+}
+
+#pitch:before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px; /* Now a vertical line */
+  background: #fff;
+  transform: translateX(-50%);
+}
+
+.arrow-container {
+  display: flex;
+  align-items: center;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.right-arrow {
+  display: inline-block;
+  margin-left: 2.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-top: 2px solid black;
+  border-left: 2px solid black;
+  transform-origin: center;
+  transform: rotate(135deg);
+}
+
+.right-arrow::after {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 45px;
+  background-color: black;
+  transform: rotate(-45deg) translate(15px, 4px);
+}
+
+.button-group {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.button-container {
+  padding-top: 0.5rem;
+  width: 100%;
+}
+
+.button-group button {
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.event-button {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.player-button {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.remove-button {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.dot {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: white;
+  border-radius: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+}
+
+#cumulative-table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+#cumulative-table th,
+#cumulative-table td {
+  padding: 5px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.dt-layout-table {
+  overflow-y: scroll !important;
+  max-height: 10rem !important;
+}
+
+#event-table {
+  width: 100%;
+  margin-top: 20px;
+}
+#event-table th,
+#event-table td {
+  padding: 5px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+#graphics-redirect {
+  margin-top: 1rem;
+}
+
+.footer {
+  margin-top: 1rem;
+}
+
+.tracked-events {
+  margin-top: 1rem !important;
+}
+
+.table-container {
+  overflow-y: scroll;
+  max-height: 25%;
+  height: 25%;
+}
+
+.table-scrollable {
+  display: inline-block;
+  width: 100%;
+  overflow-x: auto; /* Scroll on X-axis */
+  overflow-y: auto; /* Scroll on Y-axis */
+  max-height: 400px; /* Adjust based on your needs */
+}
+
+.dt-search {
+  text-align: left !important;
+}
+
+.center-spot {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+#videoPreview {
+  position: relative;
+  max-height: 400px;
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+
+.footer a {
+  word-break: break-word;
+  white-space: normal;
+}

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sports Event Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}"/>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand fw-semibold" href="{{ url_for('home') }}">Sports Event Tracker</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNav"
+          aria-controls="mainNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('football.index') }}">Football</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('floorball.index') }}">Floorball</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('tennis.index') }}">Tennis</a></li>
+            {# Add more when ready:
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('badminton.index') }}">Badminton</a></li>
+            #}
+          </ul>
+          <div class="d-flex">
+            <a
+              class="btn btn-outline-light me-2"
+              href="https://github.com/indicium15/event-tracker"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub
+            </a>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#helpModal">
+              Help
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="bg-white border-bottom">
+      <div class="container py-5">
+        <div class="row align-items-center">
+          <div class="col-lg-7">
+            <h1 class="display-6 fw-semibold">Event tagging made simple and accessible.</h1>
+            <p class="lead text-muted mt-2">
+              Click on a sport to start tracking actions on the pitch or court, then export your data as CSV or generate a PDF report.
+            </p>
+          </div>
+          <div class="col-lg-5 mt-4 mt-lg-0">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">Quickstart</h5>
+                <ol class="mb-0">
+                  <li>Pick a sport (e.g., Football).</li>
+                  <li>Select player and action from the right-side controls.</li>
+                  <li>Click (or click-drag) on the court to record start/end coordinates.</li>
+                  <li>Use the table to review events; edit players via the “Edit” buttons.</li>
+                  <li>Export data via the <strong>Download CSV</strong> or <strong>Download Report</strong> buttons.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Supported Sports -->
+    <section class="container my-5">
+      <h2 class="h4 mb-3">Supported Sports</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Football</h5>
+              <p class="card-text">
+                Tag shots, passes, and actions on a 105×68 pitch. PDF export renders a pitch diagram per player/action group.
+              </p>
+              <a href="{{ url_for('football.index') }}" class="btn btn-outline-primary">Go to Football</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Floorball</h5>
+              <p class="card-text">
+                Track events on a 40×20 rink with rounded corners and goal areas. PDF export uses a custom Matplotlib rink.
+              </p>
+              <a href="{{ url_for('floorball.index') }}" class="btn btn-outline-primary">Go to Floorball</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Tennis</h5>
+              <p class="card-text">
+                Record serves and groundstrokes, choose grip and outcomes, and visualize service boxes. CSV/PDF available.
+              </p>
+              <a href="{{ url_for('tennis.index') }}" class="btn btn-outline-primary">Go to Tennis</a>
+            </div>
+          </div>
+        </div>
+        {# Add future sports here as more blueprints are enabled #}
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="container my-5">
+      <h2 class="h4 mb-3">How to Use the App</h2>
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Tagging Basics</h5>
+              <ul class="mb-0">
+                <li>Select a player (Home/Away) and an action type.</li>
+                <li>Click on the field to mark a point; click-drag to capture a start→end vector.</li>
+                <li>Events appear in the table; remove by clicking your UI’s delete/remove button.</li>
+                <li>Edit player labels (names, jersey numbers) to personalize the report.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Exports & Reports</h5>
+              <ul class="mb-0">
+                <li><strong>CSV</strong>: All tagged rows with coordinates and metadata.</li>
+                <li><strong>PDF</strong>: A per-player, per-action visualization (Matplotlib or mplsoccer).</li>
+                <li>Fonts: uses Vera.ttf if present; otherwise falls back to default.</li>
+                <li>Images are generated server-side with a non-interactive backend.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shortcuts / Tips -->
+      <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Keyboard Shortcuts (example)</h5>
+              <ul class="mb-0">
+                <li><strong>G/H</strong>: Toggle Grip (Forehand/Backhand in Tennis).</li>
+                <li><strong>1–4</strong>: Select player buttons (A01/A02/B01/B02).</li>
+                <li><strong>Z–.</strong>: Cycle shot types (as defined on the page).</li>
+                <li><strong>W/U/F/R</strong>: Winner / Unforced / Forced / Rally.</li>
+                <li>Sports have different controls—open the page’s <em>Help</em> for specifics.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Data & Privacy</h5>
+              <ul class="mb-0">
+                <li>Default storage is in-memory per process (dev). Use a DB/Redis for multi-worker prod.</li>
+                <li>No personal data is required; player names are optional labels for reports.</li>
+                <li>CSV/PDF are generated on demand and downloaded to your device.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+      <div class="container d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+          <div class="fw-semibold">Sports Event Tracker</div>
+          <small>© {{ 2025 }} — Built by Chaitanya Jadhav &amp; John Komar</small>
+        </div>
+        <div>
+          <a class="text-white me-3" href="mailto:chaitanya.jadhav15@hotmail.com">chaitanya.jadhav15@hotmail.com</a>
+          <a class="text-white" href="mailto:john.komar@nie.edu.sg">john.komar@nie.edu.sg</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Help Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="helpModalLabel">Help</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Choose a sport to start tagging events on an interactive pitch or court.</p>
+            <hr />
+            <h5>Tips</h5>
+            <ul>
+              <li>Each sport page has its own controls and keyboard shortcuts.</li>
+              <li>Click once to mark a point; click-drag to mark start→end actions.</li>
+              <li>Use the “Edit” buttons to rename players/jerseys for clearer exports.</li>
+            </ul>
+            <hr />
+            <h5>Troubleshooting</h5>
+            <ul>
+              <li>If PDF download fails, check server logs for font/image warnings.</li>
+              <li>If CSV columns look off, confirm your event schema on that sport page.</li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <a href="{{ url_for('football.index') }}" class="btn btn-success">Open Football</a>
+            <a href="{{ url_for('floorball.index') }}" class="btn btn-info">Open Floorball</a>
+            <a href="{{ url_for('tennis.index') }}" class="btn btn-warning text-dark">Open Tennis</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

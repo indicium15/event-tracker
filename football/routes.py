@@ -1,107 +1,79 @@
-from flask import Flask, render_template, request, jsonify, Response
-import csv
-import io
-import matplotlib.pyplot as plt
-from mplsoccer import Pitch
+# football/routes.py
+from flask import Blueprint, render_template, request, jsonify, Response, current_app
+import csv, io
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from mplsoccer import Pitch
 import numpy as np
+import matplotlib.pyplot as plt
+plt.switch_backend('Agg')  # Use a non-interactive backend for matplotlib
 
-app = Flask(__name__)
-plt.switch_backend('Agg')
+bp = Blueprint(
+    "football",
+    __name__,
+    template_folder="templates",
+    static_folder="static",
+    static_url_path="/football/static",   # avoids clashes with other blueprints
+    url_prefix="/football"                # mount under /football
+)
 
-@app.route("/")
+# In-memory state per process (replace with DB/Redis for multi-worker production)
+shots = []
+
+@bp.route("/")
 def index():
-    # Render the main page with the shots data
-    return render_template("index.html")
+    # You can pass a basePath so your JS knows what to call (e.g., /football)
+    return render_template("football_index.html", basePath="/football")
 
-
-@app.route("/add_shot", methods=["POST"])
+@bp.route("/add_shot", methods=["POST"])
 def add_shot():
-    # Get data from the request
     data = request.json
-    # Add the new shot to our shots list
     shots.append(data)
-    # print(shots)
-    return jsonify({"message": "Shot added succesfully"})
+    return jsonify({"message": "Shot added successfully"})
 
-
-@app.route("/remove_shot", methods=["POST"])
+@bp.route("/remove_shot", methods=["POST"])
 def remove_shot():
     data = request.json
-    # Find the shot in the list of shots and remove it
     global shots
     shots = [
-        shot
-        for shot in shots
-        if not (
-            shot["x"] == data["x"]
-            and shot["y"] == data["y"]
-            and shot["action"] == data["action"]
-            and shot["player"] == data["player"]
-        )
+        s for s in shots
+        if not (s["x"] == data["x"] and s["y"] == data["y"]
+                and s["action"] == data["action"] and s["player"] == data["player"])
     ]
-    print(shots)
     return jsonify({"success": True, "message": "Shot removed successfully"})
 
-
-@app.route("/download_csv", methods=["POST"])
+@bp.route("/download_csv", methods=["POST"])
 def download_csv():
-    # Retrieve shot data from the request's JSON payload
-    shots = request.json
-
-    # Create a buffer to hold the CSV data
+    payload = request.json
     proxy = io.StringIO()
-
-    # Create a CSV writer object using the buffer as the file
-    fieldnames = [
-        "time",
-        "player",
-        "playerName",
-        "action",
-        "x",
-        "y",
-        "x2",
-        "y2",
-        "xG",
-        "xSave",
-    ]
+    fieldnames = ["time","player","playerName","action","x","y","x2","y2","xG","xSave"]
     writer = csv.DictWriter(proxy, fieldnames=fieldnames)
-
-    # Write the header and data to the CSV writer
     writer.writeheader()
-    for shot in shots:
-        writer.writerow(shot)
-
-    # Seek to the start so `proxy` contains the entire content
+    for row in payload:
+        writer.writerow(row)
     proxy.seek(0)
     output = proxy.getvalue()
     proxy.close()
 
-    # Create a Flask response
     return Response(
         output,
         mimetype="text/csv",
-        headers={"Content-Disposition": "attachment;filename=shots_data.csv"},
+        headers={"Content-Disposition": "attachment;filename=shots_data.csv"}
     )
 
-
-@app.route("/download_pdf", methods=["POST"])
+@bp.route("/download_pdf", methods=["POST"])
 def download_pdf():
-    shots = request.json
-    # Create the PDF file in-memory
-    pdf_buffer = create_pdf_report(shots)
+    payload = request.json
+    pdf_buffer = create_pdf_report(payload)
     pdf_buffer.seek(0)
     return Response(
         pdf_buffer,
-        mimetype='application/pdf',
-        headers={
-            'Content-Disposition': 'attachment; filename=report.pdf'
-        }
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=report.pdf"}
     )
 
 def create_pdf_report(shots):
@@ -218,7 +190,3 @@ def create_pdf_report(shots):
     pdf.save()
     buffer.seek(0)
     return buffer
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
