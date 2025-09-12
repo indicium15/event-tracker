@@ -2,3 +2,10 @@
 body { scroll-behavior: smooth; }
 .card .btn { margin-top: .25rem; }
 header .btn { min-width: 160px; }
+
+/* Fix card image heights */
+.card-img-top {
+    height: 200px; /* Fixed height for all images */
+    object-fit: cover; /* Ensures images cover the space without distortion */
+    object-position: center; /* Centers the image */
+}
