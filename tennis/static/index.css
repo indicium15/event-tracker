@@ -29,20 +29,44 @@ body {
   margin-bottom: 0 !important;
 }
 
+/* === NEW: variables driven by JS === */
+:root {
+  /* These will be set by JS so aspect ratio matches the extended surface */
+  --aspect-w: 23.77; /* fallback */
+  --aspect-h: 10.97; /* fallback */
+
+  /* Percentages (also set by JS) for placing the court inside the surface */
+  --court-w-pct: 100%;
+  --court-h-pct: 100%;
+  --runoff-x-pct: 0%;
+  --runoff-y-pct: 0%;
+}
+
+/* #pitch is now the full play surface (court + run-off) */
 #pitch {
   touch-action: none;
-  height: 100%;
   width: 100%;
-  aspect-ratio: 23.77 / 10.97;
-  background: #008000; /* tennis green */
+  aspect-ratio: var(--aspect-w) / var(--aspect-h);
+  background: #0b5d2a;  /* darker green for out-of-court */
   position: relative;
   border: 1px solid #fff;
   transition: transform 0.2s ease;
   font-size: 2vw;
 }
 
-/* Singles boundary lines: 1.37m from top/bottom (≈12.48% of 10.97m) */
-.singles-line {
+/* The actual court sits inside #pitch with margins = run-off */
+.court {
+  position: absolute;
+  left: var(--runoff-x-pct);
+  top: var(--runoff-y-pct);
+  width: var(--court-w-pct);
+  height: var(--court-h-pct);
+  background: #008000;  /* standard tennis green for in-bounds */
+  border: 2px solid #fff; /* doubles sidelines & baselines */
+}
+
+/* Scope lines to the court box */
+.court .singles-line {
   position: absolute;
   left: 0;
   right: 0;
@@ -50,16 +74,11 @@ body {
   background: white;
 }
 
-.singles-line.top {
-  top: 12.48%;
-}
+.court .singles-line.top { top: 12.48%; }
+.court .singles-line.bottom { bottom: 12.48%; }
 
-.singles-line.bottom {
-  bottom: 12.48%;
-}
-
-/* Service boxes: 4.11m high (≈37.45%) and 6.4m wide (≈26.93%) */
-.service-box {
+/* Service boxes remain proportional to the court */
+.court .service-box {
   position: absolute;
   width: 26.93%;
   height: 37.45%;
@@ -67,21 +86,21 @@ body {
   border: 2px solid white;
 }
 
-.service-box.top {
+.court .service-box.top { top: 12.48%; }
+.court .service-box.bottom { top: calc(12.48% + 37.45%); }
+.court .service-box.left { left: 23.535%; }
+.court .service-box.right { right: 23.535%; }
+
+/* Center service line: draw only between service lines (optional polish) */
+.court::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   top: 12.48%;
-}
-
-.service-box.bottom {
-  /* bottom: 12.48%; */
-  top: calc(12.48% + 37.45%);
-}
-
-.service-box.left {
-  left: 23.535%; /* (100 - 2×26.93) / 2 */
-}
-
-.service-box.right {
-  right: 23.535%;
+  height: 37.45%;
+  width: 2px;
+  background: #fff;
 }
 
   
@@ -93,17 +112,6 @@ body {
   margin-top: 10px;
 }
 
-#pitch:before {
-  content: "";
-  display: block;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px; /* Now a vertical line */
-  background: #fff;
-  transform: translateX(-50%);
-}
 
 .arrow-container {
   display: flex;

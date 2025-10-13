@@ -65,8 +65,8 @@ let awayShortcutMap = {
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
   // Check if player maps are already in sessionStorage
-  const storedHomePlayerMap = sessionStorage.getItem('homePlayerMap');
-  const storedAwayPlayerMap = sessionStorage.getItem('awayPlayerMap');
+  const storedHomePlayerMap = sessionStorage.getItem('floorballHomePlayerMap');
+  const storedAwayPlayerMap = sessionStorage.getItem('floorballAwayPlayerMap');
 
   // Load from sessionStorage if available, else initialize with default values
   if (storedHomePlayerMap) {
@@ -88,7 +88,7 @@ function initializePlayerMaps() {
         name: `HomePlayer${i}`,
       };
     }
-    sessionStorage.setItem('homePlayerMap', JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('floorballHomePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAwayPlayerMap) {
@@ -110,7 +110,7 @@ function initializePlayerMaps() {
         name: `AwayPlayer${i}`,
       };
     }
-    sessionStorage.setItem('awayPlayerMap', JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('floorballAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -144,9 +144,9 @@ function updatePlayerNames(team) {
   }
   // Persist changes to sessionStorage
   if (team === "home") {
-    sessionStorage.setItem("homePlayerMap", JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('floorballHomePlayerMap', JSON.stringify(homePlayerMap));
   } else {
-    sessionStorage.setItem("awayPlayerMap", JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('floorballAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -161,16 +161,14 @@ var currentActionType = "";
 var currentPlayer = "";
 var currentPlayerName = "";
 var cumulativeData = {
-  xG: 0,
-  xSave: 0,
   shots: 0,
   passes: 0,
   corners: 0,
   freeKicks: 0,
   tackles: 0,
 };
-if (sessionStorage.getItem("rawShots")) {
-  var rawShots = JSON.parse(sessionStorage.getItem("rawShots"));
+if (sessionStorage.getItem("floorballRawShots")) {
+  var rawShots = JSON.parse(sessionStorage.getItem("floorballRawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
@@ -196,7 +194,7 @@ $(document).ready(function () {
   });
   console.log("table");
   console.log(table);
-  console.log("rawShots");
+  console.log("floorballRawShots");
   console.log(rawShots);
   if (rawShots.length > 0) {
     for (var i = 0; i < rawShots.length; i++) {
@@ -222,9 +220,7 @@ function updateCumulativeValues() {
   console.log("filteredData");
   console.log(filteredData[0]);
   // Initialize your cumulative values
-  var totalXG = 0;
   var totalGoals = 0;
-  var totalXSave = 0;
   var totalSaves = 0;
   var totalShots = 0;
   var totalFreeKicks = 0;
@@ -234,8 +230,7 @@ function updateCumulativeValues() {
 
   // Calculate cumulative values
   filteredData.each(function (value, index) {
-    totalXG += parseFloat(value[7]) || 0;
-    totalXSave += parseFloat(value[8]) || 0;
+  // xG/xSave columns were removed; no numeric aggregation here
     // Update the counts based on your data structure and what constitutes a shot, free kick, etc.
     if (value[2].includes("Shot")) {
       totalShots++;
@@ -244,21 +239,19 @@ function updateCumulativeValues() {
       } else if (value[2] == "Shot - Save") {
         totalSaves++;
       }
-    } else if (value[2] == "Free Kick") {
+    } else if (value[2] == "Free Hit" || value[2] == "Free Kick") {
       totalFreeKicks++;
     } else if (value[2] == "Pass") {
       totalPasses++;
-    } else if (value[2] == "Corner") {
+    } else if (value[2] == "Screen" || value[2] == "Corner") {
       totalCorners++;
     } else if (value[2] == "Tackle") {
       totalTackles++;
     }
   });
 
-  // Update the cumulative table
-  $("#cumulative-xg").text(totalXG.toFixed(2));
+  // Update the cumulative table (xG/xSave removed)
   $("#cumulative-goals").text(totalGoals);
-  $("#cumulative-xsave").text(totalXSave.toFixed(2));
   $("#cumulative-saves").text(totalSaves);
   $("#cumulative-shots").text(totalShots);
   $("#cumulative-passes").text(totalPasses);
@@ -447,7 +440,7 @@ pitch.addEventListener("pointerup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("floorballRawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -498,13 +491,9 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     (startX !== endX || startY !== endY);
   // var actionType = currentActionType;
   var actionType = event;
-  var xG =
-    actionType === "Shot" ||
-    actionType === "Shot - Goal" ||
-    actionType === "Shot - Save"
-      ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
-      : "N/A";
-  var xSave = actionType === "Shot - Save" ? +(1.0 - xG).toFixed(2) : "N/A";
+  // xG/xSave calculations removed for floorball
+  var xG = "N/A";
+  var xSave = "N/A";
   if (currentPlayer == "") {
     var playerJerseyNumber = "";
   } else {
@@ -523,8 +512,6 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     startY,
     wasDragged ? endX : "N/A",
     wasDragged ? endY : "N/A",
-    xG,
-    xSave,
     "<button class='btn btn-outline-danger remove-button' onclick='removeShot(this)'>X</button>",
   ];
 
@@ -563,8 +550,7 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     y: startY,
     x2: wasDragged ? endX : "N/A",
     y2: wasDragged ? endY : "N/A",
-    xG: xG,
-    xSave: xSave,
+    // xG/xSave removed
   });
   sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
   // populateDropdown();
@@ -586,7 +572,7 @@ function removeShot(deleteButton) {
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("floorballRawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -595,12 +581,7 @@ function removeShot(deleteButton) {
   // If shotsData is not used to track each shot, you might need to retrieve values directly from the row before it's removed
   var rowData = table.row(row).data();
   var eventContent = rowData[2]; // Assuming the 3rd column is the event type
-  var xGContent = rowData[7]; // Assuming the 8th column is xG
-  var xSaveContent = rowData[8]; // Assuming the 9th column is xSave
   console.log("eventcontent ", eventContent);
-  console.log("xgcontent ", xGContent);
-  console.log("xsave ", xSaveContent);
-  //updateCumulative(xGContent, xSaveContent, eventContent, "subtract");
   table.row(row).remove().draw();
 }
 
@@ -765,7 +746,7 @@ function distanceAnglexG(pos_x, pos_y) {
 
 function downloadCSV() {
   console.log("Downloading CSV...");
-  fetch("/download_csv", {
+  fetch("/floorball/download_csv", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -787,7 +768,7 @@ function downloadCSV() {
 
 function downloadPDF() {
   console.log("Downloading PDF...");
-  fetch("/download_pdf", {
+  fetch("/floorball/download_pdf", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -882,9 +863,9 @@ document.addEventListener("keydown", function (event) {
     N: 6, // Index of Cross
     M: 7, // Index of Pass
     ",": 8, // Index of Tackle
-    ".": 9, // Index of Free Kick
-    "?": 10, // Index of Corner
-    ">": 11, // Index of Corner
+    ".": 9, // Index of Free Hit
+    "?": 10, // Index of Screen
+    ">": 11, // Index of Screen
   };
 
   if (eventKeyMap.hasOwnProperty(event.key.toUpperCase())) {
@@ -946,8 +927,8 @@ function updateDisplay() {
 // Initialize default event names
 let defaultEventNames = [
   "Shot", "Shot - Save", "Shot - Goal", "Shot Assist", 
-  "Dribble", "Location", "Cross", "Pass", 
-  "Tackle", "Foul", "Free Kick", "Corner"
+  "Dribble", "Lob", "Cross", "Pass", 
+  "Tackle", "Foul", "Free Hit", "Screen"
 ];
 
 // Load event names from sessionStorage if available

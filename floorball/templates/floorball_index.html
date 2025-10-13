@@ -188,7 +188,7 @@
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
               onclick="setActionType.call(this,5);">
-              Location (<) </button>
+              Lob (&lt;) </button>
           </div>
           <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
             <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,6);">
@@ -207,11 +207,11 @@
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
               onclick="setActionType.call(this,10);">
-              Free Kick (?)
+              Free Hit (?)
             </button>
             <button class="btn btn-outline-primary btn-small event-button"
               onclick="setActionType.call(this,11);">
-              Corner (>)
+              Screen (&gt;)
             </button>
           </div>
         </div>
@@ -576,22 +576,18 @@
         <table id="cumulative-table" class="table table-sm table-bordered">
           <thead class="table-dark">
             <tr>
-              <th scope="col">xG</th>
               <th scope="col">Goals</th>
-              <th scope="col">xSave</th>
               <th scope="col">Saves</th>
               <th scope="col">Shots</th>
               <th scope="col">Passes</th>
-              <th scope="col">Corners</th>
-              <th scope="col">Free Kicks</th>
+              <th scope="col">Screens</th>
+              <th scope="col">Free Hits</th>
               <th scope="col">Tackles</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td id="cumulative-xg">0</td>
               <td id="cumulative-goals">0</td>
-              <td id="cumulative-xsave">0</td>
               <td id="cumulative-saves">0</td>
               <td id="cumulative-shots">0</td>
               <td id="cumulative-passes">0</td>
@@ -617,8 +613,7 @@
                 <th scope="col">Y1</th>
                 <th scope="col">X2</th>
                 <th scope="col">Y2</th>
-                <th scope="col">xG</th>
-                <th scope="col">xSave</th>
+                <!-- xG/xSave removed -->
                 <th scope="col">X</th>
               </tr>
             </thead>

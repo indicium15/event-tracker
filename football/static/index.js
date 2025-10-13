@@ -64,8 +64,8 @@ let awayShortcutMap = {
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
   // Check if player maps are already in sessionStorage
-  const storedHomePlayerMap = sessionStorage.getItem('homePlayerMap');
-  const storedAwayPlayerMap = sessionStorage.getItem('awayPlayerMap');
+  const storedHomePlayerMap = sessionStorage.getItem('footballHomePlayerMap');
+  const storedAwayPlayerMap = sessionStorage.getItem('footballAwayPlayerMap');
 
   // Load from sessionStorage if available, else initialize with default values
   if (storedHomePlayerMap) {
@@ -87,7 +87,7 @@ function initializePlayerMaps() {
         name: `HomePlayer${i}`,
       };
     }
-    sessionStorage.setItem('homePlayerMap', JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('footballHomePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAwayPlayerMap) {
@@ -109,7 +109,7 @@ function initializePlayerMaps() {
         name: `AwayPlayer${i}`,
       };
     }
-    sessionStorage.setItem('awayPlayerMap', JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('footballAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -143,9 +143,9 @@ function updatePlayerNames(team) {
   }
   // Persist changes to sessionStorage
   if (team === "home") {
-    sessionStorage.setItem("homePlayerMap", JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('footballHomePlayerMap', JSON.stringify(homePlayerMap));
   } else {
-    sessionStorage.setItem("awayPlayerMap", JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('footballAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -168,8 +168,8 @@ var cumulativeData = {
   freeKicks: 0,
   tackles: 0,
 };
-if (sessionStorage.getItem("rawShots")) {
-  var rawShots = JSON.parse(sessionStorage.getItem("rawShots"));
+if (sessionStorage.getItem("footballRawShots")) {
+  var rawShots = JSON.parse(sessionStorage.getItem("footballRawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
@@ -195,7 +195,7 @@ $(document).ready(function () {
   });
   console.log("table");
   console.log(table);
-  console.log("rawShots");
+  console.log("footballRawShots");
   console.log(rawShots);
   if (rawShots.length > 0) {
     for (var i = 0; i < rawShots.length; i++) {
@@ -420,7 +420,7 @@ pitch.addEventListener("pointerup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("footballRawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -558,7 +558,7 @@ function removeShot(deleteButton) {
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("footballRawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -736,7 +736,7 @@ function distanceAnglexG(pos_x, pos_y) {
 }
 
 function downloadCSV() {
-  fetch("/download_csv", {
+  fetch("/football/download_csv", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -757,7 +757,7 @@ function downloadCSV() {
 }
 
 function downloadPDF() {
-  fetch("/download_pdf", {
+  fetch("/football/download_pdf", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -829,16 +829,16 @@ document.addEventListener("keydown", function (event) {
 
   // Check if the pressed key is in our map
   if (homePlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
-    // Get the index from the map
+    // Get the index from the map (0-based) and convert to 1-based button id
     let index = homePlayerKeyMap[event.key.toUpperCase().toString()];
-    let button = document.getElementById(`homePlayerButton${index}`);
-    button.click();
+    let button = document.getElementById(`homePlayerButton${index + 1}`);
+    if (button) button.click();
   }
   if (awayPlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
-    // Get the index from the map
+    // Get the index from the map (0-based) and convert to 1-based button id
     let index = awayPlayerKeyMap[event.key.toUpperCase()];
-    let button = document.getElementById(`awayPlayerButton${index}`);
-    button.click();
+    let button = document.getElementById(`awayPlayerButton${index + 1}`);
+    if (button) button.click();
   }
 
   const eventKeyMap = {

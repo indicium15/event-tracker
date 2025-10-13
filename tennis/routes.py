@@ -12,6 +12,14 @@ from matplotlib.patches import Rectangle
 from reportlab.pdfbase.pdfmetrics import stringWidth
 plt.switch_backend("Agg")
 
+# Dimensions in METERS (match your JS: COURT 23.77m x 10.97m)
+COURT_LEN_M = 23.77
+COURT_WID_M = 10.97
+
+# Run-off each side (meters) – baseline direction (length) and sideline direction (width)
+RUNOFF_LEN_M = 6.40  # behind each baseline
+RUNOFF_WID_M = 3.66  # beyond each sideline
+
 bp = Blueprint(
     "tennis",
     __name__,
@@ -109,77 +117,97 @@ def download_pdf():
         headers={"Content-Disposition": "attachment; filename=report.pdf"},
     )
 
-def draw_tennis_court(ax, length=23.77, width=10.97, singles_margin=1.37, service_box_len=6.40, service_box_height=4.11):
-    half_len = length / 2
-    half_wid = width / 2
-    singles_half_wid = (width - 2 * singles_margin) / 2
+def draw_tennis_court(
+    ax,
+    length=COURT_LEN_M,
+    width=COURT_WID_M,
+    runoff_len=RUNOFF_LEN_M,
+    runoff_wid=RUNOFF_WID_M,
+    singles_margin=1.37,
+    service_box_len=6.40,
+    service_box_height=4.11,
+):
+    """
+    Draw full play surface (court + run-off) with the court rendered inside.
+    Coordinates are centered at (0,0), x along length (baseline-to-baseline),
+    y along width (sideline-to-sideline) – same as your JS.
+    """
+    # Half sizes
+    half_len = length / 2.0         # court half-length
+    half_wid = width / 2.0          # court half-width
+    surf_half_len = half_len + runoff_len   # surface half-length
+    surf_half_wid = half_wid + runoff_wid   # surface half-width
 
-    ax.set_xlim(-half_len, half_len)
-    ax.set_ylim(-half_wid, half_wid)
+    # Singles half-width (distance from centerline to singles sideline)
+    singles_half_wid = (width - 2.0 * singles_margin) / 2.0
+
+    # Axes span the **full surface**
+    ax.set_xlim(-surf_half_len, surf_half_len)
+    ax.set_ylim(-surf_half_wid, surf_half_wid)
     ax.set_aspect("equal")
 
-    # ✅ 1. Green background
-    background = Rectangle((-half_len, -half_wid), length, width,
-                           facecolor="green", edgecolor="none", zorder=0)
-    ax.add_patch(background)
+    # 1) Out-of-court background (dark green)
+    surface = Rectangle(
+        (-surf_half_len, -surf_half_wid),
+        2*surf_half_len,
+        2*surf_half_wid,
+        facecolor="#0b5d2a",
+        edgecolor="none",
+        zorder=0,
+    )
+    ax.add_patch(surface)
 
-    # ✅ 2. Outer court boundary
-    court = Rectangle((-half_len, -half_wid), length, width,
-                      linewidth=2, edgecolor="white", facecolor="none", zorder=1)
+    # 2) Court rectangle (lighter green) + white border (doubles lines/baselines)
+    court = Rectangle(
+        (-half_len, -half_wid),
+        2*half_len,
+        2*half_wid,
+        facecolor="#008000",
+        edgecolor="white",
+        linewidth=2,
+        zorder=1,
+    )
     ax.add_patch(court)
 
-    # Singles sidelines
-    ax.plot([-half_len, half_len], [singles_half_wid, singles_half_wid], color="white", lw=2, zorder=2)
-    ax.plot([-half_len, half_len], [-singles_half_wid, -singles_half_wid], color="white", lw=2, zorder=2)
-
-    # Baselines
-    ax.plot([-half_len, -half_len], [-half_wid, half_wid], color="white", lw=2, zorder=2)
-    ax.plot([half_len, half_len], [-half_wid, half_wid], color="white", lw=2, zorder=2)
-
-    # Net line
+    # 3) Net (vertical line at x=0)
     ax.plot([0, 0], [-half_wid, half_wid], color="white", lw=2, zorder=2)
 
-    # Center service line
-    ax.plot([0, 0], [-service_box_height / 2, service_box_height / 2], color="white", lw=2, zorder=2)
+    # 4) Singles sidelines (horizontal lines at ±singles_half_wid)
+    ax.plot([-half_len, half_len], [singles_half_wid,  singles_half_wid],  color="white", lw=2, zorder=2)
+    ax.plot([-half_len, half_len], [-singles_half_wid, -singles_half_wid], color="white", lw=2, zorder=2)
 
-    # Service boxes (now starting from singles sideline inward)
-    for direction in (1, -1):
-        if direction == 1:
-            # top service box: from net → up to singles line
-            y0 = 0
-        else:
-            # bottom service box: from bottom singles line → up to the net
-            y0 = -singles_half_wid
+    # 5) Baselines (vertical lines at ±half_len)
+    ax.plot([-half_len, -half_len], [-half_wid, half_wid], color="white", lw=2, zorder=2)
+    ax.plot([ half_len,  half_len], [-half_wid, half_wid], color="white", lw=2, zorder=2)
 
-        h = singles_half_wid  # always positive
+    # 6) Center service line (vertical) drawn only across service-box height
+    ax.plot([0, 0], [-service_box_height/2.0, service_box_height/2.0], color="white", lw=2, zorder=2)
 
-        # left half of the court
+    # 7) Service boxes (net → service line on each half, bounded by singles lines)
+    # Left half (x in [-service_box_len, 0]), right half (x in [0, service_box_len])
+    # Top half (y in [0, +singles_half_wid]), bottom half (y in [-singles_half_wid, 0])
+    for y0 in (0, -singles_half_wid):
+        h = singles_half_wid
+        # left service box
         ax.add_patch(Rectangle(
             (-service_box_len, y0),
-            service_box_len,       # positive width
-            h,                     # positive height
-            linewidth=2,
-            edgecolor="white",
-            facecolor="none",
-            zorder=2
+            service_box_len, h,
+            linewidth=2, edgecolor="white", facecolor="none", zorder=2
         ))
-        # right half
+        # right service box
         ax.add_patch(Rectangle(
             (0, y0),
-            service_box_len,
-            h,
-            linewidth=2,
-            edgecolor="white",
-            facecolor="none",
-            zorder=2
+            service_box_len, h,
+            linewidth=2, edgecolor="white", facecolor="none", zorder=2
         ))
 
-    ax.set_xticks([])
-    ax.set_yticks([])
+    # Clean axis
+    ax.set_xticks([]); ax.set_yticks([])
     for spine in ax.spines.values():
         spine.set_visible(False)
 
     return ax
+
 
 def create_pdf_report(shots):
     # Register the custom font
@@ -302,7 +330,24 @@ def create_pdf_report(shots):
             y_pos = (PAGE_HEIGHT / 10) * ori_height
             text_y_pos = (PAGE_HEIGHT / 10.5) * (ori_height - text_height)
             image = ImageReader(img_buffer)
-            pdf.drawImage(image, x=x_pos, y=y_pos, width=250, height=200)
+            # Preserve the PNG's aspect ratio when embedding in the PDF.
+            # ImageReader.getSize() returns (width, height) in pixels.
+            try:
+                img_w, img_h = image.getSize()
+            except Exception:
+                # Fallback: assume 4:3 if size can't be obtained
+                img_w, img_h = (4.0, 3.0)
+
+            max_w, max_h = 250.0, 200.0
+            scale = min(max_w / img_w, max_h / img_h)
+            draw_w = img_w * scale
+            draw_h = img_h * scale
+
+            # center the image inside the original (250x200) box
+            x_center = x_pos + (max_w - draw_w) / 2.0
+            y_center = y_pos + (max_h - draw_h) / 2.0
+
+            pdf.drawImage(image, x=x_center, y=y_center, width=draw_w, height=draw_h)
             pdf.setFont("Vera", 15)
             pdf.setFillColor("black")
             pdf.drawString(text_x_pos, text_y_pos, action)

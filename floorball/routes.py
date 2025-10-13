@@ -78,8 +78,7 @@ def download_csv():
         "y",
         "x2",
         "y2",
-        "xG",
-        "xSave",
+        # xG and xSave removed for floorball
     ]
     writer = csv.DictWriter(proxy, fieldnames=fieldnames)
 

@@ -1,9 +1,28 @@
-// const PITCH_W = 23.77; // meters (length)
-// const PITCH_H = 10.97; // meters (width)
-const PITCH_W = 2377; // centimeters
-const PITCH_H = 1097; // centimeters
-
+// Court dimensions (cm)
+const COURT_W = 2377; // length (baseline to baseline)
+const COURT_H = 1097; // width (sideline to sideline)
 let zoomLevel = 1;
+
+// Run-off space (cm) – adjust to your needs.
+// Example: ~3.66 m at sides, ~6.40 m behind baselines (competition-friendly)
+const RUNOFF_Y = 366;  // left + right each
+const RUNOFF_X = 640;  // top + bottom each
+
+// Full play surface = court + run-off on both sides
+const PITCH_W = COURT_W + 2 * RUNOFF_X;
+const PITCH_H = COURT_H + 2 * RUNOFF_Y;
+
+// Push geometry to CSS so layout stays exact
+const rootStyle = document.documentElement.style;
+rootStyle.setProperty('--aspect-w', PITCH_W);
+rootStyle.setProperty('--aspect-h', PITCH_H);
+rootStyle.setProperty('--court-w-pct', `${(COURT_W / PITCH_W) * 100}%`);
+rootStyle.setProperty('--court-h-pct', `${(COURT_H / PITCH_H) * 100}%`);
+rootStyle.setProperty('--runoff-x-pct', `${(RUNOFF_X / PITCH_W) * 100}%`);
+rootStyle.setProperty('--runoff-y-pct', `${(RUNOFF_Y / PITCH_H) * 100}%`);
+
+// Make sure pitch is defined globally once
+const pitch = document.getElementById("pitch");
 
 function zoomIn() {
   zoomLevel += 0.1;
@@ -40,8 +59,8 @@ let awayShortcutMap = {
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
   // Check if player maps are already in sessionStorage
-  const storedHomePlayerMap = sessionStorage.getItem('homePlayerMap');
-  const storedAwayPlayerMap = sessionStorage.getItem('awayPlayerMap');
+  const storedHomePlayerMap = sessionStorage.getItem('tennisHomePlayerMap');
+  const storedAwayPlayerMap = sessionStorage.getItem('tennisAwayPlayerMap');
 
   // Load from sessionStorage if available, else initialize with default values
   if (storedHomePlayerMap) {
@@ -63,7 +82,7 @@ function initializePlayerMaps() {
         name: `HomePlayer${i}`,
       };
     }
-    sessionStorage.setItem('homePlayerMap', JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('tennisHomePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAwayPlayerMap) {
@@ -85,7 +104,7 @@ function initializePlayerMaps() {
         name: `AwayPlayer${i}`,
       };
     }
-    sessionStorage.setItem('awayPlayerMap', JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('tennisAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -119,9 +138,9 @@ function updatePlayerNames(team) {
   }
   // Persist changes to sessionStorage
   if (team === "home") {
-    sessionStorage.setItem("homePlayerMap", JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('tennisHomePlayerMap', JSON.stringify(homePlayerMap));
   } else {
-    sessionStorage.setItem("awayPlayerMap", JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('tennisAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -137,8 +156,8 @@ var currentPlayer = "";
 var currentPlayerName = "";
 var currentGrip = "";
 var currentOutcome = "";
-if (sessionStorage.getItem("rawShots")) {
-  var rawShots = JSON.parse(sessionStorage.getItem("rawShots"));
+if (sessionStorage.getItem("tennisRawShots")) {
+  var rawShots = JSON.parse(sessionStorage.getItem("tennisRawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
@@ -164,7 +183,7 @@ $(document).ready(function () {
   });
   console.log("table");
   console.log(table);
-  console.log("rawShots");
+  console.log("tennisRawShots");
   console.log(rawShots);
   if (rawShots.length > 0) {
     for (var i = 0; i < rawShots.length; i++) {
@@ -385,7 +404,7 @@ pitch.addEventListener("pointerup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -522,7 +541,7 @@ function removeShot(deleteButton) {
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("rawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -652,7 +671,7 @@ function createArrow(x1, y1, x2, y2, id) {
 
 function downloadCSV() {
   console.log("Downloading CSV...");
-  fetch("/download_csv", {
+  fetch("/tennis/download_csv", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -674,7 +693,7 @@ function downloadCSV() {
 
 function downloadPDF() {
   console.log("Downloading PDF...");
-  fetch("/download_pdf", {
+  fetch("/tennis/download_pdf", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
