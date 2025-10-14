@@ -11,7 +11,7 @@ REDIRECT_DELAY_SECONDS = 10  # redirect after page fully loads (handled via JS)
 @app.route("/")
 def index():
     # Plain-language promise for regular users; show a concrete "until" date (30 days from today)
-    display_until = (date.today() + timedelta(days=30)).strftime("%B %d, %Y")
+    display_until = "15th November 2025"
     return render_template(
         "index.html",
         old_url=OLD_URL,
