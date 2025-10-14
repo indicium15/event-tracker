@@ -1,667 +1,87 @@
-<!doctype html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" />
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
-  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.min.css" />
-  <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.min.js"></script>
-  <title>Football Event Tracker</title>
-</head>
+{% block title %}We've moved! — Event Tracking{% endblock %}
 
-<body>
-  <div class="container-fluid">
-    <div class="row">
-      <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Football Event Tracker</a>
-        <form class="form-inline">
-          <a href="https://github.com/indicium15/xg-web-app" class="github-link"><svg xmlns="http://www.w3.org/2000/svg"
-              width="32" height="32" fill="white" class="bi bi-github" viewBox="0 0 16 16">
-              <path
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-            </svg></a>
-          <button type="button" class="btn btn-outline-light instructions-button" data-bs-toggle="modal"
-            data-bs-target="#exampleModal">Help</button>
-        </form>
-      </nav>
-    </div>
-    <div class="row">
-      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title" id="exampleModalLabel">Help</h4>
-            </div>
-            <div class="modal-body">
-              <p>Thanks for using this web app! Here's how to get started with collecting event data:</p>
-              <hr>
-              <h5>Quickstart</h5>
-              <ol type="1">
-                <li>Select an event from the events menu via the mouse or keyboard shortcuts in brackets.</li>
-                <li>Select a player from the player menu via the mouse or keyboard shortcuts in brackets.</li>
-                <li>Click the area of the pitch where the action occured.</li>
-                <li>To record the start and end points of an action, click and drag the mouse across the pitch.</li>
-              </ol>
-              <hr>
-              <h5>Customize Player Details</h5>
-              <p>Click on the "Edit" button next to the Home Player or Away Player heading to open a pop-up. Add
-                additional information
-                (jersey numbers, player names) to customize the exported CSV and PDF files.</p>
-              <hr>
-              <h5>Generate CSV and PDF Reports</h5>
-              <p>After tagging the events, click on the "Download CSV" or "Download Report" button to obtain a CSV file of the
-                table or a PDF report that details the actions taken by each player.</p>
-              <hr>
-              <h5>Contributing and Feedback</h5>
-              <p>Pull requests are welcome! Check out the GitHub Repository for this app <a
-                  href="https://github.com/indicium15/xg-web-app">here</a>. Lastly, if you have any feedback, feel free
-                to send us an email <a href="mailto:chaitanya.jadhav15@hotmail.com">here</a> or <a
-                  href="mailto:john.komar@nie.edu.sg">here</a>.
-              </p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-            </div>
-          </div>
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-3">We've moved 🎉</h1>
+
+        <div class="alert alert-info" role="alert">
+          Our site has moved from
+          <a href="{{ old_url }}" class="alert-link" target="_blank" rel="noopener noreferrer">{{ old_url }}</a>
+          to
+          <a href="{{ new_url }}" class="alert-link" target="_blank" rel="noopener noreferrer">{{ new_url }}</a>.
         </div>
-      </div>
-      <div class="col-12 col-sm-12 col-md-12 col-lg-6">
-        <div class="row align-items-center">
-          <div class="row mt-2">
-            <h5 class="heading">Timer</h5>
-          </div>
-          <div class="col-md-6 mt-1">
-            <h4 id="timerDisplay">00:00:00</h4>
-          </div>
-          <div class="col-md-6 text-end mt-1">
-            <button class="btn btn-success me-1" onclick="startTimer()">Start</button>
-            <button class="btn btn-warning me-1" onclick="pauseTimer()">Pause</button>
-            <button class="btn btn-danger" onclick="stopTimer()">Stop</button>
-          </div>
+
+        <p class="mb-2">
+          The football tracking app is now available at:
+          <a href="{{ football_url }}" target="_blank" rel="noopener noreferrer">{{ football_url }}</a>
+          along with trackers for other sports.
+        </p>
+
+        <p class="text-muted mb-4">
+          We'll keep this notice up for our regular users for one month (through <strong>{{ display_until }}</strong>).
+        </p>
+
+        <hr class="my-4" />
+
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="fw-semibold">Redirecting to the new site in
+            <span id="countdown" class="text-primary">{{ delay }}</span> seconds…</span>
+          <a class="btn btn-primary btn-sm" href="{{ new_url }}" rel="noopener noreferrer">Go now</a>
         </div>
-        <hr />
-        <div class="row-container">
-          <div class="row mt-1">
-            <h5 class="pitch-heading">Pitch</h5>
-            <p class="arrow-container mt-2">
-              Direction of Attack <span class="right-arrow"></span>
-            </p>
-          </div>
-          <div class="row">
-            <div class="zoom-controls">
-              <button class="btn btn-outline-primary" onclick="zoomIn()">Zoom In</button>
-              <button class="btn btn-outline-primary" onclick="zoomOut()">Zoom Out</button>
-            </div>
-          </div>
-        </div>
-        <div class="pitch-container mt-3">
-          <div class="pitch-wrapper">
-            <div id="pitch">
-              <div class="goal-area left"></div>
-              <div class="goal-area right"></div>
-              <div class="center-circle"></div>
-              <div class="center-spot"></div>
-              <div class="eighteen-yard-box left"></div>
-              <div class="eighteen-yard-box right"></div>
-            </div>
+
+        <div class="progress" aria-label="Redirect progress">
+          <div id="progress" class="progress-bar" role="progressbar"
+               style="width: 0%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           </div>
         </div>
 
-
-      </div>
-      <div class="button-container col-sm-12 col-md-12 col-lg-6">
-
-        <!-- Modal for Editing Event Names -->
-        <div class="modal fade" id="editEventNamesModal" tabindex="-1" aria-labelledby="editEventNamesModalLabel"
-          aria-hidden="true">
-          <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="editEventNamesModalLabel">Edit Event Names</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <form id="editEventNamesForm">
-                  <div class="mb-3">
-                    <label for="eventNamesTextarea" class="form-label">Enter Event Names (One per Line, max 12)</label>
-                    <textarea class="form-control" id="eventNamesTextarea" rows="12"
-                      placeholder="Enter event names here..."></textarea>
-                  </div>
-                </form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveEventNames()">Save</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              </div>
-            </div>
+        <noscript>
+          <div class="alert alert-warning mt-4" role="alert">
+            JavaScript is disabled, so automatic redirection won’t work.
+            Please click <a href="{{ new_url }}" class="alert-link">here</a> to continue.
           </div>
-        </div>
-
-        <div class="row">
-          <div class="col-auto align-items-center d-flex">
-            <h5 class="heading">Event</h5>
-          </div>
-          <div class="col-auto">
-            <button type="button" class="btn btn-outline-secondary edit-event-button" data-bs-toggle="modal" data-bs-target="#editEventNamesModal">
-              Edit
-            </button>          
-          </div>
-        </div>
-        <div class="row">
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,0);">
-              Shot (Z)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,1);">
-              Shot - Save (X)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,2);">
-              Shot - Goal (C)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,3);">
-              Shot Assist (V)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,4);">
-              Dribble (B)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,5);">
-              Location (<) </button>
-          </div>
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,6);">
-              Cross (N)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,7);">
-              Pass (M)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,8);">
-              Tackle (,)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,9);">
-              Foul (.)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,10);">
-              Free Kick (?)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,11);">
-              Corner (>)
-            </button>
-          </div>
-        </div>
-        <div class="row">
-          <!-- Modal for Editing Player Names -->
-          <div class="modal fade" id="editHomePlayerNamesModal" tabindex="-1"
-            aria-labelledby="editHomePlayerNamesModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="editHomePlayerNamesModalLabel">Edit Home Team Player Names</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <form id="editHomePlayerNamesForm">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Jersey Number</th>
-                          <th scope="col">Player Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Statically defined rows for 16 players -->
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey1" placeholder="A01"></td>
-                          <td><input type="text" class="form-control" id="homePlayer1" placeholder="Player1"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey2" placeholder="A02"></td>
-                          <td><input type="text" class="form-control" id="homePlayer2" placeholder="Player2"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey3" placeholder="A03"></td>
-                          <td><input type="text" class="form-control" id="homePlayer3" placeholder="Player3"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey4" placeholder="A04"></td>
-                          <td><input type="text" class="form-control" id="homePlayer4" placeholder="Player4"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey5" placeholder="A05"></td>
-                          <td><input type="text" class="form-control" id="homePlayer5" placeholder="Player5"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey6" placeholder="A06"></td>
-                          <td><input type="text" class="form-control" id="homePlayer6" placeholder="Player6"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey7" placeholder="A07"></td>
-                          <td><input type="text" class="form-control" id="homePlayer7" placeholder="Player7"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey8" placeholder="A08"></td>
-                          <td><input type="text" class="form-control" id="homePlayer8" placeholder="Player8"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey9" placeholder="A09"></td>
-                          <td><input type="text" class="form-control" id="homePlayer9" placeholder="Player9"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey10" placeholder="A10"></td>
-                          <td><input type="text" class="form-control" id="homePlayer10" placeholder="Player10"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey11" placeholder="A11"></td>
-                          <td><input type="text" class="form-control" id="homePlayer11" placeholder="Player11"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey12" placeholder="A12"></td>
-                          <td><input type="text" class="form-control" id="homePlayer12" placeholder="Player12"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey13" placeholder="A13"></td>
-                          <td><input type="text" class="form-control" id="homePlayer13" placeholder="Player13"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey14" placeholder="A14"></td>
-                          <td><input type="text" class="form-control" id="homePlayer14" placeholder="Player14"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey15" placeholder="A15"></td>
-                          <td><input type="text" class="form-control" id="homePlayer15" placeholder="Player15"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="homeJersey16" placeholder="A16"></td>
-                          <td><input type="text" class="form-control" id="homePlayer16" placeholder="Player16"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </form>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" onclick="updatePlayerNames('home')">Save</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="modal fade" id="editAwayPlayerNamesModal" tabindex="-1"
-            aria-labelledby="editAwayPlayerNamesModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="editAwayPlayerNamesModalLabel">Edit Away Team Player Names</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <form id="editAwayPlayerNamesForm">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Jersey Number</th>
-                          <th scope="col">Player Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Statically defined rows for 16 players -->
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey1" placeholder="B01"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer1" placeholder="Player1"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey2" placeholder="B02"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer2" placeholder="Player2"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey3" placeholder="B03"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer3" placeholder="Player3"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey4" placeholder="B04"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer4" placeholder="Player4"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey5" placeholder="B05"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer5" placeholder="Player5"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey6" placeholder="B06"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer6" placeholder="Player6"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey7" placeholder="B07"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer7" placeholder="Player7"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey8" placeholder="B08"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer8" placeholder="Player8"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey9" placeholder="B09"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer9" placeholder="Player9"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey10" placeholder="B10"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer10" placeholder="Player10"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey11" placeholder="B11"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer11" placeholder="Player11"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey12" placeholder="B12"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer12" placeholder="Player12"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey13" placeholder="B13"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer13" placeholder="Player13"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey14" placeholder="B14"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer14" placeholder="Player14"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey15" placeholder="B15"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer15" placeholder="Player15"></td>
-                        </tr>
-                        <tr>
-                          <td><input type="text" class="form-control" id="awayJersey16" placeholder="B16"></td>
-                          <td><input type="text" class="form-control" id="awayPlayer16" placeholder="Player16"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </form>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" onclick="updatePlayerNames('away');">Save</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row align-items-center">
-            <div class="col-auto align-items-center d-flex">
-              <h5 class="heading mb-0">Home Player</h5>
-            </div>
-            <div class="col-auto">
-              <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
-                data-bs-target="#editHomePlayerNamesModal">
-                Edit
-              </button>
-            </div>
-          </div>
-          <div class="btn-group button-container" role="group">
-            <button id="homePlayerButton1" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 1);">
-              A01 (1)
-            </button>
-            <button id="homePlayerButton2" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 2);">
-              A02 (2)
-            </button>
-            <button id="homePlayerButton3" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 3);">
-              A03 (3)
-            </button>
-            <button id="homePlayerButton4" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 4);">
-              A04 (4)
-            </button>
-            <button id="homePlayerButton5" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 5);">
-              A05 (5)
-            </button>
-            <button id="homePlayerButton6" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 6);">
-              A06 (6)
-            </button>
-            <button id="homePlayerButton7" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 7);">
-              A07 (7)
-            </button>
-            <button id="homePlayerButton8" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 8);">
-              A08 (8)
-            </button>
-          </div>
-          <div class="btn-group button-container" role="group">
-            <button id="homePlayerButton9" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 9);">
-              A09 (9)
-            </button>
-            <button id="homePlayerButton10" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 10);">
-              A10 (0)
-            </button>
-            <button id="homePlayerButton11" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 11);">
-              A11 (Q)
-            </button>
-            <button id="homePlayerButton12" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 12);">
-              A12 (W)
-            </button>
-            <button id="homePlayerButton13" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 13);">
-              A13 (E)
-            </button>
-            <button id="homePlayerButton14" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 14);">
-              A14 (R)
-            </button>
-            <button id="homePlayerButton15" class="btn btn-outline-primary player-button"
-              onclick="setPlayer(this, 15);">
-              A15 (T)
-            </button>
-            <button id="homePlayerButton16" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('home', 16);">
-              A16 (Y)
-            </button>
-          </div>
-          <div class="row align-items-center">
-            <div class="col-auto align-items-center d-flex">
-              <h5 class="heading mb-0">Away Player</h5>
-            </div>
-            <div class="col-auto">
-              <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
-                data-bs-target="#editAwayPlayerNamesModal">
-                Edit
-              </button>
-            </div>
-          </div>
-          <div class="btn-group button-container" role="group">
-            <button id="awayPlayerButton1" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 1);">
-              B01 (U)
-            </button>
-            <button id="awayPlayerButton2" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 2);">
-              B02 (I)
-            </button>
-            <button id="awayPlayerButton3" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 3);">
-              B03 (O)
-            </button>
-            <button id="awayPlayerButton4" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 4);">
-              B04 (P)
-            </button>
-            <button id="awayPlayerButton5" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 5);">
-              B05 ([)
-            </button>
-            <button id="awayPlayerButton6" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 6);">
-              B06 (])
-            </button>
-            <button id="awayPlayerButton7" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 7);">
-              B07 (A)
-            </button>
-            <button id="awayPlayerButton8" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 8);">
-              B08 (S)
-            </button>
-          </div>
-          <div class="btn-group button-container" role="group">
-            <button id="awayPlayerButton9" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 9);">
-              B09 (D)
-            </button>
-            <button id="awayPlayerButton10" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 10);">
-              B10 (F)
-            </button>
-            <button id="awayPlayerButton11" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 11);">
-              B11 (G)
-            </button>
-            <button id="awayPlayerButton12" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 12);">
-              B12 (H)
-            </button>
-            <button id="awayPlayerButton13" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 13);">
-              B13 (J)
-            </button>
-            <button id="awayPlayerButton14" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 14);">
-              B14 (K)
-            </button>
-            <button id="awayPlayerButton15" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 15);">
-              B15 (L)
-            </button>
-            <button id="awayPlayerButton16" class="btn btn-outline-primary player-button"
-              onclick="setPlayer('away', 16);">
-              B16 (;)
-            </button>
-          </div>
-        </div>
+        </noscript>
       </div>
     </div>
-    <hr />
-    <div class="row tracked-events flex-fill">
-      <div class="col-12">
-        <h5>Cumulative Statistics</h5>
-        <table id="cumulative-table" class="table table-sm table-bordered">
-          <thead class="table-dark">
-            <tr>
-              <th scope="col">xG</th>
-              <th scope="col">Goals</th>
-              <th scope="col">xSave</th>
-              <th scope="col">Saves</th>
-              <th scope="col">Shots</th>
-              <th scope="col">Passes</th>
-              <th scope="col">Corners</th>
-              <th scope="col">Free Kicks</th>
-              <th scope="col">Tackles</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td id="cumulative-xg">0</td>
-              <td id="cumulative-goals">0</td>
-              <td id="cumulative-xsave">0</td>
-              <td id="cumulative-saves">0</td>
-              <td id="cumulative-shots">0</td>
-              <td id="cumulative-passes">0</td>
-              <td id="cumulative-corners">0</td>
-              <td id="cumulative-free-kicks">0</td>
-              <td id="cumulative-tackles">0</td>
-            </tr>
-          </tbody>
-        </table>
-        <hr />
-        <h5>Tracked Events</h5>
-        <div class="table-responsive">
-          <table id="event-table" class="table table-sm table-hover table-bordered dt-responsive">
-            <thead class="table-dark">
-              <tr>
-                <th scope="col">Time</th>
-                <th scope="col">Shirt Number</th>
-                <th scope="col">
-                  Event
-                  <!--TODO: Add filtering-->
-                </th>
-                <th scope="col">X1</th>
-                <th scope="col">Y1</th>
-                <th scope="col">X2</th>
-                <th scope="col">Y2</th>
-                <th scope="col">xG</th>
-                <th scope="col">xSave</th>
-                <th scope="col">X</th>
-              </tr>
-            </thead>
-            <tbody class="events">
-              <!-- Rows will be added here by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  <div class="row mb-3 mt-3 justify-content-center">
-  <div class="col-6">
-    <button id="download-csv" class="btn btn-primary w-100" onclick="downloadCSV()" type="button">
-      Download CSV
-    </button>
-  </div>
-  <div class="col-6">
-    <button id="download-pdf" class="btn btn-primary w-100" onclick="downloadPDF()" type="button">
-      Download Report
-    </button>
   </div>
 </div>
+{% endblock %}
 
-  </div>
-  <footer class="bg-dark text-center text-lg-start footer">
-    <div class="container p-4">
-      <div class="row">
-        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-          <h5 class="text-uppercase text-white">Author</h5>
-          <p class="text-white">
-            Developed by <strong>Chaitanya Jadhav</strong> and <strong>John Komar</strong>
-          </p>
-        </div>
-        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-          <h5 class="text-uppercase text-white">Contact Information</h5>
-          <p class="text-white">
-            <a href="mailto:chaitanya.jadhav15@hotmail.com" class="text-white">
-              <i class="fas fa-envelope"></i> chaitanya.jadhav15@hotmail.com
-            </a>
-            /
-            <a href="mailto:john.komar@nie.edu.sg" class="text-white">
-              <i class="fas fa-envelope"></i> john.komar@nie.edu.sg
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-  <script src="{{url_for('static', filename='index.js')}}"></script>
+{% block scripts %}
+<script>
+// Wait for the page to fully load, then start a 10-second countdown and redirect.
+window.addEventListener('load', function () {
+  var delay = {{ delay|int }};
+  var remaining = delay;
 
-</body>
+  var countdownEl = document.getElementById('countdown');
+  var progressEl  = document.getElementById('progress');
 
-</html>
+  // Initialize UI
+  countdownEl.textContent = remaining.toString();
+  progressEl.style.width = '0%';
+  progressEl.setAttribute('aria-valuenow', '0');
+
+  var tick = setInterval(function () {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(tick);
+    }
+    countdownEl.textContent = Math.max(remaining, 0).toString();
+
+    var percent = Math.min(((delay - remaining) / delay) * 100, 100);
+    progressEl.style.width = percent.toFixed(0) + '%';
+    progressEl.setAttribute('aria-valuenow', percent.toFixed(0));
+  }, 1000);
+
+  setTimeout(function () {
+    window.location.href = "{{ new_url }}";
+  }, delay * 1000);
+});
+</script>
+{% endblock %}
