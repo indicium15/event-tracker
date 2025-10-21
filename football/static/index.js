@@ -475,7 +475,7 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     actionType === "Shot" ||
     actionType === "Shot - Goal" ||
     actionType === "Shot - Save"
-      ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
+      ? (startX !== null && startY !== null ? distanceAnglexG(startX, startY) : "N/A")
       : "N/A";
   var xSave = actionType === "Shot - Save" ? +(1.0 - xG).toFixed(2) : "N/A";
   if (currentPlayer == "") {
@@ -863,6 +863,77 @@ document.addEventListener("keydown", function (event) {
       // If the calculated button exists, simulate a click on it
       eventButtons[index].click();
     }
+  }
+
+  // Enter key to add event without coordinates
+  if (event.key === 'Enter') {
+    if (currentActionType !== "" && currentPlayer !== "") {
+      var currentTime = getCurrentTime();
+      addShot(
+        currentActionType,
+        null,
+        null,
+        null,
+        null,
+        currentTime,
+        currentPlayer
+      );
+      rawShots.push({
+        event: currentActionType,
+        startX: null,
+        startY: null,
+        endX: null,
+        endY: null,
+        time: currentTime,
+        player: currentPlayer,
+      });
+      sessionStorage.setItem("footballRawShots", JSON.stringify(rawShots));
+      
+      // Clear selections
+      currentActionType = "";
+      currentPlayer = "";
+      currentPlayerName = "";
+      document.querySelectorAll(".event-button").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".player-button").forEach(btn => btn.classList.remove("active"));
+    }
+  }
+
+  // Backspace key to remove the most recent entry
+  if (event.key === 'Backspace') {
+    event.preventDefault(); // Prevent browser back navigation
+    
+    // Get the last row in the table
+    var lastRowIndex = table.rows().count() - 1;
+    if (lastRowIndex >= 0) {
+      var lastRow = table.row(lastRowIndex);
+      var lastRowNode = lastRow.node();
+      
+      // Remove from shotsData
+      if (shotsData && shotsData.length > 0) {
+        shotsData.splice(lastRowIndex, 1);
+        sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+      }
+      
+      // Remove from rawShots
+      if (rawShots && rawShots.length > 0) {
+        rawShots.splice(lastRowIndex, 1);
+        sessionStorage.setItem("footballRawShots", JSON.stringify(rawShots));
+      }
+      
+      // Remove the row from DataTable
+      removeDot();
+      lastRow.remove().draw();
+    }
+  }
+
+  // Zoom shortcuts
+  if (event.key === '+' || event.key === '=') {
+    event.preventDefault();
+    zoomIn();
+  }
+  if (event.key === '-' || event.key === '_') {
+    event.preventDefault();
+    zoomOut();
   }
 });
 

@@ -126,10 +126,14 @@ def create_pdf_report(shots):
             fig, ax = pitch.draw(figsize=(4, 3))
 
             for shot in action_list:
+                # Skip shots with null/N/A coordinates
+                if shot["x"] is None or shot["y"] is None or shot["x"] == "N/A" or shot["y"] == "N/A":
+                    continue
+                    
                 x, y = float(shot["x"]), 68 - float(shot["y"])  # Adjust y-coordinate
 
                 # Check if x2 and y2 exist and are not 'N/A'
-                if shot["x2"] != "N/A" and shot["y2"] != "N/A":
+                if shot["x2"] != "N/A" and shot["y2"] != "N/A" and shot["x2"] is not None and shot["y2"] is not None:
                     x2, y2 = float(shot["x2"]), 68 - float(shot["y2"])  # Adjust y2-coordinate
 
                     # Calculate the direction and adjust the length of the arrow

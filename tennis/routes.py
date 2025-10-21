@@ -257,11 +257,15 @@ def create_pdf_report(shots):
             draw_tennis_court(ax)
 
             for shot in action_list:
+                # Skip shots with null/N/A coordinates
+                if shot["x"] is None or shot["y"] is None or shot["x"] == "N/A" or shot["y"] == "N/A":
+                    continue
+                    
                 x = float(shot["x"]) / 100
                 y = float(shot["y"]) / 100 # Flip Y for top-left origin
 
                 # Check if it's a pass/dragged shot with a destination point
-                if shot["x2"] != "N/A" and shot["y2"] != "N/A":
+                if shot["x2"] != "N/A" and shot["y2"] != "N/A" and shot["x2"] is not None and shot["y2"] is not None:
                     x2 = float(shot["x2"]) / 100
                     y2 = float(shot["y2"]) / 100
 
