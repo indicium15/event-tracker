@@ -459,7 +459,7 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     actionType === "Shot" ||
     actionType === "Shot - Goal" ||
     actionType === "Shot - Save"
-      ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
+      ? (startX !== null && startY !== null ? distanceAnglexG(startX, startY) : "N/A")
       : "N/A";
   var xSave = actionType === "Shot - Save" ? +(1.0 - xG).toFixed(2) : "N/A";
   if (currentPlayer == "") {
@@ -478,8 +478,8 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     currentGrip || "N/A",
     actionType,
     currentOutcome || "N/A",
-    startX,
-    startY,
+    startX !== null ? startX : "N/A",
+    startY !== null ? startY : "N/A",
     wasDragged ? endX : "N/A",
     wasDragged ? endY : "N/A",
     "<button class='btn btn-outline-danger remove-button' onclick='removeShot(this)'>X</button>",
@@ -489,10 +489,12 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   var rowIndex = table.row.add(newRowData).draw().index();
 
   // Store additional data using row().data() for easy access
-  table.row(rowIndex).data().dotx = (startX + PITCH_W / 2) / PITCH_W;  // (x + 20) / 40
-  table.row(rowIndex).data().doty = (PITCH_H / 2 - startY) / PITCH_H;  // (10 - y) / 20
+  if (startX !== null && startY !== null) {
+    table.row(rowIndex).data().dotx = (startX + PITCH_W / 2) / PITCH_W;  // (x + 20) / 40
+    table.row(rowIndex).data().doty = (PITCH_H / 2 - startY) / PITCH_H;  // (10 - y) / 20
+  }
 
-  if (wasDragged) {
+  if (wasDragged && endX !== null && endY !== null) {
     table.row(rowIndex).data().dotx2 = (endX + PITCH_W / 2) / PITCH_W;
     table.row(rowIndex).data().doty2 = (PITCH_H / 2 - endY) / PITCH_H;
   }
@@ -801,6 +803,89 @@ document.addEventListener("keydown", function (event) {
     const outcome = outcomeKeyMap[event.key.toUpperCase()];
     setOutcome(outcome);
     return;
+  }
+
+  // Enter key to add event without coordinates
+  if (event.key === 'Enter') {
+    if (currentActionType !== "" && currentPlayer !== "" && currentGrip !== "" && currentOutcome !== "") {
+      var currentTime = getCurrentTime();
+      addShot(
+        currentActionType,
+        null,
+        null,
+        null,
+        null,
+        currentTime,
+        currentPlayer
+      );
+      rawShots.push({
+        event: currentActionType,
+        startX: null,
+        startY: null,
+        endX: null,
+        endY: null,
+        time: currentTime,
+        player: currentPlayer,
+      });
+      sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
+      
+      // Clear selections
+      currentActionType = "";
+      currentPlayer = "";
+      currentPlayerName = "";
+      currentGrip = "";
+      currentOutcome = "";
+      document.querySelectorAll(".event-button").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".player-button").forEach(btn => btn.classList.remove("active"));
+      ["forehand", "backhand"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove("active");
+      });
+      ["winner", "unforcederror", "forcederror", "rally"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove("active");
+      });
+    }
+  }
+
+  // Backspace key to remove the most recent entry
+  if (event.key === 'Backspace') {
+    event.preventDefault(); // Prevent browser back navigation
+    
+    // Get the last visible row in the table (handles filtering correctly)
+    var visibleRows = table.rows({search: 'applied'});
+    var visibleCount = visibleRows.count();
+    if (visibleCount > 0) {
+      var lastVisibleRow = visibleRows.nodes()[visibleCount - 1];
+      var rowIndex = table.row(lastVisibleRow).index();
+      var lastRow = table.row(lastVisibleRow);
+      
+      // Remove from shotsData
+      if (shotsData && shotsData.length > 0) {
+        shotsData.splice(rowIndex, 1);
+        sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+      }
+      
+      // Remove from rawShots
+      if (rawShots && rawShots.length > 0) {
+        rawShots.splice(rowIndex, 1);
+        sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
+      }
+      
+      // Remove the row from DataTable
+      removeDot();
+      lastRow.remove().draw();
+    }
+  }
+
+  // Zoom shortcuts
+  if (event.key === '+' || event.key === '=') {
+    event.preventDefault();
+    zoomIn();
+  }
+  if (event.key === '-' || event.key === '_') {
+    event.preventDefault();
+    zoomOut();
   }
 
 });
