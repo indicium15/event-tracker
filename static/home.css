@@ -9,3 +9,61 @@ header .btn { min-width: 160px; }
     object-fit: cover; /* Ensures images cover the space without distortion */
     object-position: center; /* Centers the image */
 }
+
+/* Changelog timeline styles */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #0d6efd, #198754, #0dcaf0, #6c757d);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0.75rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+.timeline-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive timeline */
+@media (max-width: 768px) {
+    .timeline {
+        padding-left: 1.5rem;
+    }
+    
+    .timeline::before {
+        left: 0.5rem;
+    }
+    
+    .timeline-item {
+        padding-left: 1rem;
+    }
+    
+    .timeline-marker {
+        left: -1.5rem;
+        width: 0.625rem;
+        height: 0.625rem;
+    }
+}

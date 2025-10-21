@@ -492,8 +492,8 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     time,
     playerJerseyNumber,
     actionType,
-    startX,
-    startY,
+    startX !== null ? startX : "N/A",
+    startY !== null ? startY : "N/A",
     wasDragged ? endX : "N/A",
     wasDragged ? endY : "N/A",
     xG,
@@ -505,9 +505,11 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   var rowIndex = table.row.add(newRowData).draw().index();
 
   // Store additional data using row().data() for easy access
-  table.row(rowIndex).data().dotx = (startX * 1.0) / 105;
-  table.row(rowIndex).data().doty = (startY * 1.0) / 68;
-  if (wasDragged) {
+  if (startX !== null && startY !== null) {
+    table.row(rowIndex).data().dotx = (startX * 1.0) / 105;
+    table.row(rowIndex).data().doty = (startY * 1.0) / 68;
+  }
+  if (wasDragged && endX !== null && endY !== null) {
     table.row(rowIndex).data().dotx2 = (endX * 1.0) / 105;
     table.row(rowIndex).data().doty2 = (endY * 1.0) / 68;
   }
@@ -902,27 +904,30 @@ document.addEventListener("keydown", function (event) {
   if (event.key === 'Backspace') {
     event.preventDefault(); // Prevent browser back navigation
     
-    // Get the last row in the table
-    var lastRowIndex = table.rows().count() - 1;
-    if (lastRowIndex >= 0) {
-      var lastRow = table.row(lastRowIndex);
-      var lastRowNode = lastRow.node();
+    // Get the last visible row in the table (handles filtering correctly)
+    var visibleRows = table.rows({search: 'applied'});
+    var visibleCount = visibleRows.count();
+    if (visibleCount > 0) {
+      var lastVisibleRow = visibleRows.nodes()[visibleCount - 1];
+      var rowIndex = table.row(lastVisibleRow).index();
+      var lastRow = table.row(lastVisibleRow);
       
       // Remove from shotsData
       if (shotsData && shotsData.length > 0) {
-        shotsData.splice(lastRowIndex, 1);
+        shotsData.splice(rowIndex, 1);
         sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
       }
       
       // Remove from rawShots
       if (rawShots && rawShots.length > 0) {
-        rawShots.splice(lastRowIndex, 1);
+        rawShots.splice(rowIndex, 1);
         sessionStorage.setItem("footballRawShots", JSON.stringify(rawShots));
       }
       
       // Remove the row from DataTable
       removeDot();
       lastRow.remove().draw();
+      updateCumulativeValues();
     }
   }
 

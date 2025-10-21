@@ -17,8 +17,8 @@ bp = Blueprint(
     __name__,
     template_folder="templates",
     static_folder="static",
-    static_url_path="/football/static",   # avoids clashes with other blueprints
-    url_prefix="/football"                # mount under /football
+    static_url_path="/football/static",
+    url_prefix="/football"
 )
 
 # In-memory state per process (replace with DB/Redis for multi-worker production)
@@ -113,6 +113,17 @@ def create_pdf_report(shots):
 
         # Iterate over action types for the current player
         for action, action_list in actions.items():
+            # Filter out shots with N/A coordinates
+            valid_shots = [
+                shot for shot in action_list
+                if shot["x"] is not None and shot["y"] is not None 
+                and shot["x"] != "N/A" and shot["y"] != "N/A"
+            ]
+            
+            # Skip this action type if no valid shots remain
+            if not valid_shots:
+                continue
+                
             # Add a new page if necessary
             if image_count == 7:
                 image_count = 1
@@ -125,10 +136,7 @@ def create_pdf_report(shots):
             pitch = Pitch(pitch_type="custom", pitch_length=105, pitch_width=68)
             fig, ax = pitch.draw(figsize=(4, 3))
 
-            for shot in action_list:
-                # Skip shots with null/N/A coordinates
-                if shot["x"] is None or shot["y"] is None or shot["x"] == "N/A" or shot["y"] == "N/A":
-                    continue
+            for shot in valid_shots:
                     
                 x, y = float(shot["x"]), 68 - float(shot["y"])  # Adjust y-coordinate
 
