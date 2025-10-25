@@ -240,6 +240,17 @@ def create_pdf_report(shots):
         text_height = 0
 
         for action, action_list in actions.items():
+            # Filter out shots with N/A coordinates
+            valid_shots = [
+                shot for shot in action_list
+                if shot["x"] is not None and shot["y"] is not None 
+                and shot["x"] != "N/A" and shot["y"] != "N/A"
+            ]
+            
+            # Skip this action type if no valid shots remain
+            if not valid_shots:
+                continue
+                
             if image_count == 7:
                 image_count = 1
                 ori_height = 6.5
@@ -252,12 +263,13 @@ def create_pdf_report(shots):
             # Draw the floorball pitch using our custom function
             ax = draw_floorball_pitch(ax, pitch_length=40, pitch_width=20)
 
-            for shot in action_list:
+            for shot in valid_shots:
+                    
                 x = float(shot["x"])
                 y = float(shot["y"])  # Flip Y for top-left origin
 
                 # Check if it's a pass/dragged shot with a destination point
-                if shot["x2"] != "N/A" and shot["y2"] != "N/A":
+                if shot["x2"] != "N/A" and shot["y2"] != "N/A" and shot["x2"] is not None and shot["y2"] is not None:
                     x2 = float(shot["x2"])
                     y2 = float(shot["y2"])
 
