@@ -28,6 +28,18 @@
           </form>
       </nav>
     </div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+      <div id="keyboardShortcutToast" class="toast align-items-center text-bg-dark border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            New: Use keyboard shortcuts to quickly select events and players. Use Enter to add an event without coordinates, or Backspace to remove the last event.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -86,30 +98,30 @@
         <div class="row-container">
           <div class="row mt-1">
             <h5 class="court-heading">Court</h5>
-            <p class="arrow-container mt-2">
-              Direction of Attack <span class="right-arrow"></span>
-            </p>
-          </div>
-          <div class="row">
-            <div class="zoom-controls">
-              <button class="btn btn-outline-primary" onclick="zoomIn()">Zoom In</button>
-              <button class="btn btn-outline-primary" onclick="zoomOut()">Zoom Out</button>
+            <div class="col-md-6">
+              <label for="courtTypeSelect" class="form-label">Court Type:</label>
+              <select class="form-select" id="courtTypeSelect" onchange="changeCourtType()">
+                <option value="nba">NBA</option>
+                <option value="wnba">WNBA</option>
+                <option value="ncaa">NCAA</option>
+                <option value="fiba">FIBA</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <p class="arrow-container mt-2">
+                Direction of Attack <span class="right-arrow"></span>
+              </p>
             </div>
           </div>
         </div>
         <div class="court-container mt-3">
           <div class="court-wrapper">
             <div id="court">
-              <div class="basket left"></div>
-              <div class="basket right"></div>
-              <div class="center-circle"></div>
-              <div class="center-spot"></div>
-              <div class="three-point-line left"></div>
-              <div class="three-point-line right"></div>
-              <div class="free-throw-line left"></div>
-              <div class="free-throw-line right"></div>
-              <div class="key-area left"></div>
-              <div class="key-area right"></div>
+              <img id="courtImage" 
+                   src="{{ url_for('basketball.static', filename='court-nba.png') }}" 
+                   alt="Basketball Court" 
+                   class="court-image" 
+                   style="width: 100%; height: 100%; object-fit: contain;" />
             </div>
           </div>
         </div>
@@ -130,9 +142,9 @@
               <div class="modal-body">
                 <form id="editEventNamesForm">
                   <div class="mb-3">
-                    <label for="eventNamesTextarea" class="form-label">Enter Event Names (One per Line, max 12)</label>
+                    <label for="eventNamesTextarea" class="form-label">Enter Event Names (One per line)</label>
                     <textarea class="form-control" id="eventNamesTextarea" rows="12"
-                      placeholder="Enter event names here..."></textarea>
+                      placeholder="Field Goal&#10;Field Goal - Miss&#10;Three Pointer"></textarea>
                   </div>
                 </form>
               </div>
@@ -154,55 +166,8 @@
             </button>          
           </div>
         </div>
-        <div class="row">
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,0);">
-              Field Goal (Z)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,1);">
-              Field Goal - Miss (X)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,2);">
-              Three Pointer (C)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,3);">
-              Assist (V)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,4);">
-              Dribble (B)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,5);">
-              Rebound (<) </button>
-          </div>
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,6);">
-              Pass (N)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,7);">
-              Steal (M)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,8);">
-              Block (,)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,9);">
-              Foul (.)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,10);">
-              Free Throw (?)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,11);">
-              Turnover (>)
-            </button>
-          </div>
+        <div class="event-buttons-scroll mt-2">
+          <div id="eventButtonsGrid" class="event-buttons-grid" role="group" aria-label="Event selection buttons"></div>
         </div>
         <div class="row">
           <!-- Modal for Editing Player Names -->
@@ -224,7 +189,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <!-- Statically defined rows for 12 players -->
+                        <!-- Statically defined rows for 14 players -->
                         <tr>
                           <td><input type="text" class="form-control" id="homeJersey1" placeholder="A01"></td>
                           <td><input type="text" class="form-control" id="homePlayer1" placeholder="Player1"></td>
@@ -273,6 +238,14 @@
                           <td><input type="text" class="form-control" id="homeJersey12" placeholder="A12"></td>
                           <td><input type="text" class="form-control" id="homePlayer12" placeholder="Player12"></td>
                         </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="homeJersey13" placeholder="A13"></td>
+                          <td><input type="text" class="form-control" id="homePlayer13" placeholder="Player13"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="homeJersey14" placeholder="A14"></td>
+                          <td><input type="text" class="form-control" id="homePlayer14" placeholder="Player14"></td>
+                        </tr>
                       </tbody>
                     </table>
                   </form>
@@ -304,7 +277,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <!-- Statically defined rows for 12 players -->
+                        <!-- Statically defined rows for 14 players -->
                         <tr>
                           <td><input type="text" class="form-control" id="awayJersey1" placeholder="B01"></td>
                           <td><input type="text" class="form-control" id="awayPlayer1" placeholder="Player1"></td>
@@ -353,6 +326,14 @@
                           <td><input type="text" class="form-control" id="awayJersey12" placeholder="B12"></td>
                           <td><input type="text" class="form-control" id="awayPlayer12" placeholder="Player12"></td>
                         </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey13" placeholder="B13"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer13" placeholder="Player13"></td>
+                        </tr>
+                        <tr>
+                          <td><input type="text" class="form-control" id="awayJersey14" placeholder="B14"></td>
+                          <td><input type="text" class="form-control" id="awayPlayer14" placeholder="Player14"></td>
+                        </tr>
                       </tbody>
                     </table>
                   </form>
@@ -365,7 +346,7 @@
             </div>
           </div>
 
-          <div class="row align-items-center">
+          <div class="row align-items-center mt-2">
             <div class="col-auto align-items-center d-flex">
               <h5 class="heading mb-0">Home Player</h5>
             </div>
@@ -401,12 +382,12 @@
               onclick="setPlayer('home', 6);">
               A06 (6)
             </button>
-          </div>
-          <div class="btn-group button-container" role="group">
             <button id="homePlayerButton7" class="btn btn-outline-primary player-button"
               onclick="setPlayer('home', 7);">
               A07 (7)
             </button>
+          </div>
+          <div class="btn-group button-container" role="group">
             <button id="homePlayerButton8" class="btn btn-outline-primary player-button"
               onclick="setPlayer('home', 8);">
               A08 (8)
@@ -421,11 +402,19 @@
             </button>
             <button id="homePlayerButton11" class="btn btn-outline-primary player-button"
               onclick="setPlayer('home', 11);">
-              A11 (Q)
+              A11 (-)
             </button>
             <button id="homePlayerButton12" class="btn btn-outline-primary player-button"
               onclick="setPlayer('home', 12);">
-              A12 (W)
+              A12 (=)
+            </button>
+            <button id="homePlayerButton13" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 13);">
+              A13 (Q)
+            </button>
+            <button id="homePlayerButton14" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('home', 14);">
+              A14 (W)
             </button>
           </div>
           <div class="row align-items-center">
@@ -464,12 +453,12 @@
               onclick="setPlayer('away', 6);">
               B06 (I)
             </button>
-          </div>
-          <div class="btn-group button-container" role="group">
             <button id="awayPlayerButton7" class="btn btn-outline-primary player-button"
               onclick="setPlayer('away', 7);">
               B07 (O)
             </button>
+          </div>
+          <div class="btn-group button-container" role="group">
             <button id="awayPlayerButton8" class="btn btn-outline-primary player-button"
               onclick="setPlayer('away', 8);">
               B08 (P)
@@ -490,6 +479,14 @@
               onclick="setPlayer('away', 12);">
               B12 (F)
             </button>
+            <button id="awayPlayerButton13" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 13);">
+              B13 (G)
+            </button>
+            <button id="awayPlayerButton14" class="btn btn-outline-primary player-button"
+              onclick="setPlayer('away', 14);">
+              B14 (H)
+            </button>
           </div>
         </div>
       </div>
@@ -501,9 +498,7 @@
         <table id="cumulative-table" class="table table-sm table-bordered">
           <thead class="table-dark">
             <tr>
-              <th scope="col">xG</th>
               <th scope="col">Goals</th>
-              <th scope="col">xSave</th>
               <th scope="col">Saves</th>
               <th scope="col">Field Goals</th>
               <th scope="col">Assists</th>
@@ -514,9 +509,7 @@
           </thead>
           <tbody>
             <tr>
-              <td id="cumulative-xg">0</td>
               <td id="cumulative-goals">0</td>
-              <td id="cumulative-xsave">0</td>
               <td id="cumulative-saves">0</td>
               <td id="cumulative-field-goals">0</td>
               <td id="cumulative-assists">0</td>
@@ -542,8 +535,6 @@
                 <th scope="col">Y1</th>
                 <th scope="col">X2</th>
                 <th scope="col">Y2</th>
-                <th scope="col">xG</th>
-                <th scope="col">xSave</th>
                 <th scope="col">X</th>
               </tr>
             </thead>

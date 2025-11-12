@@ -29,145 +29,62 @@ body {
   margin-bottom: 0 !important;
 }
 
-#court {
-  /* Basketball court dimensions: 28.65m x 15.24m */
-  /* Height needs to be a multiple of 15.24m */
-  touch-action: none; /* Add this line to prevent default touch actions */
-  height: 400px; /* Adjust height proportionally */
-  /* Width needs to be a multiple of 28.65m */
-  width: 100%;
-  background: #ff6b35; /* Basketball court orange */
-  position: relative;
-  border: 2px solid #000;
-  transition: transform 0.2s ease;
-}
-
-.court-wrapper {
-  overflow: auto;
-}
-
 .zoom-controls {
   margin-top: 10px;
 }
 
-#court:before {
-  content: "";
-  display: block;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px; /* Center line */
-  background: #fff;
-  transform: translateX(-50%);
+/* --- COURT --------------------------------------------------------------- */
+.court-container {
+  overflow: hidden;
+  position: relative;
 }
 
-/* Basketball hoops */
-.basket {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #ffd700; /* Gold color for basketball hoop */
-  border: 3px solid #000;
-  border-radius: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.basket.left {
-  left: 0;
-  transform: translateY(-50%) translateX(-10px);
-}
-
-.basket.right {
-  right: 0;
-  transform: translateY(-50%) translateX(10px);
-}
-
-/* Center circle */
-.center-circle {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  background: none;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.center-spot {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: #fff;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-}
-
-/* Three-point line */
-.three-point-line {
-  position: absolute;
+.court-wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
   height: 100%;
-  width: 20%;
-  top: 0;
-  background: none;
-  border: 2px solid #fff;
 }
 
-.three-point-line.left {
-  left: 0;
-  border-left: 0;
-  border-radius: 0 50% 50% 0;
+#court {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 94 / 50;     /* keep true 94' x 50' shape */
+  max-height: 70vh;
+  border: 0;
+  transition: transform 0.2s ease;
+  cursor: crosshair; /* Default cursor for placing events */
 }
 
-.three-point-line.right {
-  right: 0;
-  border-right: 0;
-  border-radius: 50% 0 0 50%;
+#court.panning {
+  cursor: grabbing;
 }
 
-/* Free throw line */
-.free-throw-line {
+/* When zoomed in and no event/player selected, show grab cursor */
+#court.can-pan {
+  cursor: grab;
+}
+
+/* the court image */
+#court .court-image {
   position: absolute;
-  height: 15%;
-  width: 12%;
-  top: 42.5%;
-  background: none;
-  border: 2px solid #fff;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none; /* keeps your click/drag handlers on #court working */
+  object-fit: contain;
 }
 
-.free-throw-line.left {
-  left: 0;
-  border-left: 0;
-}
-
-.free-throw-line.right {
-  right: 0;
-  border-right: 0;
-}
-
-/* Key area (paint) */
-.key-area {
+/* keep your dots above the SVG */
+.dot {
   position: absolute;
-  height: 35%;
-  width: 12%;
-  top: 32.5%;
-  background: none;
-  border: 2px solid #fff;
-}
-
-.key-area.left {
-  left: 0;
-  border-left: 0;
-}
-
-.key-area.right {
-  right: 0;
-  border-right: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: #fff;
+  border-radius: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
 }
 
 .arrow-container {
@@ -217,6 +134,7 @@ body {
 .event-button {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  width: 100%;
 }
 
 .player-button {
@@ -291,6 +209,26 @@ body {
   overflow-x: auto; /* Scroll on X-axis */
   overflow-y: auto; /* Scroll on Y-axis */
   max-height: 400px; /* Adjust based on your needs */
+}
+
+.event-buttons-scroll {
+  max-height: 24rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.event-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.event-buttons-grid .event-button {
+  margin: 0;
+}
+
+.event-buttons-grid .span-two {
+  grid-column: 1 / -1;
 }
 
 .dt-search {

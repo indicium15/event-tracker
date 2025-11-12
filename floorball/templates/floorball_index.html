@@ -28,6 +28,18 @@
         </form>
       </nav>
     </div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+      <div id="keyboardShortcutToast" class="toast align-items-center text-bg-dark border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            New: Use keyboard shortcuts to quickly select events and players. Use Enter and Backspace to add and remove events.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -137,9 +149,9 @@
               <div class="modal-body">
                 <form id="editEventNamesForm">
                   <div class="mb-3">
-                    <label for="eventNamesTextarea" class="form-label">Enter Event Names (One per Line, max 12)</label>
+                    <label for="eventNamesTextarea" class="form-label">Enter Event Names (One per line)</label>
                     <textarea class="form-control" id="eventNamesTextarea" rows="12"
-                      placeholder="Enter event names here..."></textarea>
+                      placeholder="Shot&#10;Shot - Save&#10;Shot - Goal"></textarea>
                   </div>
                 </form>
               </div>
@@ -162,55 +174,8 @@
             </button>          
           </div>
         </div>
-        <div class="row">
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,0);">
-              Shot (Z)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,1);">
-              Shot - Save (X)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,2);">
-              Shot - Goal (C)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,3);">
-              Shot Assist (V)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,4);">
-              Dribble (B)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,5);">
-              Lob (&lt;) </button>
-          </div>
-          <div class="btn-group-vertical col-sm-12 col-md-6" role="group">
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,6);">
-              Cross (N)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button" onclick="setActionType.call(this,7);">
-              Pass (M)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,8);">
-              Tackle (,)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,9);">
-              Foul (.)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,10);">
-              Free Hit (?)
-            </button>
-            <button class="btn btn-outline-primary btn-small event-button"
-              onclick="setActionType.call(this,11);">
-              Screen (&gt;)
-            </button>
-          </div>
+        <div class="event-buttons-scroll mt-2">
+          <div id="eventButtonsGrid" class="event-buttons-grid" role="group" aria-label="Event selection buttons"></div>
         </div>
         <div class="row">
           <!-- Modal for Editing Player Names -->
@@ -405,7 +370,7 @@
             </div>
           </div>
 
-          <div class="row align-items-center">
+          <div class="row align-items-center mt-2">
             <div class="col-auto align-items-center d-flex">
               <h5 class="heading mb-0">Home Player</h5>
             </div>

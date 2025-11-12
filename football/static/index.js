@@ -61,6 +61,14 @@ let awayShortcutMap = {
   16: "(;)",
 };
 
+const eventShortcutKeys = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
+const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
+  map[key.toUpperCase()] = index;
+  return map;
+}, {});
+
+let eventNames = [];
+
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
   // Check if player maps are already in sessionStorage
@@ -183,6 +191,7 @@ let endX = null;
 let endY = null;
 
 var table;
+const keyboardShortcutToastKey = "footballKeyboardShortcutToastDismissed";
 
 $(document).ready(function () {
   table = $("#event-table").DataTable({
@@ -214,6 +223,7 @@ $(document).ready(function () {
     updateCumulativeValues();
   });
   updateCumulativeValues();
+  initKeyboardShortcutToast();
 });
 
 function updateCumulativeValues() {
@@ -270,7 +280,13 @@ console.log("table");
 console.log(table);
 
 function setActionType(index) {
-  if (currentActionType == eventNames[index]) {
+  const eventName = eventNames[index];
+  if (!eventName) {
+    currentActionType = "";
+    return;
+  }
+
+  if (currentActionType === eventName) {
     //Undo button active style
     var buttons = document.querySelectorAll(".event-button");
     // Remove the active class from all buttons
@@ -281,7 +297,7 @@ function setActionType(index) {
     return;
   }
   // Set the current action type
-  currentActionType = eventNames[index];
+  currentActionType = eventName;
 
   // Get all action buttons
   var buttons = document.querySelectorAll(".event-button");
@@ -540,7 +556,7 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     xG: xG,
     xSave: xSave,
   });
-  sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+  sessionStorage.setItem("footballShotsData", JSON.stringify(shotsData));
   // populateDropdown();
 }
 
@@ -554,7 +570,7 @@ function removeShot(deleteButton) {
   // Remove the shot from the shotsData array if storing shot data separately
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+    sessionStorage.setItem("footballShotsData", JSON.stringify(shotsData));
     console.log(shotsData);
   }
 
@@ -843,24 +859,9 @@ document.addEventListener("keydown", function (event) {
     if (button) button.click();
   }
 
-  const eventKeyMap = {
-    Z: 0, // Index of Shot
-    X: 1, // Index of Shot(Save)
-    C: 2, // Index of Shot(Goal)
-    V: 3, // Index of Shot Assist
-    B: 4, // Index of Dribble
-    "<": 5, // Index of Dribble
-    N: 6, // Index of Cross
-    M: 7, // Index of Pass
-    ",": 8, // Index of Tackle
-    ".": 9, // Index of Free Kick
-    "?": 10, // Index of Corner
-    ">": 11, // Index of Corner
-  };
-
-  if (eventKeyMap.hasOwnProperty(event.key.toUpperCase())) {
-    // Get the index from the map
-    const index = eventKeyMap[event.key.toUpperCase()];
+  const normalizedKey = event.key.toUpperCase();
+  if (eventKeyMap.hasOwnProperty(normalizedKey)) {
+    const index = eventKeyMap[normalizedKey];
     if (index < eventButtons.length) {
       // If the calculated button exists, simulate a click on it
       eventButtons[index].click();
@@ -915,7 +916,7 @@ document.addEventListener("keydown", function (event) {
       // Remove from shotsData
       if (shotsData && shotsData.length > 0) {
         shotsData.splice(rowIndex, 1);
-        sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+        sessionStorage.setItem("footballShotsData", JSON.stringify(shotsData));
       }
       
       // Remove from rawShots
@@ -988,6 +989,13 @@ function updateDisplay() {
 }
 
 //Event name customization
+//Event name customization
+function ensureCurrentActionTypeIsValid() {
+  if (!eventNames.includes(currentActionType)) {
+    currentActionType = "";
+  }
+}
+
 // Initialize default event names
 let defaultEventNames = [
   "Shot", "Shot - Save", "Shot - Goal", "Shot Assist", 
@@ -997,9 +1005,19 @@ let defaultEventNames = [
 
 // Load event names from sessionStorage if available
 function initializeEventNames() {
-  let storedEventNames = sessionStorage.getItem('eventNames');
+  let storedEventNames = sessionStorage.getItem('footballEventNames');
   if (storedEventNames) {
-    eventNames = JSON.parse(storedEventNames);
+    try {
+      const parsed = JSON.parse(storedEventNames);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        eventNames = parsed;
+      } else {
+        eventNames = [...defaultEventNames];
+      }
+    } catch (error) {
+      console.error("Failed to parse stored event names", error);
+      eventNames = [...defaultEventNames];
+    }
   } else {
     eventNames = [...defaultEventNames];
   }
@@ -1008,28 +1026,56 @@ function initializeEventNames() {
 
 // Display event names on buttons
 function displayEventNames() {
-  const eventShortcuts = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
-  const eventButtons = document.querySelectorAll(".event-button");
+  const eventButtonsGrid = document.getElementById("eventButtonsGrid");
+  if (!eventButtonsGrid) {
+    return;
+  }
+
+  eventButtonsGrid.innerHTML = "";
+  ensureCurrentActionTypeIsValid();
+
+  const createdButtons = [];
+
   for (let i = 0; i < eventNames.length; i++) {
-    let button = eventButtons[i];
-    if (button) {
-      button.innerHTML = `${eventNames[i]} (${eventShortcuts[i]})`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn btn-outline-primary btn-small event-button";
+
+    const shortcut = i < eventShortcutKeys.length ? ` (${eventShortcutKeys[i]})` : "";
+    button.innerHTML = `${eventNames[i]}${shortcut}`;
+
+    button.addEventListener("click", function () {
+      setActionType.call(this, i);
+    });
+
+    if (currentActionType === eventNames[i]) {
+      button.classList.add("active");
     }
+
+    eventButtonsGrid.appendChild(button);
+    createdButtons.push(button);
+  }
+
+  if (createdButtons.length % 2 === 1) {
+    createdButtons[createdButtons.length - 1].classList.add("span-two");
   }
 }
 
 // Save event names from modal into sessionStorage
 function saveEventNames() {
   const textarea = document.getElementById('eventNamesTextarea');
-  let eventLines = textarea.value.split('\n').slice(0, 12).map(name => name.trim()).filter(name => name.length > 0);
+  let eventLines = textarea.value
+    .split('\n')
+    .map(name => name.trim())
+    .filter(name => name.length > 0);
 
-  // If less than 12 names are provided, fill in the remaining with default names
-  for (let i = eventLines.length; i < 12; i++) {
-    eventLines.push(defaultEventNames[i]);
+  if (eventLines.length === 0) {
+    eventNames = [...defaultEventNames];
+  } else {
+    eventNames = eventLines;
   }
 
-  sessionStorage.setItem('eventNames', JSON.stringify(eventLines));
-  eventNames = eventLines;
+  sessionStorage.setItem('footballEventNames', JSON.stringify(eventNames));
   
   // Update buttons with new event names
   displayEventNames();
@@ -1040,14 +1086,9 @@ function saveEventNames() {
 
 // Load saved event names into the textarea
 function loadEventNamesToTextarea() {
-  let storedEventNames = sessionStorage.getItem('eventNames');
   const textarea = document.getElementById('eventNamesTextarea');
-  
-  if (storedEventNames) {
-    textarea.value = JSON.parse(storedEventNames).join('\n');
-  } else {
-    textarea.value = defaultEventNames.join('\n');
-  }
+  const namesToLoad = (eventNames.length > 0 ? eventNames : defaultEventNames);
+  textarea.value = namesToLoad.join('\n');
 }
 
 // Call this function when the modal opens to populate the textarea
@@ -1055,3 +1096,25 @@ document.getElementById('editEventNamesModal').addEventListener('show.bs.modal',
 
 // Initialize event names on page load
 initializeEventNames();
+
+function initKeyboardShortcutToast() {
+  const toastElement = document.getElementById("keyboardShortcutToast");
+  if (!toastElement) {
+    return;
+  }
+
+  if (localStorage.getItem(keyboardShortcutToastKey) === "true") {
+    return;
+  }
+
+  const toast = bootstrap.Toast.getOrCreateInstance(toastElement, { autohide: false });
+  toast.show();
+
+  toastElement.addEventListener(
+    "hidden.bs.toast",
+    function () {
+      localStorage.setItem(keyboardShortcutToastKey, "true");
+    },
+    { once: true }
+  );
+}

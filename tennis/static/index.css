@@ -160,6 +160,7 @@ body {
 .event-button {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  width: 100%;
 }
 
 .player-button {
@@ -234,6 +235,26 @@ body {
   overflow-x: auto; /* Scroll on X-axis */
   overflow-y: auto; /* Scroll on Y-axis */
   max-height: 400px; /* Adjust based on your needs */
+}
+
+.event-buttons-scroll {
+  max-height: 24rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.event-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.event-buttons-grid .event-button {
+  margin: 0;
+}
+
+.event-buttons-grid .span-two {
+  grid-column: 1 / -1;
 }
 
 .dt-search {

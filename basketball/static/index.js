@@ -1,22 +1,54 @@
-let zoomLevel = 1;
+// Court configuration object with dimensions for each court type
+const courtConfig = {
+  nba: { width: 28.6512, height: 15.24, name: "NBA" },
+  wnba: { width: 28.6512, height: 15.24, name: "WNBA" },
+  ncaa: { width: 28.6512, height: 15.24, name: "NCAA" },
+  fiba: { width: 28.0, height: 15.0, name: "FIBA" }
+};
 
-function zoomIn() {
-  zoomLevel += 0.1;
-  const court = document.getElementById("court");
-  court.style.transformOrigin = "center center";
-  court.style.transform = `scale(${zoomLevel})`;
+// Current court type (default to NBA)
+let currentCourtType = 'nba';
+
+// Get current court dimensions
+function getCurrentCourtDimensions() {
+  return courtConfig[currentCourtType];
 }
 
-function zoomOut() {
-  if (zoomLevel > 0.5) {
-    // Prevents excessive zoom out
-    zoomLevel -= 0.1;
-    const court = document.getElementById("court");
-    court.style.transformOrigin = "center center";
-    court.style.transform = `scale(${zoomLevel})`;
+// Function to change court type
+function changeCourtType() {
+  const select = document.getElementById('courtTypeSelect');
+  const newCourtType = select.value;
+  
+  if (newCourtType !== currentCourtType) {
+    currentCourtType = newCourtType;
+    
+    // Update court image
+    const courtImage = document.getElementById('courtImage');
+    courtImage.src = `/basketball/static/court-${currentCourtType}.png`;
+    
+    // Save court type to sessionStorage
+    sessionStorage.setItem('basketballCourtType', currentCourtType);
+    
+    console.log(`Court type changed to: ${courtConfig[currentCourtType].name}`);
   }
 }
 
+// Load court type from sessionStorage on page load
+function loadCourtType() {
+  const savedCourtType = sessionStorage.getItem('basketballCourtType');
+  if (savedCourtType && courtConfig[savedCourtType]) {
+    currentCourtType = savedCourtType;
+    const select = document.getElementById('courtTypeSelect');
+    if (select) {
+      select.value = currentCourtType;
+    }
+    // Update the court image to match the saved court type
+    const courtImage = document.getElementById('courtImage');
+    if (courtImage) {
+      courtImage.src = `/basketball/static/court-${currentCourtType}.png`;
+    }
+  }
+}
 // Create an object to store jersey numbers and player names
 // Create objects to store jersey numbers and player names for both teams
 let homePlayerMap = {};
@@ -34,8 +66,10 @@ let homeShortcutMap = {
   8: "(8)",
   9: "(9)",
   10: "(0)",
-  11: "(Q)",
-  12: "(W)",
+  11: "(-)",
+  12: "(=)",
+  13: "(Q)",
+  14: "(W)",
 };
 
 let awayShortcutMap = {
@@ -51,9 +85,11 @@ let awayShortcutMap = {
   10: "(S)",
   11: "(D)",
   12: "(F)",
+  13: "(G)",
+  14: "(H)",
 };
 
-// Initialize playerMap with default values for 12 players for both teams
+// Initialize playerMap with default values for 14 players for both teams
 function initializePlayerMaps() {
   // Check if player maps are already in sessionStorage
   const storedHomePlayerMap = sessionStorage.getItem('basketballHomePlayerMap');
@@ -64,45 +100,49 @@ function initializePlayerMaps() {
     homePlayerMap = JSON.parse(storedHomePlayerMap);
     console.log("stored home map:");
     console.log(homePlayerMap);
-    for (let i = 1; i <= 12; i++) {
-      let button = document.getElementById(`homePlayerButton${i}`);
-      if (button) {
-        let jerseyNumber = homePlayerMap[i].jersey;
-        let shortcut = homeShortcutMap[i]; // Get the shortcut based on the player's index
-        button.innerHTML = `${jerseyNumber} ${shortcut}`;
-      }
-    }
   } else {
-    for (let i = 1; i <= 12; i++) {
+    homePlayerMap = {};
+  }
+
+  for (let i = 1; i <= 14; i++) {
+    if (!homePlayerMap[i]) {
       homePlayerMap[i] = {
         jersey: `A${i.toString().padStart(2, "0")}`,
         name: `HomePlayer${i}`,
       };
     }
-    sessionStorage.setItem('basketballHomePlayerMap', JSON.stringify(homePlayerMap));
+    let button = document.getElementById(`homePlayerButton${i}`);
+    if (button) {
+      let jerseyNumber = homePlayerMap[i].jersey;
+      let shortcut = homeShortcutMap[i]; // Get the shortcut based on the player's index
+      button.innerHTML = `${jerseyNumber} ${shortcut || ""}`;
+    }
   }
+  sessionStorage.setItem('basketballHomePlayerMap', JSON.stringify(homePlayerMap));
 
   if (storedAwayPlayerMap) {
     awayPlayerMap = JSON.parse(storedAwayPlayerMap);
     console.log("stored away map:");
     console.log(awayPlayerMap);
-    for (let i = 1; i <= 12; i++) {
-      let button = document.getElementById(`awayPlayerButton${i}`);
-      if (button) {
-        let jerseyNumber = awayPlayerMap[i].jersey;
-        let shortcut = awayShortcutMap[i]; // Get the shortcut based on the player's index
-        button.innerHTML = `${jerseyNumber} ${shortcut}`;
-      }
-    }
   } else {
-    for (let i = 1; i <= 12; i++) {
+    awayPlayerMap = {};
+  }
+
+  for (let i = 1; i <= 14; i++) {
+    if (!awayPlayerMap[i]) {
       awayPlayerMap[i] = {
         jersey: `B${i.toString().padStart(2, "0")}`,
         name: `AwayPlayer${i}`,
       };
     }
-    sessionStorage.setItem('basketballAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    let button = document.getElementById(`awayPlayerButton${i}`);
+    if (button) {
+      let jerseyNumber = awayPlayerMap[i].jersey;
+      let shortcut = awayShortcutMap[i]; // Get the shortcut based on the player's index
+      button.innerHTML = `${jerseyNumber} ${shortcut || ""}`;
+    }
   }
+  sessionStorage.setItem('basketballAwayPlayerMap', JSON.stringify(awayPlayerMap));
 }
 
 // Call initializePlayerMap when the script loads
@@ -114,7 +154,7 @@ function updatePlayerNames(team) {
   const shortcutMap = team === "home" ? homeShortcutMap : awayShortcutMap;
   const prefix = team === "home" ? "home" : "away"; // No prefix for home, "away" for away team
 
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= 14; i++) {
     let jerseyInput = document.getElementById(`${prefix}Jersey${i}`); // Use "awayJersey1" for away team
     let playerInput = document.getElementById(`${prefix}Player${i}`); // Use "awayPlayer1" for away team
     if (jerseyInput && playerInput) {
@@ -125,12 +165,12 @@ function updatePlayerNames(team) {
     }
   }
 
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= 14; i++) {
     let button = document.getElementById(`${prefix}PlayerButton${i}`);
     if (button) {
       let jerseyNumber = playerMap[i].jersey;
       let shortcut = shortcutMap[i]; // Get the shortcut based on the player's index
-      button.innerHTML = `${jerseyNumber} ${shortcut}`;
+      button.innerHTML = `${jerseyNumber} ${shortcut || ""}`;
     }
   }
   // Persist changes to sessionStorage
@@ -152,8 +192,6 @@ var currentActionType = "";
 var currentPlayer = "";
 var currentPlayerName = "";
 var cumulativeData = {
-  xG: 0,
-  xSave: 0,
   fieldGoals: 0,
   assists: 0,
   rebounds: 0,
@@ -175,6 +213,7 @@ let endX = null;
 let endY = null;
 
 var table;
+const keyboardShortcutToastKey = "basketballKeyboardShortcutToastDismissed";
 
 $(document).ready(function () {
   table = $("#event-table").DataTable({
@@ -206,6 +245,7 @@ $(document).ready(function () {
     updateCumulativeValues();
   });
   updateCumulativeValues();
+  initKeyboardShortcutToast();
 });
 
 function updateCumulativeValues() {
@@ -213,9 +253,7 @@ function updateCumulativeValues() {
   console.log("filteredData");
   console.log(filteredData[0]);
   // Initialize your cumulative values
-  var totalXG = 0;
   var totalGoals = 0;
-  var totalXSave = 0;
   var totalSaves = 0;
   var totalFieldGoals = 0;
   var totalAssists = 0;
@@ -225,8 +263,6 @@ function updateCumulativeValues() {
 
   // Calculate cumulative values
   filteredData.each(function (value, index) {
-    totalXG += parseFloat(value[7]) || 0;
-    totalXSave += parseFloat(value[8]) || 0;
     // Update the counts based on your data structure and what constitutes a field goal, assist, etc.
     if (value[2].includes("Field Goal")) {
       totalFieldGoals++;
@@ -247,9 +283,7 @@ function updateCumulativeValues() {
   });
 
   // Update the cumulative table
-  $("#cumulative-xg").text(totalXG.toFixed(2));
   $("#cumulative-goals").text(totalGoals);
-  $("#cumulative-xsave").text(totalXSave.toFixed(2));
   $("#cumulative-saves").text(totalSaves);
   $("#cumulative-field-goals").text(totalFieldGoals);
   $("#cumulative-assists").text(totalAssists);
@@ -262,7 +296,13 @@ console.log("table");
 console.log(table);
 
 function setActionType(index) {
-  if (currentActionType == eventNames[index]) {
+  const eventName = eventNames[index];
+  if (!eventName) {
+    currentActionType = "";
+    return;
+  }
+
+  if (currentActionType === eventName) {
     //Undo button active style
     var buttons = document.querySelectorAll(".event-button");
     // Remove the active class from all buttons
@@ -273,7 +313,7 @@ function setActionType(index) {
     return;
   }
   // Set the current action type
-  currentActionType = eventNames[index];
+  currentActionType = eventName;
 
   // Get all action buttons
   var buttons = document.querySelectorAll(".event-button");
@@ -313,7 +353,7 @@ function setPlayer(team, playerIndex) {
   // Get all player buttons
   var buttons = document.querySelectorAll(".player-button");
 
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= 14; i++) {
     let homeButton = document.getElementById(`homePlayerButton${i}`);
     let awayButton = document.getElementById(`awayPlayerButton${i}`);
     
@@ -335,11 +375,15 @@ court.addEventListener("mousedown", function (event) {
   if (startX === null || startY === null) {
     isDragging = true;
     let rect = court.getBoundingClientRect();
-    // Basketball court dimensions: 28.65m x 15.24m
-    startX =
-      (((event.clientX - rect.left) / court.offsetWidth) * 28.65) / zoomLevel;
-    startY =
-      (((event.clientY - rect.top) / court.offsetHeight) * 15.24) / zoomLevel;
+    const dimensions = getCurrentCourtDimensions();
+    
+    // Calculate coordinates based on the rendered court dimensions
+    const adjustedX = event.clientX - rect.left;
+    const adjustedY = event.clientY - rect.top;
+    
+    // RHCS: Calculate coordinates from bottom-left origin
+    startX = (adjustedX / court.offsetWidth) * dimensions.width;
+    startY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
     startX = Math.round(startX);
     startY = Math.round(startY);
   }
@@ -348,9 +392,15 @@ court.addEventListener("mousedown", function (event) {
 court.addEventListener("mousemove", function (event) {
   if (isDragging) {
     let rect = court.getBoundingClientRect();
-    endX =
-      (((event.clientX - rect.left) / court.offsetWidth) * 28.65) / zoomLevel;
-    endY = (((event.clientY - rect.top) / court.offsetHeight) * 15.24) / zoomLevel;
+    const dimensions = getCurrentCourtDimensions();
+    
+    // Calculate coordinates based on the rendered court dimensions
+    const adjustedX = event.clientX - rect.left;
+    const adjustedY = event.clientY - rect.top;
+    
+    // RHCS: Calculate coordinates from bottom-left origin
+    endX = (adjustedX / court.offsetWidth) * dimensions.width;
+    endY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
     endX = Math.round(endX);
     endY = Math.round(endY);
   }
@@ -361,13 +411,19 @@ court.addEventListener("mousemove", function (event) {
 // Add pointer event listeners
 court.addEventListener("pointerdown", function (event) {
   event.preventDefault(); // Prevent default touch behavior
+  
   if (startX === null || startY === null) {
     isDragging = true;
     let rect = court.getBoundingClientRect();
-    startX =
-      (((event.clientX - rect.left) / court.offsetWidth) * 28.65) / zoomLevel;
-    startY =
-      (((event.clientY - rect.top) / court.offsetHeight) * 15.24) / zoomLevel;
+    const dimensions = getCurrentCourtDimensions();
+    
+    // Calculate coordinates based on the rendered court dimensions
+    const adjustedX = event.clientX - rect.left;
+    const adjustedY = event.clientY - rect.top;
+    
+    // RHCS: Calculate coordinates from bottom-left origin
+    startX = (adjustedX / court.offsetWidth) * dimensions.width;
+    startY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
     startX = Math.round(startX);
     startY = Math.round(startY);
   }
@@ -375,12 +431,18 @@ court.addEventListener("pointerdown", function (event) {
 
 court.addEventListener("pointermove", function (event) {
   event.preventDefault(); // Prevent default touch behavior
+  
   if (isDragging) {
     let rect = court.getBoundingClientRect();
-    endX =
-      (((event.clientX - rect.left) / court.offsetWidth) * 28.65) / zoomLevel;
-    endY =
-      (((event.clientY - rect.top) / court.offsetHeight) * 15.24) / zoomLevel;
+    const dimensions = getCurrentCourtDimensions();
+    
+    // Calculate coordinates based on the rendered court dimensions
+    const adjustedX = event.clientX - rect.left;
+    const adjustedY = event.clientY - rect.top;
+    
+    // RHCS: Calculate coordinates from bottom-left origin
+    endX = (adjustedX / court.offsetWidth) * dimensions.width;
+    endY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
     endX = Math.round(endX);
     endY = Math.round(endY);
   }
@@ -416,7 +478,6 @@ court.addEventListener("pointerup", function (event) {
     endY = null;
   }
 });
-
 
 function getCurrentDateTime() {
   let now = new Date();
@@ -460,13 +521,7 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     (startX !== endX || startY !== endY);
   // var actionType = currentActionType;
   var actionType = event;
-  var xG =
-    actionType === "Field Goal" ||
-    actionType === "Field Goal - Miss" ||
-    actionType === "Three Pointer"
-      ? distanceAnglexG(startX, startY) // Use startX and startY for xG calculation
-      : "N/A";
-  var xSave = actionType === "Field Goal - Miss" ? +(1.0 - xG).toFixed(2) : "N/A";
+  
   if (currentPlayer == "") {
     var playerJerseyNumber = "";
   } else {
@@ -481,8 +536,6 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     startY,
     wasDragged ? endX : "N/A",
     wasDragged ? endY : "N/A",
-    xG,
-    xSave,
     "<button class='btn btn-outline-danger remove-button' onclick='removeShot(this)'>X</button>",
   ];
 
@@ -490,11 +543,12 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   var rowIndex = table.row.add(newRowData).draw().index();
 
   // Store additional data using row().data() for easy access
-  table.row(rowIndex).data().dotx = (startX * 1.0) / 28.65;
-  table.row(rowIndex).data().doty = (startY * 1.0) / 15.24;
+  const dimensions = getCurrentCourtDimensions();
+  table.row(rowIndex).data().dotx = (startX * 1.0) / dimensions.width;
+  table.row(rowIndex).data().doty = (startY * 1.0) / dimensions.height;
   if (wasDragged) {
-    table.row(rowIndex).data().dotx2 = (endX * 1.0) / 28.65;
-    table.row(rowIndex).data().doty2 = (endY * 1.0) / 15.24;
+    table.row(rowIndex).data().dotx2 = (endX * 1.0) / dimensions.width;
+    table.row(rowIndex).data().doty2 = (endY * 1.0) / dimensions.height;
   }
 
   // Assign mouseenter and mouseleave events to show and remove dots
@@ -519,10 +573,9 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     y: startY,
     x2: wasDragged ? endX : "N/A",
     y2: wasDragged ? endY : "N/A",
-    xG: xG,
-    xSave: xSave,
+    courtType: currentCourtType
   });
-  sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+  sessionStorage.setItem("basketballShotsData", JSON.stringify(shotsData));
 }
 
 function removeShot(deleteButton) {
@@ -535,7 +588,7 @@ function removeShot(deleteButton) {
   // Remove the shot from the shotsData array if storing shot data separately
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    sessionStorage.setItem("shotsData", JSON.stringify(shotsData));
+    sessionStorage.setItem("basketballShotsData", JSON.stringify(shotsData));
     console.log(shotsData);
   }
 
@@ -550,11 +603,7 @@ function removeShot(deleteButton) {
   // If shotsData is not used to track each shot, you might need to retrieve values directly from the row before it's removed
   var rowData = table.row(row).data();
   var eventContent = rowData[2]; // Assuming the 3rd column is the event type
-  var xGContent = rowData[7]; // Assuming the 8th column is xG
-  var xSaveContent = rowData[8]; // Assuming the 9th column is xSave
   console.log("eventcontent ", eventContent);
-  console.log("xgcontent ", xGContent);
-  console.log("xsave ", xSaveContent);
   table.row(row).remove().draw();
 }
 
@@ -567,8 +616,9 @@ function showDot(rowNode) {
   var xPercent = parseFloat(rowData.dotx);
   var yPercent = parseFloat(rowData.doty);
 
+  // Calculate positions relative to the rendered court
   var x1 = xPercent * court.offsetWidth;
-  var y1 = yPercent * court.offsetHeight;
+  var y1 = (1 - yPercent) * court.offsetHeight;
 
   console.log("showdot x1 ", x1);
   console.log("showdot y1 ", y1);
@@ -578,7 +628,7 @@ function showDot(rowNode) {
     var x2Percent = parseFloat(rowData.dotx2);
     var y2Percent = parseFloat(rowData.doty2);
     var x2 = x2Percent * court.offsetWidth;
-    var y2 = y2Percent * court.offsetHeight;
+    var y2 = (1 - y2Percent) * court.offsetHeight;
     createDot(x2, y2, "hover-dot-2");
     createArrow(x1, y1, x2, y2, "hover-arrow");
   }
@@ -668,49 +718,7 @@ function createArrow(x1, y1, x2, y2, id) {
   court.appendChild(svg);
 }
 
-function calculateDistance(pos_x, pos_y) {
-  const midGoalX = 0.0;
-  const midGoalY = 7.62; // Half of 15.24m
-  const goalCoordinates = [midGoalX, midGoalY];
-  const shotCoordinates = [pos_x, pos_y];
-  const distance = Math.hypot(
-    shotCoordinates[0] - goalCoordinates[0],
-    shotCoordinates[1] - goalCoordinates[1]
-  );
-  return distance;
-}
-
-function calculateAngle(pos_x, pos_y) {
-  const deltaY = Math.pow(pos_y - 7.62, 2);
-  const deltaX = Math.pow(pos_x - 0.0, 2);
-  const radian = Math.atan2(deltaY, deltaX);
-  const degrees = radian * (180 / Math.PI);
-  return degrees;
-}
-
-function distanceAnglexG(pos_x, pos_y) {
-  if (pos_x >= 14.325) { // Half of 28.65m
-    pos_x = 28.65 - pos_x;
-    pos_y = 15.24 - pos_y;
-  }
-  let distance = calculateDistance(pos_x, pos_y);
-  let angle = calculateAngle(pos_x, pos_y);
-  // Basketball xG calculation (simplified)
-  let p =
-    1 /
-    (1 +
-      Math.exp(
-        -(
-          0.2204 -
-          0.0281 * pos_x -
-          0.0062 * pos_y -
-          0.0998 * distance -
-          0.0081 * angle
-        )
-      ));
-  p = p.toFixed(2);
-  return p;
-}
+// xG-related functions removed as xG is not supported for basketball
 
 function downloadCSV() {
   fetch("/basketball/download_csv", {
@@ -777,8 +785,10 @@ document.addEventListener("keydown", function (event) {
     '8': 7,
     '9': 8,
     '0': 9,
-    'Q': 10,
-    'W': 11,
+    '-': 10,
+    '=': 11,
+    'Q': 12,
+    'W': 13,
   }
 
   const awayPlayerKeyMap = {
@@ -794,6 +804,8 @@ document.addEventListener("keydown", function (event) {
     'S': 9,
     'D': 10,
     'F': 11,
+    'G': 12,
+    'H': 13,
   }
 
   // Check if the pressed key is in our map
@@ -810,29 +822,77 @@ document.addEventListener("keydown", function (event) {
     if (button) button.click();
   }
 
-  const eventKeyMap = {
-    Z: 0, // Index of Field Goal
-    X: 1, // Index of Field Goal - Miss
-    C: 2, // Index of Three Pointer
-    V: 3, // Index of Assist
-    B: 4, // Index of Dribble
-    "<": 5, // Index of Rebound
-    N: 6, // Index of Pass
-    M: 7, // Index of Steal
-    ",": 8, // Index of Block
-    ".": 9, // Index of Foul
-    "?": 10, // Index of Free Throw
-    ">": 11, // Index of Turnover
-  };
-
-  if (eventKeyMap.hasOwnProperty(event.key.toUpperCase())) {
-    // Get the index from the map
-    const index = eventKeyMap[event.key.toUpperCase()];
+  const normalizedKey = event.key.toUpperCase();
+  if (eventKeyMap.hasOwnProperty(normalizedKey)) {
+    const index = eventKeyMap[normalizedKey];
     if (index < eventButtons.length) {
-      // If the calculated button exists, simulate a click on it
       eventButtons[index].click();
     }
   }
+
+  // Enter key to add event without coordinates
+  if (event.key === 'Enter') {
+    if (currentActionType !== "" && currentPlayer !== "") {
+      var currentTime = getCurrentTime();
+      addShot(
+        currentActionType,
+        null,
+        null,
+        null,
+        null,
+        currentTime,
+        currentPlayer
+      );
+      rawShots.push({
+        event: currentActionType,
+        startX: null,
+        startY: null,
+        endX: null,
+        endY: null,
+        time: currentTime,
+        player: currentPlayer,
+      });
+      sessionStorage.setItem("basketballRawShots", JSON.stringify(rawShots));
+      
+      // Clear selections
+      currentActionType = "";
+      currentPlayer = "";
+      currentPlayerName = "";
+      document.querySelectorAll(".event-button").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".player-button").forEach(btn => btn.classList.remove("active"));
+    }
+  }
+
+  // Backspace key to remove the most recent entry
+  if (event.key === 'Backspace') {
+    event.preventDefault(); // Prevent browser back navigation
+    
+    // Get the last visible row in the table (handles filtering correctly)
+    var visibleRows = table.rows({search: 'applied'});
+    var visibleCount = visibleRows.count();
+    if (visibleCount > 0) {
+      var lastVisibleRow = visibleRows.nodes()[visibleCount - 1];
+      var rowIndex = table.row(lastVisibleRow).index();
+      var lastRow = table.row(lastVisibleRow);
+      
+      // Remove from shotsData
+      if (shotsData && shotsData.length > 0) {
+        shotsData.splice(rowIndex, 1);
+        sessionStorage.setItem("basketballShotsData", JSON.stringify(shotsData));
+      }
+      
+      // Remove from rawShots
+      if (rawShots && rawShots.length > 0) {
+        rawShots.splice(rowIndex, 1);
+        sessionStorage.setItem("basketballRawShots", JSON.stringify(rawShots));
+      }
+      
+      // Remove the row from DataTable
+      removeDot();
+      lastRow.remove().draw();
+    }
+  }
+
 });
 
 //Timer Code
@@ -881,18 +941,41 @@ function updateDisplay() {
 }
 
 //Event name customization
-// Initialize default event names
+const eventShortcutKeys = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
+const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
+  map[key.toUpperCase()] = index;
+  return map;
+}, {});
+
 let defaultEventNames = [
-  "Field Goal", "Field Goal - Miss", "Three Pointer", "Assist", 
-  "Dribble", "Rebound", "Pass", "Steal", 
+  "Field Goal", "Field Goal - Miss", "Three Pointer", "Assist",
+  "Dribble", "Rebound", "Pass", "Steal",
   "Block", "Foul", "Free Throw", "Turnover"
 ];
 
+let eventNames = [];
+
+function ensureCurrentActionTypeIsValid() {
+  if (!eventNames.includes(currentActionType)) {
+    currentActionType = "";
+  }
+}
+
 // Load event names from sessionStorage if available
 function initializeEventNames() {
-  let storedEventNames = sessionStorage.getItem('eventNames');
+  let storedEventNames = sessionStorage.getItem('basketballEventNames');
   if (storedEventNames) {
-    eventNames = JSON.parse(storedEventNames);
+    try {
+      const parsed = JSON.parse(storedEventNames);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        eventNames = parsed;
+      } else {
+        eventNames = [...defaultEventNames];
+      }
+    } catch (error) {
+      console.error("Failed to parse stored event names", error);
+      eventNames = [...defaultEventNames];
+    }
   } else {
     eventNames = [...defaultEventNames];
   }
@@ -901,46 +984,67 @@ function initializeEventNames() {
 
 // Display event names on buttons
 function displayEventNames() {
-  const eventShortcuts = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
-  const eventButtons = document.querySelectorAll(".event-button");
+  const eventButtonsGrid = document.getElementById("eventButtonsGrid");
+  if (!eventButtonsGrid) {
+    return;
+  }
+
+  eventButtonsGrid.innerHTML = "";
+  ensureCurrentActionTypeIsValid();
+
+  const createdButtons = [];
+
   for (let i = 0; i < eventNames.length; i++) {
-    let button = eventButtons[i];
-    if (button) {
-      button.innerHTML = `${eventNames[i]} (${eventShortcuts[i]})`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn btn-outline-primary btn-small event-button";
+
+    const shortcut = i < eventShortcutKeys.length ? ` (${eventShortcutKeys[i]})` : "";
+    button.innerHTML = `${eventNames[i]}${shortcut}`;
+
+    button.addEventListener("click", function () {
+      setActionType.call(this, i);
+    });
+
+    if (currentActionType === eventNames[i]) {
+      button.classList.add("active");
     }
+
+    eventButtonsGrid.appendChild(button);
+    createdButtons.push(button);
+  }
+
+  if (createdButtons.length % 2 === 1) {
+    createdButtons[createdButtons.length - 1].classList.add("span-two");
   }
 }
 
 // Save event names from modal into sessionStorage
 function saveEventNames() {
   const textarea = document.getElementById('eventNamesTextarea');
-  let eventLines = textarea.value.split('\n').slice(0, 12).map(name => name.trim()).filter(name => name.length > 0);
+  let eventLines = textarea.value
+    .split('\n')
+    .map(name => name.trim())
+    .filter(name => name.length > 0);
 
-  // If less than 12 names are provided, fill in the remaining with default names
-  for (let i = eventLines.length; i < 12; i++) {
-    eventLines.push(defaultEventNames[i]);
+  if (eventLines.length === 0) {
+    eventNames = [...defaultEventNames];
+  } else {
+    eventNames = eventLines;
   }
 
-  sessionStorage.setItem('eventNames', JSON.stringify(eventLines));
-  eventNames = eventLines;
-  
-  // Update buttons with new event names
+  sessionStorage.setItem('basketballEventNames', JSON.stringify(eventNames));
   displayEventNames();
-  
+
   // Close the modal
   $('#editEventNamesModal').modal('hide');
 }
 
 // Load saved event names into the textarea
 function loadEventNamesToTextarea() {
-  let storedEventNames = sessionStorage.getItem('eventNames');
   const textarea = document.getElementById('eventNamesTextarea');
-  
-  if (storedEventNames) {
-    textarea.value = JSON.parse(storedEventNames).join('\n');
-  } else {
-    textarea.value = defaultEventNames.join('\n');
-  }
+  const namesToLoad = (eventNames.length > 0 ? eventNames : defaultEventNames);
+  textarea.value = namesToLoad.join('\n');
 }
 
 // Call this function when the modal opens to populate the textarea
@@ -948,3 +1052,29 @@ document.getElementById('editEventNamesModal').addEventListener('show.bs.modal',
 
 // Initialize event names on page load
 initializeEventNames();
+
+// Load court type on page load
+loadCourtType();
+
+function initKeyboardShortcutToast() {
+  const toastElement = document.getElementById("keyboardShortcutToast");
+  if (!toastElement) {
+    return;
+  }
+
+  if (localStorage.getItem(keyboardShortcutToastKey) === "true") {
+    return;
+  }
+
+  const toast = bootstrap.Toast.getOrCreateInstance(toastElement, { autohide: false });
+  toast.show();
+
+  toastElement.addEventListener(
+    "hidden.bs.toast",
+    function () {
+      localStorage.setItem(keyboardShortcutToastKey, "true");
+    },
+    { once: true }
+  );
+}
+

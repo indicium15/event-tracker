@@ -8,6 +8,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from mplsoccer import Pitch
+from mplbasketball import Court
 import numpy as np
 import matplotlib.pyplot as plt
 plt.switch_backend('Agg')  # Use a non-interactive backend for matplotlib
@@ -17,8 +18,8 @@ bp = Blueprint(
     __name__,
     template_folder="templates",
     static_folder="static",
-    static_url_path="/basketball/static",   # avoids clashes with other blueprints
-    url_prefix="/basketball"                # mount under /basketball
+    static_url_path="static",   # serves static files at /basketball/static
+    url_prefix="/basketball"    # mount under /basketball
 )
 
 # In-memory state per process (replace with DB/Redis for multi-worker production)
@@ -50,7 +51,7 @@ def remove_shot():
 def download_csv():
     payload = request.json
     proxy = io.StringIO()
-    fieldnames = ["time","player","playerName","action","x","y","x2","y2","xG","xSave"]
+    fieldnames = ["time","player","playerName","action","x","y","x2","y2","courtType"]
     writer = csv.DictWriter(proxy, fieldnames=fieldnames)
     writer.writeheader()
     for row in payload:
@@ -75,6 +76,7 @@ def download_pdf():
         mimetype="application/pdf",
         headers={"Content-Disposition": "attachment; filename=report.pdf"}
     )
+
 
 def create_pdf_report(shots):
     # Register the custom font
@@ -121,17 +123,21 @@ def create_pdf_report(shots):
                 pdf.showPage()
                 pdf.setFont("Vera", 18)
 
-            # Create a pitch instance using mplsoccer with basketball dimensions
-            # Basketball court: 28.65m x 15.24m
-            pitch = Pitch(pitch_type="custom", pitch_length=28.65, pitch_width=15.24)
-            fig, ax = pitch.draw(figsize=(4, 3))
+            # Create a court instance using mplbasketball with the correct court type
+            court_type = action_list[0].get("courtType", "nba")  # Default to NBA if not specified
+            court = Court(court_type=court_type, origin="bottom-left", units="m")
+            fig, ax = court.draw()
+
+            # Get court dimensions for coordinate adjustment
+            court_dimensions = {"nba": 15.24, "wnba": 15.24, "ncaa": 15.24, "fiba": 15.0}
+            court_height = court_dimensions.get(court_type, 15.24)
 
             for shot in action_list:
-                x, y = float(shot["x"]), 15.24 - float(shot["y"])  # Adjust y-coordinate
+                x, y = float(shot["x"]), court_height - float(shot["y"])  # Adjust y-coordinate based on court type
 
                 # Check if x2 and y2 exist and are not 'N/A'
                 if shot["x2"] != "N/A" and shot["y2"] != "N/A":
-                    x2, y2 = float(shot["x2"]), 15.24 - float(shot["y2"])  # Adjust y2-coordinate
+                    x2, y2 = float(shot["x2"]), court_height - float(shot["y2"])  # Adjust y2-coordinate based on court type
 
                     # Calculate the direction and adjust the length of the arrow
                     dx = x2 - x
@@ -144,14 +150,15 @@ def create_pdf_report(shots):
                     y2_adj = y + arrow_length_factor * dy
 
                     # Draw an arrow from (x, y) to (x2_adj, y2_adj)
-                    pitch.arrows(x, y, x2_adj, y2_adj, width=2, headwidth=5, color="black", ax=ax)
+                    ax.annotate('', xy=(x2_adj, y2_adj), xytext=(x, y),
+                               arrowprops=dict(arrowstyle='->', color='black', lw=2))
 
                     # Draw the start and end points
-                    pitch.scatter(x, y, s=100, color="yellow", edgecolors="black", ax=ax)  # Start point
-                    pitch.scatter(x2, y2, s=100, color="yellow", edgecolors="black", ax=ax)  # End point
+                    ax.scatter(x, y, s=100, color="yellow", edgecolors="black")  # Start point
+                    ax.scatter(x2, y2, s=100, color="yellow", edgecolors="black")  # End point
                 else:
                     # Draw a single point if x2 or y2 is 'N/A'
-                    pitch.scatter(x, y, s=100, color="yellow", edgecolors="black", ax=ax)
+                    ax.scatter(x, y, s=100, color="yellow", edgecolors="black")
 
             # Save the plot to a buffer
             img_buffer = io.BytesIO()
