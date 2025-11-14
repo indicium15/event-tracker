@@ -88,17 +88,28 @@ def create_pdf_report(shots):
     pdf.setTitle("Report")
     PAGE_WIDTH, PAGE_HEIGHT = A4
 
-    # Group shots by player and action type
+    # Group shots by player, action type, and court type
+    # This ensures each plot uses the correct court background
     player_actions = {}
     for shot in shots:
         print(shot)
         player_name = shot["playerName"]
         action_type = shot["action"]
+        court_type = shot.get("courtType", "nba")  # Get court type from shot
+        
         if player_name not in player_actions:
             player_actions[player_name] = {}
-        if action_type not in player_actions[player_name]:
-            player_actions[player_name][action_type] = []
-        player_actions[player_name][action_type].append(shot)
+        
+        # Create a key that includes both action and court type
+        action_court_key = f"{action_type}_{court_type}"
+        
+        if action_court_key not in player_actions[player_name]:
+            player_actions[player_name][action_court_key] = {
+                "action": action_type,
+                "court_type": court_type,
+                "shots": []
+            }
+        player_actions[player_name][action_court_key]["shots"].append(shot)
 
     # Iterate over each player's actions to create pages in the PDF
     for player, actions in player_actions.items():
@@ -114,7 +125,11 @@ def create_pdf_report(shots):
         text_height = 0
 
         # Iterate over action types for the current player
-        for action, action_list in actions.items():
+        for action_court_key, action_data in actions.items():
+            action_type = action_data["action"]
+            court_type = action_data["court_type"]
+            action_list = action_data["shots"]
+            
             # Add a new page if necessary
             if image_count == 7:
                 image_count = 1
@@ -124,20 +139,23 @@ def create_pdf_report(shots):
                 pdf.setFont("Vera", 18)
 
             # Create a court instance using mplbasketball with the correct court type
-            court_type = action_list[0].get("courtType", "nba")  # Default to NBA if not specified
             court = Court(court_type=court_type, origin="bottom-left", units="m")
             fig, ax = court.draw()
 
             # Get court dimensions for coordinate adjustment
-            court_dimensions = {"nba": 15.24, "wnba": 15.24, "ncaa": 15.24, "fiba": 15.0}
-            court_height = court_dimensions.get(court_type, 15.24)
+            # The HTML court image and mplbasketball court have different orientations,
+            # so we need to flip both X and Y coordinates to match
+            court_widths = {"nba": 28.6512, "wnba": 28.6512, "ncaa": 28.6512, "fiba": 28.0}
+            court_heights = {"nba": 15.24, "wnba": 15.24, "ncaa": 15.24, "fiba": 15.0}
+            court_width = court_widths.get(court_type, 28.6512)
+            court_height = court_heights.get(court_type, 15.24)
 
             for shot in action_list:
-                x, y = float(shot["x"]), court_height - float(shot["y"])  # Adjust y-coordinate based on court type
+                x, y = float(shot["x"]), float(shot["y"])  # Adjust y-coordinate based on court type
 
                 # Check if x2 and y2 exist and are not 'N/A'
                 if shot["x2"] != "N/A" and shot["y2"] != "N/A":
-                    x2, y2 = float(shot["x2"]), court_height - float(shot["y2"])  # Adjust y2-coordinate based on court type
+                    x2, y2 = float(shot["x2"]), float(shot["y2"])  # Adjust y2-coordinate based on court type
 
                     # Calculate the direction and adjust the length of the arrow
                     dx = x2 - x
@@ -169,10 +187,10 @@ def create_pdf_report(shots):
             # Determine the placement of the image
             if image_count % 2 != 0:  # Left side of the page
                 x_pos = (PAGE_WIDTH / 4.0) - 125
-                text_x_pos = x_pos + 125 - (pdf.stringWidth(action, "Vera", 15) / 2)
+                text_x_pos = x_pos + 125 - (pdf.stringWidth(action_type, "Vera", 15) / 2)
             else:  # Right side of the page
                 x_pos = ((PAGE_WIDTH / 4.0) * 3) - 125
-                text_x_pos = x_pos + 125 - (pdf.stringWidth(action, "Vera", 15) / 2)
+                text_x_pos = x_pos + 125 - (pdf.stringWidth(action_type, "Vera", 15) / 2)
 
             y_pos = (PAGE_HEIGHT / 10) * ori_height
             text_y_pos = (PAGE_HEIGHT / 10.5) * (ori_height - text_height)
@@ -181,7 +199,7 @@ def create_pdf_report(shots):
             pdf.drawImage(image, x=x_pos, y=y_pos, width=250, height=200)
             pdf.setFont("Vera", 15)
             pdf.setFillColor("black")
-            pdf.drawString(text_x_pos, text_y_pos, action)
+            pdf.drawString(text_x_pos, text_y_pos, action_type)
 
             # Update counters for placement
             image_count += 1
