@@ -25,93 +25,67 @@ body {
   margin-left: 0.75rem;
 }
 
-.pitch-heading {
+.court-heading {
   margin-bottom: 0 !important;
-}
-
-/* === NEW: variables driven by JS === */
-:root {
-  /* These will be set by JS so aspect ratio matches the extended surface */
-  --aspect-w: 23.77; /* fallback */
-  --aspect-h: 10.97; /* fallback */
-
-  /* Percentages (also set by JS) for placing the court inside the surface */
-  --court-w-pct: 100%;
-  --court-h-pct: 100%;
-  --runoff-x-pct: 0%;
-  --runoff-y-pct: 0%;
-}
-
-/* #pitch is now the full play surface (court + run-off) */
-#pitch {
-  touch-action: none;
-  width: 100%;
-  aspect-ratio: var(--aspect-w) / var(--aspect-h);
-  background: #0b5d2a;  /* darker green for out-of-court */
-  position: relative;
-  border: 1px solid #fff;
-  transition: transform 0.2s ease;
-  font-size: 2vw;
-}
-
-/* The actual court sits inside #pitch with margins = run-off */
-.court {
-  position: absolute;
-  left: var(--runoff-x-pct);
-  top: var(--runoff-y-pct);
-  width: var(--court-w-pct);
-  height: var(--court-h-pct);
-  background: #008000;  /* standard tennis green for in-bounds */
-  border: 2px solid #fff; /* doubles sidelines & baselines */
-}
-
-/* Scope lines to the court box */
-.court .singles-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: white;
-}
-
-.court .singles-line.top { top: 12.48%; }
-.court .singles-line.bottom { bottom: 12.48%; }
-
-/* Service boxes remain proportional to the court */
-.court .service-box {
-  position: absolute;
-  width: 26.93%;
-  height: 37.45%;
-  background: none;
-  border: 2px solid white;
-}
-
-.court .service-box.top { top: 12.48%; }
-.court .service-box.bottom { top: calc(12.48% + 37.45%); }
-.court .service-box.left { left: 23.535%; }
-.court .service-box.right { right: 23.535%; }
-
-/* Center service line: draw only between service lines (optional polish) */
-.court::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 12.48%;
-  height: 37.45%;
-  width: 2px;
-  background: #fff;
-}
-
-  
-.pitch-wrapper {
-  overflow: auto;
 }
 
 .zoom-controls {
   margin-top: 10px;
 }
 
+/* --- COURT --------------------------------------------------------------- */
+.court-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.court-wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#court {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 94 / 50;     /* keep true 94' x 50' shape */
+  max-height: 70vh;
+  border: 0;
+  transition: transform 0.2s ease;
+  cursor: crosshair; /* Default cursor for placing events */
+}
+
+#court.panning {
+  cursor: grabbing;
+}
+
+/* When zoomed in and no event/player selected, show grab cursor */
+#court.can-pan {
+  cursor: grab;
+}
+
+/* the court image */
+#court .court-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none; /* keeps your click/drag handlers on #court working */
+  object-fit: contain;
+}
+
+/* keep your dots above the SVG */
+.dot {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: #fff;
+  border-radius: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+}
 
 .arrow-container {
   display: flex;
@@ -259,24 +233,6 @@ body {
 
 .dt-search {
   text-align: left !important;
-}
-
-.center-spot {
-  position: absolute;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: #fff;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-}
-
-#videoPreview {
-  position: relative;
-  max-height: 400px;
-  width: 100%;
-  padding-bottom: 0.5rem;
 }
 
 .footer a {
