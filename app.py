@@ -4,7 +4,7 @@ from football.routes import bp as football_bp
 from floorball.routes import bp as floorball_bp
 from tennis.routes import bp as tennis_bp
 from basketball.routes import bp as basketball_bp
-# from badminton.routes import bp as badminton_bp
+from badminton.routes import bp as badminton_bp
 
 def create_app():
     app = Flask(__name__)
@@ -14,7 +14,7 @@ def create_app():
     app.register_blueprint(floorball_bp)
     app.register_blueprint(tennis_bp)
     app.register_blueprint(basketball_bp)
-    # app.register_blueprint(badminton_bp)
+    app.register_blueprint(badminton_bp)
 
     @app.route("/football")
     def football():
@@ -31,6 +31,10 @@ def create_app():
     @app.route("/basketball")
     def basketball():
         return redirect(url_for("basketball.index"))
+    
+    @app.route("/badminton")
+    def badminton():
+        return redirect(url_for("badminton.index"))
     
     @app.route("/")
     def home():
@@ -61,6 +65,7 @@ def create_app():
             {'loc': f'{base_url}/floorball', 'priority': '0.8', 'changefreq': 'weekly'},
             {'loc': f'{base_url}/tennis', 'priority': '0.8', 'changefreq': 'weekly'},
             {'loc': f'{base_url}/basketball', 'priority': '0.8', 'changefreq': 'weekly'},
+            {'loc': f'{base_url}/badminton', 'priority': '0.8', 'changefreq': 'weekly'},
         ]
         
         # Generate XML sitemap

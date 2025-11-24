@@ -1,55 +1,52 @@
-// Court configuration object with dimensions for each court type
-const courtConfig = {
-  nba: { width: 28.6512, height: 15.24, name: "NBA" },
-  wnba: { width: 28.6512, height: 15.24, name: "WNBA" },
-  ncaa: { width: 28.6512, height: 15.24, name: "NCAA" },
-  fiba: { width: 28.0, height: 15.0, name: "FIBA" }
-};
+// Court dimensions (m)
+// Badminton: 13.40m length, 6.10m width (doubles)
+const COURT_W = 13.40; // length (baseline to baseline) in m
+const COURT_H = 6.10; // width for doubles (sideline to sideline) in m
+let zoomLevel = 1;
 
-// Current court type (default to NBA)
-let currentCourtType = 'nba';
+// Run-off space (m)
+const RUNOFF_Y = 1.50;  // left + right each
+const RUNOFF_X = 2.00;  // top + bottom each
 
-// Get current court dimensions
-function getCurrentCourtDimensions() {
-  return courtConfig[currentCourtType];
+// Pitch dimensions (court + run-off)
+const PITCH_W = COURT_W + 2 * RUNOFF_X;
+const PITCH_H = COURT_H + 2 * RUNOFF_Y;
+
+// Push geometry to CSS so layout stays exact
+function updateCourtDimensions() {
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty('--aspect-w', PITCH_W);
+  rootStyle.setProperty('--aspect-h', PITCH_H);
+  rootStyle.setProperty('--court-w-pct', `${(COURT_W / PITCH_W) * 100}%`);
+  rootStyle.setProperty('--court-h-pct', `${(COURT_H / PITCH_H) * 100}%`);
+  rootStyle.setProperty('--runoff-x-pct', `${(RUNOFF_X / PITCH_W) * 100}%`);
+  rootStyle.setProperty('--runoff-y-pct', `${(RUNOFF_Y / PITCH_H) * 100}%`);
 }
 
-// Function to change court type
-function changeCourtType() {
-  const select = document.getElementById('courtTypeSelect');
-  const newCourtType = select.value;
-  
-  if (newCourtType !== currentCourtType) {
-    currentCourtType = newCourtType;
-    
-    // Update court image
-    const courtImage = document.getElementById('courtImage');
-    courtImage.src = `/basketball/static/court-${currentCourtType}.png`;
-    
-    // Save court type to sessionStorage
-    sessionStorage.setItem('basketballCourtType', currentCourtType);
-    
-    console.log(`Court type changed to: ${courtConfig[currentCourtType].name}`);
+// Initialize court dimensions
+updateCourtDimensions();
+
+// Make sure pitch is defined globally once
+const pitch = document.getElementById("pitch");
+
+function zoomIn() {
+  zoomLevel += 0.1;
+  const pitch = document.getElementById("pitch");
+  pitch.style.transformOrigin = "center center";
+  pitch.style.transform = `scale(${zoomLevel})`;
+}
+
+function zoomOut() {
+  if (zoomLevel > 0.5) {
+    // Prevents excessive zoom out
+    zoomLevel -= 0.1;
+    const pitch = document.getElementById("pitch");
+    pitch.style.transformOrigin = "center center";
+    pitch.style.transform = `scale(${zoomLevel})`;
   }
 }
 
-// Load court type from sessionStorage on page load
-function loadCourtType() {
-  const savedCourtType = sessionStorage.getItem('basketballCourtType');
-  if (savedCourtType && courtConfig[savedCourtType]) {
-    currentCourtType = savedCourtType;
-    const select = document.getElementById('courtTypeSelect');
-    if (select) {
-      select.value = currentCourtType;
-    }
-    // Update the court image to match the saved court type
-    const courtImage = document.getElementById('courtImage');
-    if (courtImage) {
-      courtImage.src = `/basketball/static/court-${currentCourtType}.png`;
-    }
-  }
-}
-// Create an object to store jersey numbers and player names
+
 // Create objects to store jersey numbers and player names for both teams
 let homePlayerMap = {};
 let awayPlayerMap = {};
@@ -58,91 +55,71 @@ let awayPlayerMap = {};
 let homeShortcutMap = {
   1: "(1)",
   2: "(2)",
-  3: "(3)",
-  4: "(4)",
-  5: "(5)",
-  6: "(6)",
-  7: "(7)",
-  8: "(8)",
-  9: "(9)",
-  10: "(0)",
-  11: "(-)",
-  12: "(=)",
-  13: "(Q)",
-  14: "(W)",
 };
 
 let awayShortcutMap = {
-  1: "(E)",
-  2: "(R)",
-  3: "(T)",
-  4: "(Y)",
-  5: "(U)",
-  6: "(I)",
-  7: "(O)",
-  8: "(P)",
-  9: "(A)",
-  10: "(S)",
-  11: "(D)",
-  12: "(F)",
-  13: "(G)",
-  14: "(H)",
+  1: "(3)",
+  2: "(4)",
 };
 
-// Initialize playerMap with default values for 14 players for both teams
+const eventShortcutKeys = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
+const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
+  map[key.toUpperCase()] = index;
+  return map;
+}, {});
+
+let eventNames = [];
+
+// Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
   // Check if player maps are already in sessionStorage
-  const storedHomePlayerMap = sessionStorage.getItem('basketballHomePlayerMap');
-  const storedAwayPlayerMap = sessionStorage.getItem('basketballAwayPlayerMap');
+  const storedHomePlayerMap = sessionStorage.getItem('badmintonHomePlayerMap');
+  const storedAwayPlayerMap = sessionStorage.getItem('badmintonAwayPlayerMap');
 
   // Load from sessionStorage if available, else initialize with default values
   if (storedHomePlayerMap) {
     homePlayerMap = JSON.parse(storedHomePlayerMap);
     console.log("stored home map:");
     console.log(homePlayerMap);
+    for (let i = 1; i <= 16; i++) {
+      let button = document.getElementById(`homePlayerButton${i}`);
+      if (button) {
+        let jerseyNumber = homePlayerMap[i].jersey;
+        let shortcut = homeShortcutMap[i]; // Get the shortcut based on the player's index
+        button.innerHTML = `${jerseyNumber} ${shortcut}`;
+      }
+    }
   } else {
-    homePlayerMap = {};
-  }
-
-  for (let i = 1; i <= 14; i++) {
-    if (!homePlayerMap[i]) {
+    for (let i = 1; i <= 16; i++) {
       homePlayerMap[i] = {
         jersey: `A${i.toString().padStart(2, "0")}`,
         name: `HomePlayer${i}`,
       };
     }
-    let button = document.getElementById(`homePlayerButton${i}`);
-    if (button) {
-      let jerseyNumber = homePlayerMap[i].jersey;
-      let shortcut = homeShortcutMap[i]; // Get the shortcut based on the player's index
-      button.innerHTML = `${jerseyNumber} ${shortcut || ""}`;
-    }
+    sessionStorage.setItem('badmintonHomePlayerMap', JSON.stringify(homePlayerMap));
   }
-  sessionStorage.setItem('basketballHomePlayerMap', JSON.stringify(homePlayerMap));
 
   if (storedAwayPlayerMap) {
     awayPlayerMap = JSON.parse(storedAwayPlayerMap);
     console.log("stored away map:");
     console.log(awayPlayerMap);
+    for (let i = 1; i <= 16; i++) {
+      let button = document.getElementById(`awayPlayerButton${i}`);
+      if (button) {
+        let jerseyNumber = awayPlayerMap[i].jersey;
+        let shortcut = awayShortcutMap[i]; // Get the shortcut based on the player's index
+        button.innerHTML = `${jerseyNumber} ${shortcut}`;
+      }
+    }
   } else {
-    awayPlayerMap = {};
-  }
-
-  for (let i = 1; i <= 14; i++) {
-    if (!awayPlayerMap[i]) {
+    for (let i = 1; i <= 16; i++) {
       awayPlayerMap[i] = {
         jersey: `B${i.toString().padStart(2, "0")}`,
         name: `AwayPlayer${i}`,
       };
     }
-    let button = document.getElementById(`awayPlayerButton${i}`);
-    if (button) {
-      let jerseyNumber = awayPlayerMap[i].jersey;
-      let shortcut = awayShortcutMap[i]; // Get the shortcut based on the player's index
-      button.innerHTML = `${jerseyNumber} ${shortcut || ""}`;
-    }
+    sessionStorage.setItem('badmintonAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
-  sessionStorage.setItem('basketballAwayPlayerMap', JSON.stringify(awayPlayerMap));
 }
 
 // Call initializePlayerMap when the script loads
@@ -154,7 +131,7 @@ function updatePlayerNames(team) {
   const shortcutMap = team === "home" ? homeShortcutMap : awayShortcutMap;
   const prefix = team === "home" ? "home" : "away"; // No prefix for home, "away" for away team
 
-  for (let i = 1; i <= 14; i++) {
+  for (let i = 1; i <= 16; i++) {
     let jerseyInput = document.getElementById(`${prefix}Jersey${i}`); // Use "awayJersey1" for away team
     let playerInput = document.getElementById(`${prefix}Player${i}`); // Use "awayPlayer1" for away team
     if (jerseyInput && playerInput) {
@@ -165,19 +142,19 @@ function updatePlayerNames(team) {
     }
   }
 
-  for (let i = 1; i <= 14; i++) {
+  for (let i = 1; i <= 16; i++) {
     let button = document.getElementById(`${prefix}PlayerButton${i}`);
     if (button) {
       let jerseyNumber = playerMap[i].jersey;
       let shortcut = shortcutMap[i]; // Get the shortcut based on the player's index
-      button.innerHTML = `${jerseyNumber} ${shortcut || ""}`;
+      button.innerHTML = `${jerseyNumber} ${shortcut}`;
     }
   }
   // Persist changes to sessionStorage
   if (team === "home") {
-    sessionStorage.setItem('basketballHomePlayerMap', JSON.stringify(homePlayerMap));
+    sessionStorage.setItem('badmintonHomePlayerMap', JSON.stringify(homePlayerMap));
   } else {
-    sessionStorage.setItem('basketballAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    sessionStorage.setItem('badmintonAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -191,20 +168,15 @@ function updatePlayerNames(team) {
 var currentActionType = "";
 var currentPlayer = "";
 var currentPlayerName = "";
-var cumulativeData = {
-  fieldGoals: 0,
-  assists: 0,
-  rebounds: 0,
-  steals: 0,
-  blocks: 0,
-};
-if (sessionStorage.getItem("basketballRawShots")) {
-  var rawShots = JSON.parse(sessionStorage.getItem("basketballRawShots"));
+var currentGrip = "";
+var currentOutcome = "";
+if (sessionStorage.getItem("badmintonRawShots")) {
+  var rawShots = JSON.parse(sessionStorage.getItem("badmintonRawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
   var rawShots = [];
-  const court = document.getElementById("court");
+  const pitch = document.getElementById("pitch");
 }
 let isDragging = false;
 let startX = null;
@@ -213,7 +185,7 @@ let endX = null;
 let endY = null;
 
 var table;
-const keyboardShortcutToastKey = "basketballKeyboardShortcutToastDismissed";
+const keyboardShortcutToastKey = "badmintonKeyboardShortcutToastDismissed";
 
 $(document).ready(function () {
   table = $("#event-table").DataTable({
@@ -226,7 +198,7 @@ $(document).ready(function () {
   });
   console.log("table");
   console.log(table);
-  console.log("basketballRawShots");
+  console.log("badmintonRawShots");
   console.log(rawShots);
   if (rawShots.length > 0) {
     for (var i = 0; i < rawShots.length; i++) {
@@ -241,59 +213,56 @@ $(document).ready(function () {
       );
     }
   }
-  table.on("draw", function () {
-    updateCumulativeValues();
-  });
-  updateCumulativeValues();
   initKeyboardShortcutToast();
 });
 
-function updateCumulativeValues() {
-  var filteredData = table.rows({ search: "applied" }).data();
-  console.log("filteredData");
-  console.log(filteredData[0]);
-  // Initialize your cumulative values
-  var totalGoals = 0;
-  var totalSaves = 0;
-  var totalFieldGoals = 0;
-  var totalAssists = 0;
-  var totalRebounds = 0;
-  var totalSteals = 0;
-  var totalBlocks = 0;
-
-  // Calculate cumulative values
-  filteredData.each(function (value, index) {
-    // Update the counts based on your data structure and what constitutes a field goal, assist, etc.
-    if (value[2].includes("Field Goal")) {
-      totalFieldGoals++;
-      if (value[2] == "Field Goal") {
-        totalGoals++;
-      } else if (value[2] == "Field Goal - Miss") {
-        totalSaves++;
-      }
-    } else if (value[2] == "Assist") {
-      totalAssists++;
-    } else if (value[2] == "Rebound") {
-      totalRebounds++;
-    } else if (value[2] == "Steal") {
-      totalSteals++;
-    } else if (value[2] == "Block") {
-      totalBlocks++;
-    }
-  });
-
-  // Update the cumulative table
-  $("#cumulative-goals").text(totalGoals);
-  $("#cumulative-saves").text(totalSaves);
-  $("#cumulative-field-goals").text(totalFieldGoals);
-  $("#cumulative-assists").text(totalAssists);
-  $("#cumulative-rebounds").text(totalRebounds);
-  $("#cumulative-steals").text(totalSteals);
-  $("#cumulative-blocks").text(totalBlocks);
-}
-
 console.log("table");
 console.log(table);
+
+function setGrip(gripType) {
+  const gripId = gripType.toLowerCase(); // "Forehand" → "forehand", etc.
+  const selectedBtn = document.getElementById(gripId);
+
+  // Deselect all grip buttons
+  ["forehand", "backhand"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove("active");
+  });
+
+  // Toggle off if it's the same grip
+  if (currentGrip === gripType) {
+    currentGrip = "";
+  } else {
+    currentGrip = gripType;
+    if (selectedBtn) selectedBtn.classList.add("active");
+  }
+}
+
+function setOutcome(outcomeType) {
+  const outcomeIdMap = {
+    "Winner": "winner",
+    "Unforced Error": "unforcederror",
+    "Forced Error": "forcederror",
+    "Rally": "rally"
+  };
+
+  const outcomeId = outcomeIdMap[outcomeType];
+  const selectedBtn = document.getElementById(outcomeId);
+
+  // Deselect all outcome buttons
+  Object.values(outcomeIdMap).forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove("active");
+  });
+
+  // Toggle off if already selected
+  if (currentOutcome === outcomeType) {
+    currentOutcome = "";
+  } else {
+    currentOutcome = outcomeType;
+    if (selectedBtn) selectedBtn.classList.add("active");
+  }
+}
 
 function setActionType(index) {
   const eventName = eventNames[index];
@@ -328,6 +297,8 @@ function setActionType(index) {
 
 function setPlayer(team, playerIndex) {
   // Set the current player type
+  console.log("given team");
+  console.log(team);
   const playerMap = team === "home" ? homePlayerMap : awayPlayerMap;
   console.log("selected playerMap");
   console.log(playerMap);
@@ -353,7 +324,7 @@ function setPlayer(team, playerIndex) {
   // Get all player buttons
   var buttons = document.querySelectorAll(".player-button");
 
-  for (let i = 1; i <= 14; i++) {
+  for (let i = 1; i <= 16; i++) {
     let homeButton = document.getElementById(`homePlayerButton${i}`);
     let awayButton = document.getElementById(`awayPlayerButton${i}`);
     
@@ -371,88 +342,68 @@ function setPlayer(team, playerIndex) {
     .classList.add("active");
 }
 
-court.addEventListener("mousedown", function (event) {
+pitch.addEventListener("mousedown", function (event) {
   if (startX === null || startY === null) {
     isDragging = true;
-    let rect = court.getBoundingClientRect();
-    const dimensions = getCurrentCourtDimensions();
-    
-    // Calculate coordinates based on the rendered court dimensions
-    const adjustedX = event.clientX - rect.left;
-    const adjustedY = event.clientY - rect.top;
-    
-    // RHCS: Calculate coordinates from bottom-left origin
-    startX = (adjustedX / court.offsetWidth) * dimensions.width;
-    startY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
+    let rect = pitch.getBoundingClientRect();
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
     // Round to 2 decimal places for practical precision
-    startX = +(startX).toFixed(2);
-    startY = +(startY).toFixed(2);
+    startX = +(centredX).toFixed(2);
+    startY = +(centredY).toFixed(2);
+
   }
 });
 
-court.addEventListener("mousemove", function (event) {
+pitch.addEventListener("mousemove", function (event) {
   if (isDragging) {
-    let rect = court.getBoundingClientRect();
-    const dimensions = getCurrentCourtDimensions();
-    
-    // Calculate coordinates based on the rendered court dimensions
-    const adjustedX = event.clientX - rect.left;
-    const adjustedY = event.clientY - rect.top;
-    
-    // RHCS: Calculate coordinates from bottom-left origin
-    endX = (adjustedX / court.offsetWidth) * dimensions.width;
-    endY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
+    let rect = pitch.getBoundingClientRect();
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
     // Round to 2 decimal places for practical precision
-    endX = +(endX).toFixed(2);
-    endY = +(endY).toFixed(2);
+    endX = +(centredX).toFixed(2);
+    endY = +(centredY).toFixed(2);
+
   }
 });
 
 // Remove existing mouse and touch event listeners
 
 // Add pointer event listeners
-court.addEventListener("pointerdown", function (event) {
+pitch.addEventListener("pointerdown", function (event) {
   event.preventDefault(); // Prevent default touch behavior
-  
   if (startX === null || startY === null) {
     isDragging = true;
-    let rect = court.getBoundingClientRect();
-    const dimensions = getCurrentCourtDimensions();
-    
-    // Calculate coordinates based on the rendered court dimensions
-    const adjustedX = event.clientX - rect.left;
-    const adjustedY = event.clientY - rect.top;
-    
-    // RHCS: Calculate coordinates from bottom-left origin
-    startX = (adjustedX / court.offsetWidth) * dimensions.width;
-    startY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
+    let rect = pitch.getBoundingClientRect();
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
     // Round to 2 decimal places for practical precision
-    startX = +(startX).toFixed(2);
-    startY = +(startY).toFixed(2);
+    startX = +(centredX).toFixed(2);
+    startY = +(centredY).toFixed(2);
   }
 });
 
-court.addEventListener("pointermove", function (event) {
+pitch.addEventListener("pointermove", function (event) {
   event.preventDefault(); // Prevent default touch behavior
-  
   if (isDragging) {
-    let rect = court.getBoundingClientRect();
-    const dimensions = getCurrentCourtDimensions();
-    
-    // Calculate coordinates based on the rendered court dimensions
-    const adjustedX = event.clientX - rect.left;
-    const adjustedY = event.clientY - rect.top;
-    
-    // RHCS: Calculate coordinates from bottom-left origin
-    endX = (adjustedX / court.offsetWidth) * dimensions.width;
-    endY = ((court.offsetHeight - adjustedY) / court.offsetHeight) * dimensions.height;
+    let rect = pitch.getBoundingClientRect();
+    let normX = ((event.clientX - rect.left) / pitch.offsetWidth) * PITCH_W;
+    let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
+    let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
+    let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
     // Round to 2 decimal places for practical precision
-    endX = +(endX).toFixed(2);
-    endY = +(endY).toFixed(2);
+    endX = +(centredX).toFixed(2);
+    endY = +(centredY).toFixed(2);
   }
 });
 
-court.addEventListener("pointerup", function (event) {
+pitch.addEventListener("pointerup", function (event) {
   event.preventDefault(); // Prevent default touch behavior
   if (isDragging) {
     isDragging = false;
@@ -475,13 +426,14 @@ court.addEventListener("pointerup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    sessionStorage.setItem("basketballRawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
     endY = null;
   }
 });
+
 
 function getCurrentDateTime() {
   let now = new Date();
@@ -525,19 +477,31 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     (startX !== endX || startY !== endY);
   // var actionType = currentActionType;
   var actionType = event;
-  
+  var xG =
+    actionType === "Shot" ||
+    actionType === "Shot - Goal" ||
+    actionType === "Shot - Save"
+      ? (startX !== null && startY !== null ? distanceAnglexG(startX, startY) : "N/A")
+      : "N/A";
+  var xSave = actionType === "Shot - Save" ? +(1.0 - xG).toFixed(2) : "N/A";
   if (currentPlayer == "") {
     var playerJerseyNumber = "";
   } else {
     var playerJerseyNumber = currentPlayer;
   }
+  // console.log("playerMap");
+  // console.log(playerMap);
+  // console.log("playerJerseyNumber");
+  // console.log(playerJerseyNumber);
 
   var newRowData = [
     time,
     playerJerseyNumber,
+    currentGrip || "N/A",
     actionType,
-    startX,
-    startY,
+    currentOutcome || "N/A",
+    startX !== null ? startX : "N/A",
+    startY !== null ? startY : "N/A",
     wasDragged ? endX : "N/A",
     wasDragged ? endY : "N/A",
     "<button class='btn btn-outline-danger remove-button' onclick='removeShot(this)'>X</button>",
@@ -547,12 +511,14 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
   var rowIndex = table.row.add(newRowData).draw().index();
 
   // Store additional data using row().data() for easy access
-  const dimensions = getCurrentCourtDimensions();
-  table.row(rowIndex).data().dotx = (startX * 1.0) / dimensions.width;
-  table.row(rowIndex).data().doty = (startY * 1.0) / dimensions.height;
-  if (wasDragged) {
-    table.row(rowIndex).data().dotx2 = (endX * 1.0) / dimensions.width;
-    table.row(rowIndex).data().doty2 = (endY * 1.0) / dimensions.height;
+  if (startX !== null && startY !== null) {
+    table.row(rowIndex).data().dotx = (startX + PITCH_W / 2) / PITCH_W;  // (x + 20) / 40
+    table.row(rowIndex).data().doty = (PITCH_H / 2 - startY) / PITCH_H;  // (10 - y) / 20
+  }
+
+  if (wasDragged && endX !== null && endY !== null) {
+    table.row(rowIndex).data().dotx2 = (endX + PITCH_W / 2) / PITCH_W;
+    table.row(rowIndex).data().doty2 = (PITCH_H / 2 - endY) / PITCH_H;
   }
 
   // Assign mouseenter and mouseleave events to show and remove dots
@@ -572,14 +538,15 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     time: time,
     player: playerJerseyNumber,
     playerName: currentPlayerName,
+    grip: currentGrip || "N/A",
+    outcome: currentOutcome || "N/A",
     action: actionType,
     x: startX,
     y: startY,
     x2: wasDragged ? endX : "N/A",
     y2: wasDragged ? endY : "N/A",
-    courtType: currentCourtType
   });
-  sessionStorage.setItem("basketballShotsData", JSON.stringify(shotsData));
+  sessionStorage.setItem("badmintonShotsData", JSON.stringify(shotsData));
 }
 
 function removeShot(deleteButton) {
@@ -592,13 +559,13 @@ function removeShot(deleteButton) {
   // Remove the shot from the shotsData array if storing shot data separately
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    sessionStorage.setItem("basketballShotsData", JSON.stringify(shotsData));
+    sessionStorage.setItem("badmintonShotsData", JSON.stringify(shotsData));
     console.log(shotsData);
   }
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("basketballRawShots", JSON.stringify(rawShots));
+    sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -607,7 +574,11 @@ function removeShot(deleteButton) {
   // If shotsData is not used to track each shot, you might need to retrieve values directly from the row before it's removed
   var rowData = table.row(row).data();
   var eventContent = rowData[2]; // Assuming the 3rd column is the event type
+  var xGContent = rowData[7]; // Assuming the 8th column is xG
+  var xSaveContent = rowData[8]; // Assuming the 9th column is xSave
   console.log("eventcontent ", eventContent);
+  console.log("xgcontent ", xGContent);
+  console.log("xsave ", xSaveContent);
   table.row(row).remove().draw();
 }
 
@@ -620,9 +591,8 @@ function showDot(rowNode) {
   var xPercent = parseFloat(rowData.dotx);
   var yPercent = parseFloat(rowData.doty);
 
-  // Calculate positions relative to the rendered court
-  var x1 = xPercent * court.offsetWidth;
-  var y1 = (1 - yPercent) * court.offsetHeight;
+  var x1 = xPercent * pitch.offsetWidth;
+  var y1 = yPercent * pitch.offsetHeight;
 
   console.log("showdot x1 ", x1);
   console.log("showdot y1 ", y1);
@@ -631,21 +601,21 @@ function showDot(rowNode) {
   if (rowData.dotx2 && rowData.doty2) {
     var x2Percent = parseFloat(rowData.dotx2);
     var y2Percent = parseFloat(rowData.doty2);
-    var x2 = x2Percent * court.offsetWidth;
-    var y2 = (1 - y2Percent) * court.offsetHeight;
+    var x2 = x2Percent * pitch.offsetWidth;
+    var y2 = y2Percent * pitch.offsetHeight;
     createDot(x2, y2, "hover-dot-2");
     createArrow(x1, y1, x2, y2, "hover-arrow");
   }
 }
 
 function createDot(x, y, id) {
-  var court = document.getElementById("court");
+  var pitch = document.getElementById("pitch");
   var dot = document.createElement("div");
   dot.id = id;
   dot.className = "dot";
   dot.style.left = `${x}px`;
   dot.style.top = `${y}px`;
-  court.appendChild(dot);
+  pitch.appendChild(dot);
 }
 
 function removeDot() {
@@ -676,7 +646,7 @@ function createArrow(x1, y1, x2, y2, id) {
   // Adjust the width and height to include the markers
   svg.setAttribute("height", height + 20); // Add some padding for the marker
   svg.setAttribute("width", width + 20);
-  // Position the SVG absolutely within the court
+  // Position the SVG absolutely within the pitch
   svg.style.position = "absolute";
   svg.style.left = `${minX - 10}px`; // Shift to the left to account for marker
   svg.style.top = `${minY - 10}px`; // Shift up to account for marker
@@ -718,14 +688,14 @@ function createArrow(x1, y1, x2, y2, id) {
   line.setAttribute("stroke-width", "2");
   line.setAttribute("marker-end", "url(#markerArrow)");
   svg.appendChild(line);
-  // Append the SVG to the court
-  court.appendChild(svg);
+  // Append the SVG to the pitch
+  var pitch = document.getElementById("pitch");
+  pitch.appendChild(svg);
 }
 
-// xG-related functions removed as xG is not supported for basketball
-
 function downloadCSV() {
-  fetch("/basketball/download_csv", {
+  console.log("Downloading CSV...");
+  fetch("/badminton/download_csv", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -734,19 +704,20 @@ function downloadCSV() {
   })
     .then((response) => response.blob())
     .then((blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "shots_data.csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const csvUrl = window.URL.createObjectURL(blob);
+      const csvLink = document.createElement("a");
+      csvLink.href = csvUrl;
+      csvLink.download = "shots_data.csv";
+      document.body.appendChild(csvLink);
+      csvLink.click();
+      csvLink.remove();
     })
     .catch((error) => console.error("Error downloading CSV:", error));
 }
 
 function downloadPDF() {
-  fetch("/basketball/download_pdf", {
+  console.log("Downloading PDF...");
+  fetch("/badminton/download_pdf", {
     method: "POST",
     body: JSON.stringify(shotsData),
     headers: {
@@ -755,17 +726,16 @@ function downloadPDF() {
   })
     .then((response) => response.blob())
     .then((blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "report.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const pdfUrl = window.URL.createObjectURL(blob);
+      const pdfLink = document.createElement("a");
+      pdfLink.href = pdfUrl;
+      pdfLink.download = "report.pdf";
+      document.body.appendChild(pdfLink);
+      pdfLink.click();
+      pdfLink.remove();
     })
     .catch((error) => console.error("Error downloading PDF:", error));
 }
-
 
 // Keyboard Shortcuts
 document.addEventListener("keydown", function (event) {
@@ -781,62 +751,71 @@ document.addEventListener("keydown", function (event) {
   const homePlayerKeyMap = {
     '1': 0,
     '2': 1,
-    '3': 2,
-    '4': 3,
-    '5': 4,
-    '6': 5,
-    '7': 6,
-    '8': 7,
-    '9': 8,
-    '0': 9,
-    '-': 10,
-    '=': 11,
-    'Q': 12,
-    'W': 13,
   }
 
   const awayPlayerKeyMap = {
-    'E': 0,
-    'R': 1,
-    'T': 2,
-    'Y': 3,
-    'U': 4,
-    'I': 5,
-    'O': 6,
-    'P': 7,
-    'A': 8,
-    'S': 9,
-    'D': 10,
-    'F': 11,
-    'G': 12,
-    'H': 13,
+    '3': 0,
+    '4': 1,
   }
 
   // Check if the pressed key is in our map
   if (homePlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
-    // Get the index from the map (0-based) and convert to 1-based button id
+    // Get the index from the map
     let index = homePlayerKeyMap[event.key.toUpperCase().toString()];
-    let button = document.getElementById(`homePlayerButton${index + 1}`);
-    if (button) button.click();
+    let button = document.getElementById(`homePlayerButton${index+1}`);
+    button.click();
   }
-  if (awayPlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
-    // Get the index from the map (0-based) and convert to 1-based button id
+  else if (awayPlayerKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+    console.log(event.key.toUpperCase);
+    console.log("is being triggered in away key map");
+    // Get the index from the map
     let index = awayPlayerKeyMap[event.key.toUpperCase()];
-    let button = document.getElementById(`awayPlayerButton${index + 1}`);
-    if (button) button.click();
+    let button = document.getElementById(`awayPlayerButton${index+1}`);
+    button.click();
   }
 
-  const normalizedKey = event.key.toUpperCase();
-  if (eventKeyMap.hasOwnProperty(normalizedKey)) {
-    const index = eventKeyMap[normalizedKey];
+  // Grip Shortcuts: G for Forehand, H for Backhand
+  const gripKeyMap = {
+    G: "Forehand",
+    H: "Backhand"
+  };
+
+  // Outcome Shortcuts: W - Winner, U - Unforced, F - Forced, R - Rally
+  const outcomeKeyMap = {
+    W: "Winner",
+    U: "Unforced Error",
+    F: "Forced Error",
+    R: "Rally"
+  };
+
+
+  if (eventKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+    // Get the index from the map
+    const index = eventKeyMap[event.key.toUpperCase()];
     if (index < eventButtons.length) {
+      // If the calculated button exists, simulate a click on it
       eventButtons[index].click();
     }
+  }
+  // Grip Selection
+  if (gripKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+    console.log("key is being pressed!!!");
+    const grip = gripKeyMap[event.key.toUpperCase()];
+    console.log(grip);
+    setGrip(grip);  // Directly call the function
+    return;
+  } 
+
+  // Outcome Selection
+  if (outcomeKeyMap.hasOwnProperty(event.key.toUpperCase())) {
+    const outcome = outcomeKeyMap[event.key.toUpperCase()];
+    setOutcome(outcome);
+    return;
   }
 
   // Enter key to add event without coordinates
   if (event.key === 'Enter') {
-    if (currentActionType !== "" && currentPlayer !== "") {
+    if (currentActionType !== "" && currentPlayer !== "" && currentGrip !== "" && currentOutcome !== "") {
       var currentTime = getCurrentTime();
       addShot(
         currentActionType,
@@ -856,14 +835,24 @@ document.addEventListener("keydown", function (event) {
         time: currentTime,
         player: currentPlayer,
       });
-      sessionStorage.setItem("basketballRawShots", JSON.stringify(rawShots));
+      sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
       
       // Clear selections
       currentActionType = "";
       currentPlayer = "";
       currentPlayerName = "";
+      currentGrip = "";
+      currentOutcome = "";
       document.querySelectorAll(".event-button").forEach(btn => btn.classList.remove("active"));
       document.querySelectorAll(".player-button").forEach(btn => btn.classList.remove("active"));
+      ["forehand", "backhand"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove("active");
+      });
+      ["winner", "unforcederror", "forcederror", "rally"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove("active");
+      });
     }
   }
 
@@ -882,19 +871,29 @@ document.addEventListener("keydown", function (event) {
       // Remove from shotsData
       if (shotsData && shotsData.length > 0) {
         shotsData.splice(rowIndex, 1);
-        sessionStorage.setItem("basketballShotsData", JSON.stringify(shotsData));
+        sessionStorage.setItem("badmintonShotsData", JSON.stringify(shotsData));
       }
       
       // Remove from rawShots
       if (rawShots && rawShots.length > 0) {
         rawShots.splice(rowIndex, 1);
-        sessionStorage.setItem("basketballRawShots", JSON.stringify(rawShots));
+        sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
       }
       
       // Remove the row from DataTable
       removeDot();
       lastRow.remove().draw();
     }
+  }
+
+  // Zoom shortcuts
+  if (event.key === '+' || event.key === '=') {
+    event.preventDefault();
+    zoomIn();
+  }
+  if (event.key === '-' || event.key === '_') {
+    event.preventDefault();
+    zoomOut();
   }
 
 });
@@ -945,29 +944,22 @@ function updateDisplay() {
 }
 
 //Event name customization
-const eventShortcutKeys = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
-const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
-  map[key.toUpperCase()] = index;
-  return map;
-}, {});
-
-let defaultEventNames = [
-  "Field Goal", "Field Goal - Miss", "Three Pointer", "Assist",
-  "Dribble", "Rebound", "Pass", "Steal",
-  "Block", "Foul", "Free Throw", "Turnover"
-];
-
-let eventNames = [];
-
 function ensureCurrentActionTypeIsValid() {
   if (!eventNames.includes(currentActionType)) {
     currentActionType = "";
   }
 }
 
+// Initialize default event names for badminton
+let defaultEventNames = [
+  "Serve-High", "Serve-Low",
+  "Smash", "Drop Shot", "Clear-High", "Drive",
+  "Net Shot", "Lift", "Kill", "Block"
+];
+
 // Load event names from sessionStorage if available
 function initializeEventNames() {
-  let storedEventNames = sessionStorage.getItem('basketballEventNames');
+  let storedEventNames = sessionStorage.getItem('badmintonEventNames');
   if (storedEventNames) {
     try {
       const parsed = JSON.parse(storedEventNames);
@@ -1018,7 +1010,7 @@ function displayEventNames() {
     createdButtons.push(button);
   }
 
-  if (createdButtons.length % 2 === 1) {
+  if (createdButtons.length % 2 === 1 && createdButtons.length > 0) {
     createdButtons[createdButtons.length - 1].classList.add("span-two");
   }
 }
@@ -1037,9 +1029,11 @@ function saveEventNames() {
     eventNames = eventLines;
   }
 
-  sessionStorage.setItem('basketballEventNames', JSON.stringify(eventNames));
+  sessionStorage.setItem('badmintonEventNames', JSON.stringify(eventNames));
+  
+  // Update buttons with new event names
   displayEventNames();
-
+  
   // Close the modal
   $('#editEventNamesModal').modal('hide');
 }
@@ -1053,12 +1047,8 @@ function loadEventNamesToTextarea() {
 
 // Call this function when the modal opens to populate the textarea
 document.getElementById('editEventNamesModal').addEventListener('show.bs.modal', loadEventNamesToTextarea);
-
 // Initialize event names on page load
 initializeEventNames();
-
-// Load court type on page load
-loadCourtType();
 
 function initKeyboardShortcutToast() {
   const toastElement = document.getElementById("keyboardShortcutToast");

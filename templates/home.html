@@ -92,42 +92,6 @@
         <div class="col-md-6">
           <div class="card h-100 shadow-sm">
             <img 
-              src="{{ url_for('static', filename='img/football-preview.png') }}" 
-              class="card-img-top" 
-              alt="Football tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Football</h5>
-              <a
-                href="{{ url_for('football.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <img 
-              src="{{ url_for('static', filename='img/floorball-preview.png') }}" 
-              class="card-img-top" 
-              alt="Floorball tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Floorball</h5>
-              <a
-                href="{{ url_for('floorball.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <img 
               src="{{ url_for('static', filename='img/tennis-preview.png') }}" 
               class="card-img-top" 
               alt="Tennis tracking interface preview"
@@ -137,6 +101,42 @@
               <h5 class="card-title">Tennis</h5>
               <a
                 href="{{ url_for('tennis.index') }}"
+                class="btn btn-outline-primary"
+                >Start Tracking</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm">
+            <img 
+              src="{{ url_for('static', filename='img/badminton-preview.png') }}" 
+              class="card-img-top" 
+              alt="Badminton tracking interface preview"
+              loading="lazy"
+            >
+            <div class="card-body text-center">
+              <h5 class="card-title">Badminton</h5>
+              <a
+                href="{{ url_for('badminton.index') }}"
+                class="btn btn-outline-primary"
+                >Start Tracking</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm">
+            <img 
+              src="{{ url_for('static', filename='img/football-preview.png') }}" 
+              class="card-img-top" 
+              alt="Football tracking interface preview"
+              loading="lazy"
+            >
+            <div class="card-body text-center">
+              <h5 class="card-title">Football</h5>
+              <a
+                href="{{ url_for('football.index') }}"
                 class="btn btn-outline-primary"
                 >Start Tracking</a
               >
@@ -161,6 +161,24 @@
             </div>
           </div>
         </div>
+        <div class="col-md-6 offset-md-3">
+          <div class="card h-100 shadow-sm">
+            <img 
+              src="{{ url_for('static', filename='img/floorball-preview.png') }}" 
+              class="card-img-top" 
+              alt="Floorball tracking interface preview"
+              loading="lazy"
+            >
+            <div class="card-body text-center">
+              <h5 class="card-title">Floorball</h5>
+              <a
+                href="{{ url_for('floorball.index') }}"
+                class="btn btn-outline-primary"
+                >Start Tracking</a
+              >
+            </div>
+          </div>
+        </div>
         {# Add future sports here as more blueprints are enabled #}
       </div>
     </section>
@@ -176,6 +194,26 @@
                 <div class="card border-0 shadow-sm">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h6 class="card-title mb-0 text-primary">Version 1.3.0</h6>
+                      <small class="text-muted">November 2025</small>
+                    </div>
+                    <p class="card-text text-muted mb-2">
+                      <strong>New Features:</strong>
+                    </p>
+                    <ul class="list-unstyled mb-0">
+                      <li class="mb-1">• Added badminton event tracker</li>
+                      <li class="mb-1">• Changed unit of measurement of tennis tracker from centimeters to meters</li>
+                      <li class="mb-1">• Improved coordinate precision to 2 decimal places for tennis, badminton, and basketball</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="timeline-item mb-4">
+              <div class="timeline-content">
+                <div class="card border-0 shadow-sm">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
                       <h6 class="card-title mb-0 text-primary">Version 1.2.0</h6>
                       <small class="text-muted">November 2025</small>
                     </div>
@@ -183,7 +221,7 @@
                       <strong>New Features:</strong>
                     </p>
                     <ul class="list-unstyled mb-0">
-                      <li class="mb-1">• Added basketball event tracker with court selection support</li>
+                      <li class="mb-1">• Added basketball event tracker with support for NBA, WNBA, NCAA, and FIBA courts</li>
                       <li class="mb-1">• Added support for unlimited events and shot types</li>
                     </ul>
                   </div>
