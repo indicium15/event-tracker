@@ -1,12 +1,12 @@
-// Court dimensions (cm)
-const COURT_W = 2377; // length (baseline to baseline)
-const COURT_H = 1097; // width (sideline to sideline)
+// Court dimensions (m)
+const COURT_W = 23.77; // length (baseline to baseline)
+const COURT_H = 10.97; // width (sideline to sideline)
 let zoomLevel = 1;
 
-// Run-off space (cm) – adjust to your needs.
+// Run-off space (m) – adjust to your needs.
 // Example: ~3.66 m at sides, ~6.40 m behind baselines (competition-friendly)
-const RUNOFF_Y = 366;  // left + right each
-const RUNOFF_X = 640;  // top + bottom each
+const RUNOFF_Y = 3.66;  // left + right each
+const RUNOFF_X = 6.40;  // top + bottom each
 
 // Full play surface = court + run-off on both sides
 const PITCH_W = COURT_W + 2 * RUNOFF_X;
@@ -379,8 +379,9 @@ pitch.addEventListener("pointerdown", function (event) {
     let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
     let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
     let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
-    startX = Math.round(centredX);
-    startY = Math.round(centredY);
+    // Round to 2 decimal places for practical precision
+    startX = +(centredX).toFixed(2);
+    startY = +(centredY).toFixed(2);
   }
 });
 
@@ -392,8 +393,9 @@ pitch.addEventListener("pointermove", function (event) {
     let normY = ((event.clientY - rect.top )  / pitch.offsetHeight) * PITCH_H;
     let centredX = (normX - PITCH_W/2) / zoomLevel;      // now –20…+20
     let centredY = (PITCH_H/2 - normY) / zoomLevel;      // now +10…–10
-    endX = Math.round(centredX);
-    endY = Math.round(centredY);
+    // Round to 2 decimal places for practical precision
+    endX = +(centredX).toFixed(2);
+    endY = +(centredY).toFixed(2);
   }
 });
 
