@@ -1,3 +1,6 @@
 __pycache__/
 .vscode/
 venv/
+.claude/
+.cursor/
+CLAUDE.md
