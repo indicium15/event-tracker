@@ -62,6 +62,44 @@ let awayShortcutMap = {
   16: "(;)",
 };
 
+const homeDefaultLabels = {
+  1: "Free hit",
+  2: "Hit in",
+  3: "Restart play",
+  4: "Lost ball",
+  5: "FHLB",
+  6: "HILB",
+  7: "RPLB",
+  8: "Lost ball intercept",
+  9: "Power play",
+  10: "Short handed",
+  11: "PPLB",
+  12: "SHLB",
+  13: "Reset",
+  14: "Ref call",
+  15: "Keeper throw",
+  16: "Rebound",
+};
+
+const awayDefaultLabels = {
+  1: "Delete this and above",
+  2: "Corrected",
+  3: "Delete all above",
+  4: "Corrected, delete action above",
+  5: "B05",
+  6: "B06",
+  7: "B07",
+  8: "B08",
+  9: "B09",
+  10: "B10",
+  11: "B11",
+  12: "B12",
+  13: "B13",
+  14: "B14",
+  15: "B15",
+  16: "B16",
+};
+
 const eventShortcutKeys = ['Z', 'X', 'C', 'V', 'B', '<', 'N', 'M', ',', '.', '?', '>'];
 const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
   map[key.toUpperCase()] = index;
@@ -92,8 +130,8 @@ function initializePlayerMaps() {
   } else {
     for (let i = 1; i <= 16; i++) {
       homePlayerMap[i] = {
-        jersey: `A${i.toString().padStart(2, "0")}`,
-        name: `HomePlayer${i}`,
+        jersey: homeDefaultLabels[i],
+        name: homeDefaultLabels[i],
       };
     }
     sessionStorage.setItem('floorballHomePlayerMap', JSON.stringify(homePlayerMap));
@@ -114,13 +152,20 @@ function initializePlayerMaps() {
   } else {
     for (let i = 1; i <= 16; i++) {
       awayPlayerMap[i] = {
-        jersey: `B${i.toString().padStart(2, "0")}`,
-        name: `AwayPlayer${i}`,
+        jersey: awayDefaultLabels[i],
+        name: awayDefaultLabels[i],
       };
     }
     sessionStorage.setItem('floorballAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
+
+// Force a fresh read of the current default player labels on every page
+// load, so stale labels from a previous version don't linger in the
+// browser's sessionStorage. Recorded shots (floorballRawShots /
+// floorballShotsData) are left untouched.
+sessionStorage.removeItem('floorballHomePlayerMap');
+sessionStorage.removeItem('floorballAwayPlayerMap');
 
 // Call initializePlayerMap when the script loads
 initializePlayerMaps();
@@ -130,19 +175,21 @@ function updatePlayerNames(team) {
   const playerMap = team === "home" ? homePlayerMap : awayPlayerMap;
   const shortcutMap = team === "home" ? homeShortcutMap : awayShortcutMap;
   const prefix = team === "home" ? "home" : "away"; // No prefix for home, "away" for away team
+  const defaultLabels = team === "home" ? homeDefaultLabels : awayDefaultLabels;
+  const playerCount = 16;
 
-  for (let i = 1; i <= 16; i++) {
+  for (let i = 1; i <= playerCount; i++) {
     let jerseyInput = document.getElementById(`${prefix}Jersey${i}`); // Use "awayJersey1" for away team
     let playerInput = document.getElementById(`${prefix}Player${i}`); // Use "awayPlayer1" for away team
     if (jerseyInput && playerInput) {
       playerMap[i] = {
-        jersey: jerseyInput.value || `P${i.toString().padStart(2, "0")}`, // Default to 'P01', 'P02', etc.
-        name: playerInput.value || `Player${i}`, // Default to 'PlayerX'
+        jersey: jerseyInput.value || defaultLabels[i],
+        name: playerInput.value || defaultLabels[i],
       };
     }
   }
 
-  for (let i = 1; i <= 16; i++) {
+  for (let i = 1; i <= playerCount; i++) {
     let button = document.getElementById(`${prefix}PlayerButton${i}`);
     if (button) {
       let jerseyNumber = playerMap[i].jersey;
@@ -1008,9 +1055,9 @@ function ensureCurrentActionTypeIsValid() {
 
 // Initialize default event names
 let defaultEventNames = [
-  "Shot", "Shot - Save", "Shot - Goal", "Shot Assist", 
-  "Dribble", "Lob", "Cross", "Pass", 
-  "Tackle", "Foul", "Free Hit", "Screen"
+  "Shot", "Shot - Save", "Shot - Goal", "Dribble",
+  "Lob", "Pass", "Tackle", "Tackle D",
+  "Attacker", "Defender"
 ];
 
 // Load event names from sessionStorage if available
@@ -1103,6 +1150,9 @@ function loadEventNamesToTextarea() {
 
 // Call this function when the modal opens to populate the textarea
 document.getElementById('editEventNamesModal').addEventListener('show.bs.modal', loadEventNamesToTextarea);
+// Same fresh-defaults treatment for event names
+sessionStorage.removeItem('floorballEventNames');
+
 // Initialize event names on page load
 initializeEventNames();
 
