@@ -1,4 +1,19 @@
 {# GoatCounter analytics, included by every page. Kept in one partial so the
-   snippet only has to change in one place rather than in seven templates. #}
+   snippet only has to change in one place rather than in seven templates.
+
+   This reports into the same GoatCounter site as the personal website.
+   GoatCounter does not store the domain a pageview belongs to, so without a
+   prefix the tracker's /  and the personal site's / would be recorded as the
+   same path. Prefixing identifies the source; see
+   https://www.goatcounter.com/help/domains
+
+   A fixed string is used rather than location.host so the grouping stays
+   stable across hosting changes and preview URLs. To record the real domain
+   instead, use: return location.host + p #}
+<script>
+  window.goatcounter = {
+    path: function (p) { return "event-tracker" + p; },
+  };
+</script>
 <script data-goatcounter="https://indicium.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
