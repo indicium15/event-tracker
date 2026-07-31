@@ -1,3 +1,9 @@
+// Persistence and table helpers come from static/js/tracker-storage.js.
+const store = createTrackerStore({
+  prefix: "futsal",
+  extraKeys: ["futsalPitchLength", "futsalPitchWidth"],
+});
+
 let zoomLevel = 1;
 let pitchLength = 40;
 let pitchWidth = 20;
@@ -133,8 +139,8 @@ const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
 let eventNames = [];
 
 function initializePlayerMaps() {
-  const storedHome = sessionStorage.getItem('futsalHomePlayerMap');
-  const storedAway = sessionStorage.getItem('futsalAwayPlayerMap');
+  const storedHome = store.get('futsalHomePlayerMap');
+  const storedAway = store.get('futsalAwayPlayerMap');
 
   if (storedHome) {
     homePlayerMap = JSON.parse(storedHome);
@@ -146,7 +152,7 @@ function initializePlayerMaps() {
     for (let i = 1; i <= 16; i++) {
       homePlayerMap[i] = { jersey: `A${i.toString().padStart(2, "0")}`, name: `HomePlayer${i}` };
     }
-    sessionStorage.setItem('futsalHomePlayerMap', JSON.stringify(homePlayerMap));
+    store.set('futsalHomePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAway) {
@@ -159,7 +165,7 @@ function initializePlayerMaps() {
     for (let i = 1; i <= 16; i++) {
       awayPlayerMap[i] = { jersey: `B${i.toString().padStart(2, "0")}`, name: `AwayPlayer${i}` };
     }
-    sessionStorage.setItem('futsalAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    store.set('futsalAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -187,10 +193,10 @@ function updatePlayerNames(team) {
   }
 
   if (team === "home") {
-    sessionStorage.setItem('futsalHomePlayerMap', JSON.stringify(homePlayerMap));
+    store.set('futsalHomePlayerMap', JSON.stringify(homePlayerMap));
     $(`#editHomePlayerNamesModal`).modal('hide');
   } else {
-    sessionStorage.setItem('futsalAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    store.set('futsalAwayPlayerMap', JSON.stringify(awayPlayerMap));
     $(`#editAwayPlayerNamesModal`).modal('hide');
   }
 }
@@ -201,7 +207,7 @@ var currentActionType = "";
 var currentPlayer = "";
 var currentPlayerName = "";
 
-const storedRaw = sessionStorage.getItem("futsalRawShots");
+const storedRaw = store.get("futsalRawShots");
 var rawShots = storedRaw ? JSON.parse(storedRaw) : [];
 var shotsData = [];
 
@@ -245,8 +251,8 @@ $(document).ready(function () {
   initKeyboardShortcutToast();
 
   // Restore pitch dimensions from session
-  const storedLength = sessionStorage.getItem("futsalPitchLength");
-  const storedWidth = sessionStorage.getItem("futsalPitchWidth");
+  const storedLength = store.get("futsalPitchLength");
+  const storedWidth = store.get("futsalPitchWidth");
   if (storedLength) {
     pitchLength = parseInt(storedLength);
     document.getElementById("pitchLengthSelect").value = storedLength;
@@ -258,7 +264,7 @@ $(document).ready(function () {
   drawPitch(pitchLength, pitchWidth);
 
   // Restore event names
-  const storedEvents = sessionStorage.getItem("futsalEventNames");
+  const storedEvents = store.get("futsalEventNames");
   if (storedEvents) {
     eventNames = JSON.parse(storedEvents);
   } else {
@@ -274,7 +280,7 @@ $(document).ready(function () {
       "Foul",
       "Turnover",
     ];
-    sessionStorage.setItem("futsalEventNames", JSON.stringify(eventNames));
+    store.set("futsalEventNames", JSON.stringify(eventNames));
   }
   renderEventButtons();
   setupGoalZoneEvents();
@@ -300,7 +306,7 @@ function saveEventNames() {
   const textarea = document.getElementById("eventNamesTextarea");
   const lines = textarea.value.split("\n").map(l => l.trim()).filter(l => l.length > 0);
   eventNames = lines;
-  sessionStorage.setItem("futsalEventNames", JSON.stringify(eventNames));
+  store.set("futsalEventNames", JSON.stringify(eventNames));
   renderEventButtons();
   $("#editEventNamesModal").modal("hide");
 }
@@ -426,7 +432,7 @@ pitch.addEventListener("pointerup", function (event) {
     var currentTime = getCurrentTime();
     addShot(currentActionType, startX, startY, endX, endY, currentTime, currentPlayer);
     rawShots.push({ event: currentActionType, startX, startY, endX, endY, time: currentTime, player: currentPlayer });
-    sessionStorage.setItem("futsalRawShots", JSON.stringify(rawShots));
+    store.set("futsalRawShots", JSON.stringify(rawShots));
     startX = null; startY = null; endX = null; endY = null;
   }
 });
@@ -476,7 +482,7 @@ function setupGoalZoneEvents() {
         const currentTime = getCurrentTime();
         addShot(currentActionType, startX, startY, endX, endY, currentTime, currentPlayer);
         rawShots.push({ event: currentActionType, startX, startY, endX, endY, time: currentTime, player: currentPlayer });
-        sessionStorage.setItem("futsalRawShots", JSON.stringify(rawShots));
+        store.set("futsalRawShots", JSON.stringify(rawShots));
         startX = null; startY = null; endX = null; endY = null;
       }
     });
@@ -575,20 +581,20 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     x2: wasDragged ? endX : "N/A",
     y2: wasDragged ? endY : "N/A",
   });
-  sessionStorage.setItem("futsalShotsData", JSON.stringify(shotsData));
+  store.set("futsalShotsData", JSON.stringify(shotsData));
 }
 
 function removeShot(deleteButton) {
   var row = $(deleteButton).closest("tr");
-  var rowIndex = table.row(row).index();
+  var rowIndex = arrayPositionForRow(table, table.row(row));
 
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    sessionStorage.setItem("futsalShotsData", JSON.stringify(shotsData));
+    store.set("futsalShotsData", JSON.stringify(shotsData));
   }
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("futsalRawShots", JSON.stringify(rawShots));
+    store.set("futsalRawShots", JSON.stringify(rawShots));
   }
 
   removeDot();
@@ -683,41 +689,11 @@ function createArrow(x1, y1, x2, y2, id) {
 // ── Download ──────────────────────────────────────────────────────────────────
 
 function downloadCSV() {
-  fetch("/futsal/download_csv", {
-    method: "POST",
-    body: JSON.stringify(shotsData),
-    headers: { "Content-Type": "application/json" },
-  })
-    .then(r => r.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "futsal_events.csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    })
-    .catch(err => console.error("Error downloading CSV:", err));
+  downloadExport("/futsal/download_csv", shotsData, "shots_data.csv", "CSV");
 }
 
 function downloadPDF() {
-  fetch("/futsal/download_pdf", {
-    method: "POST",
-    body: JSON.stringify({ shots: shotsData, pitchLength, pitchWidth }),
-    headers: { "Content-Type": "application/json" },
-  })
-    .then(r => r.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "futsal_report.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    })
-    .catch(err => console.error("Error downloading PDF:", err));
+  downloadExport("/futsal/download_pdf", shotsData, "report.pdf", "PDF");
 }
 
 // ── Timer ─────────────────────────────────────────────────────────────────────
@@ -761,12 +737,12 @@ function updateTimerDisplay() {
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
 
 function initKeyboardShortcutToast() {
-  if (!sessionStorage.getItem(keyboardShortcutToastKey)) {
+  if (!localStorage.getItem(keyboardShortcutToastKey)) {
     var toastEl = document.getElementById("keyboardShortcutToast");
     var toast = new bootstrap.Toast(toastEl, { delay: 8000 });
     toast.show();
     toastEl.addEventListener("hidden.bs.toast", function () {
-      sessionStorage.setItem(keyboardShortcutToastKey, "true");
+      localStorage.setItem(keyboardShortcutToastKey, "true");
     });
   }
 }
@@ -808,22 +784,36 @@ document.addEventListener("keydown", function (event) {
     var currentTime = getCurrentTime();
     addShot(currentActionType, null, null, null, null, currentTime, currentPlayer);
     rawShots.push({ event: currentActionType, startX: null, startY: null, endX: null, endY: null, time: currentTime, player: currentPlayer });
-    sessionStorage.setItem("futsalRawShots", JSON.stringify(rawShots));
+    store.set("futsalRawShots", JSON.stringify(rawShots));
     return;
   }
 
+  // Remove the most recent entry. Works off the last *visible* row so it stays
+  // correct while the table is filtered, and maps that row back to an array
+  // position rather than assuming display order matches insertion order.
   if (event.key === "Backspace") {
-    if (shotsData.length > 0) {
-      const lastRow = table.row(table.rows().count() - 1);
-      if (lastRow) {
-        shotsData.pop();
-        rawShots.pop();
-        sessionStorage.setItem("futsalShotsData", JSON.stringify(shotsData));
-        sessionStorage.setItem("futsalRawShots", JSON.stringify(rawShots));
-        removeDot();
-        lastRow.remove().draw();
-      }
+    event.preventDefault(); // Prevent browser back navigation
+
+    const visibleRows = table.rows({ search: "applied" });
+    const visibleCount = visibleRows.count();
+    if (visibleCount === 0) return;
+
+    const lastRow = table.row(visibleRows.nodes()[visibleCount - 1]);
+    const rowIndex = arrayPositionForRow(table, lastRow);
+    if (rowIndex < 0) return;
+
+    if (shotsData && shotsData.length > 0) {
+      shotsData.splice(rowIndex, 1);
+      store.set("futsalShotsData", JSON.stringify(shotsData));
     }
+    if (rawShots && rawShots.length > 0) {
+      rawShots.splice(rowIndex, 1);
+      store.set("futsalRawShots", JSON.stringify(rawShots));
+    }
+
+    removeDot();
+    lastRow.remove().draw();
+    updateCumulativeValues();
     return;
   }
 });
@@ -831,8 +821,8 @@ document.addEventListener("keydown", function (event) {
 // ── Dimension persistence ─────────────────────────────────────────────────────
 
 document.getElementById("pitchLengthSelect").addEventListener("change", function () {
-  sessionStorage.setItem("futsalPitchLength", this.value);
+  store.set("futsalPitchLength", this.value);
 });
 document.getElementById("pitchWidthSelect").addEventListener("change", function () {
-  sessionStorage.setItem("futsalPitchWidth", this.value);
+  store.set("futsalPitchWidth", this.value);
 });

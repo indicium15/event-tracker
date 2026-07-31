@@ -1,3 +1,8 @@
+// Persistence and table helpers come from static/js/tracker-storage.js.
+const store = createTrackerStore({
+  prefix: "tennis",
+});
+
 // Court dimensions (m)
 const COURT_W = 23.77; // length (baseline to baseline)
 const COURT_H = 10.97; // width (sideline to sideline)
@@ -66,11 +71,11 @@ let eventNames = [];
 
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
-  // Check if player maps are already in sessionStorage
-  const storedHomePlayerMap = sessionStorage.getItem('tennisHomePlayerMap');
-  const storedAwayPlayerMap = sessionStorage.getItem('tennisAwayPlayerMap');
+  // Check if player maps have already been saved
+  const storedHomePlayerMap = store.get('tennisHomePlayerMap');
+  const storedAwayPlayerMap = store.get('tennisAwayPlayerMap');
 
-  // Load from sessionStorage if available, else initialize with default values
+  // Load from storage if available, else initialize with default values
   if (storedHomePlayerMap) {
     homePlayerMap = JSON.parse(storedHomePlayerMap);
     console.log("stored home map:");
@@ -90,7 +95,7 @@ function initializePlayerMaps() {
         name: `HomePlayer${i}`,
       };
     }
-    sessionStorage.setItem('tennisHomePlayerMap', JSON.stringify(homePlayerMap));
+    store.set('tennisHomePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAwayPlayerMap) {
@@ -112,7 +117,7 @@ function initializePlayerMaps() {
         name: `AwayPlayer${i}`,
       };
     }
-    sessionStorage.setItem('tennisAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    store.set('tennisAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -144,11 +149,11 @@ function updatePlayerNames(team) {
       button.innerHTML = `${jerseyNumber} ${shortcut}`;
     }
   }
-  // Persist changes to sessionStorage
+  // Persist changes
   if (team === "home") {
-    sessionStorage.setItem('tennisHomePlayerMap', JSON.stringify(homePlayerMap));
+    store.set('tennisHomePlayerMap', JSON.stringify(homePlayerMap));
   } else {
-    sessionStorage.setItem('tennisAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    store.set('tennisAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -164,8 +169,8 @@ var currentPlayer = "";
 var currentPlayerName = "";
 var currentGrip = "";
 var currentOutcome = "";
-if (sessionStorage.getItem("tennisRawShots")) {
-  var rawShots = JSON.parse(sessionStorage.getItem("tennisRawShots"));
+if (store.get("tennisRawShots")) {
+  var rawShots = JSON.parse(store.get("tennisRawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
@@ -422,7 +427,7 @@ pitch.addEventListener("pointerup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
+    store.set("tennisRawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -542,26 +547,26 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     x2: wasDragged ? endX : "N/A",
     y2: wasDragged ? endY : "N/A",
   });
-  sessionStorage.setItem("tennisShotsData", JSON.stringify(shotsData));
+  store.set("tennisShotsData", JSON.stringify(shotsData));
 }
 
 function removeShot(deleteButton) {
   // Retrieve the DataTables row for the delete button
   var row = $(deleteButton).closest("tr");
-  var rowIndex = table.row(row).index();
+  var rowIndex = arrayPositionForRow(table, table.row(row));
   console.log("row: " + row);
   console.log("rowIndex: " + rowIndex);
 
   // Remove the shot from the shotsData array if storing shot data separately
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    sessionStorage.setItem("tennisShotsData", JSON.stringify(shotsData));
+    store.set("tennisShotsData", JSON.stringify(shotsData));
     console.log(shotsData);
   }
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
+    store.set("tennisRawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -690,47 +695,11 @@ function createArrow(x1, y1, x2, y2, id) {
 }
 
 function downloadCSV() {
-  console.log("Downloading CSV...");
-  fetch("/tennis/download_csv", {
-    method: "POST",
-    body: JSON.stringify(shotsData),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.blob())
-    .then((blob) => {
-      const csvUrl = window.URL.createObjectURL(blob);
-      const csvLink = document.createElement("a");
-      csvLink.href = csvUrl;
-      csvLink.download = "shots_data.csv";
-      document.body.appendChild(csvLink);
-      csvLink.click();
-      csvLink.remove();
-    })
-    .catch((error) => console.error("Error downloading CSV:", error));
+  downloadExport("/tennis/download_csv", shotsData, "shots_data.csv", "CSV");
 }
 
 function downloadPDF() {
-  console.log("Downloading PDF...");
-  fetch("/tennis/download_pdf", {
-    method: "POST",
-    body: JSON.stringify(shotsData),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.blob())
-    .then((blob) => {
-      const pdfUrl = window.URL.createObjectURL(blob);
-      const pdfLink = document.createElement("a");
-      pdfLink.href = pdfUrl;
-      pdfLink.download = "report.pdf";
-      document.body.appendChild(pdfLink);
-      pdfLink.click();
-      pdfLink.remove();
-    })
-    .catch((error) => console.error("Error downloading PDF:", error));
+  downloadExport("/tennis/download_pdf", shotsData, "report.pdf", "PDF");
 }
 
 // Keyboard Shortcuts
@@ -831,7 +800,7 @@ document.addEventListener("keydown", function (event) {
         time: currentTime,
         player: currentPlayer,
       });
-      sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
+      store.set("tennisRawShots", JSON.stringify(rawShots));
       
       // Clear selections
       currentActionType = "";
@@ -861,19 +830,19 @@ document.addEventListener("keydown", function (event) {
     var visibleCount = visibleRows.count();
     if (visibleCount > 0) {
       var lastVisibleRow = visibleRows.nodes()[visibleCount - 1];
-      var rowIndex = table.row(lastVisibleRow).index();
+      var rowIndex = arrayPositionForRow(table, table.row(lastVisibleRow));
       var lastRow = table.row(lastVisibleRow);
       
       // Remove from shotsData
       if (shotsData && shotsData.length > 0) {
         shotsData.splice(rowIndex, 1);
-        sessionStorage.setItem("tennisShotsData", JSON.stringify(shotsData));
+        store.set("tennisShotsData", JSON.stringify(shotsData));
       }
       
       // Remove from rawShots
       if (rawShots && rawShots.length > 0) {
         rawShots.splice(rowIndex, 1);
-        sessionStorage.setItem("tennisRawShots", JSON.stringify(rawShots));
+        store.set("tennisRawShots", JSON.stringify(rawShots));
       }
       
       // Remove the row from DataTable
@@ -953,9 +922,9 @@ let defaultEventNames = [
   "Drop", "Smash", "Volley", "Half Volley"
 ];
 
-// Load event names from sessionStorage if available
+// Load event names from storage if available
 function initializeEventNames() {
-  let storedEventNames = sessionStorage.getItem('tennisEventNames');
+  let storedEventNames = store.get('tennisEventNames');
   if (storedEventNames) {
     try {
       const parsed = JSON.parse(storedEventNames);
@@ -1011,7 +980,7 @@ function displayEventNames() {
   }
 }
 
-// Save event names from modal into sessionStorage
+// Save event names from modal into storage
 function saveEventNames() {
   const textarea = document.getElementById('eventNamesTextarea');
   let eventLines = textarea.value
@@ -1025,7 +994,7 @@ function saveEventNames() {
     eventNames = eventLines;
   }
 
-  sessionStorage.setItem('tennisEventNames', JSON.stringify(eventNames));
+  store.set('tennisEventNames', JSON.stringify(eventNames));
   
   // Update buttons with new event names
   displayEventNames();

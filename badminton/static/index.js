@@ -1,3 +1,8 @@
+// Persistence and table helpers come from static/js/tracker-storage.js.
+const store = createTrackerStore({
+  prefix: "badminton",
+});
+
 // Court dimensions (m)
 // Badminton: 13.40m length, 6.10m width (doubles)
 const COURT_W = 13.40; // length (baseline to baseline) in m
@@ -72,11 +77,11 @@ let eventNames = [];
 
 // Initialize playerMap with default values for 16 players for both teams
 function initializePlayerMaps() {
-  // Check if player maps are already in sessionStorage
-  const storedHomePlayerMap = sessionStorage.getItem('badmintonHomePlayerMap');
-  const storedAwayPlayerMap = sessionStorage.getItem('badmintonAwayPlayerMap');
+  // Check if player maps have already been saved
+  const storedHomePlayerMap = store.get('badmintonHomePlayerMap');
+  const storedAwayPlayerMap = store.get('badmintonAwayPlayerMap');
 
-  // Load from sessionStorage if available, else initialize with default values
+  // Load from storage if available, else initialize with default values
   if (storedHomePlayerMap) {
     homePlayerMap = JSON.parse(storedHomePlayerMap);
     console.log("stored home map:");
@@ -96,7 +101,7 @@ function initializePlayerMaps() {
         name: `HomePlayer${i}`,
       };
     }
-    sessionStorage.setItem('badmintonHomePlayerMap', JSON.stringify(homePlayerMap));
+    store.set('badmintonHomePlayerMap', JSON.stringify(homePlayerMap));
   }
 
   if (storedAwayPlayerMap) {
@@ -118,7 +123,7 @@ function initializePlayerMaps() {
         name: `AwayPlayer${i}`,
       };
     }
-    sessionStorage.setItem('badmintonAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    store.set('badmintonAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
 }
 
@@ -150,11 +155,11 @@ function updatePlayerNames(team) {
       button.innerHTML = `${jerseyNumber} ${shortcut}`;
     }
   }
-  // Persist changes to sessionStorage
+  // Persist changes
   if (team === "home") {
-    sessionStorage.setItem('badmintonHomePlayerMap', JSON.stringify(homePlayerMap));
+    store.set('badmintonHomePlayerMap', JSON.stringify(homePlayerMap));
   } else {
-    sessionStorage.setItem('badmintonAwayPlayerMap', JSON.stringify(awayPlayerMap));
+    store.set('badmintonAwayPlayerMap', JSON.stringify(awayPlayerMap));
   }
   //Close the modal
   if(prefix == "home"){
@@ -170,8 +175,8 @@ var currentPlayer = "";
 var currentPlayerName = "";
 var currentGrip = "";
 var currentOutcome = "";
-if (sessionStorage.getItem("badmintonRawShots")) {
-  var rawShots = JSON.parse(sessionStorage.getItem("badmintonRawShots"));
+if (store.get("badmintonRawShots")) {
+  var rawShots = JSON.parse(store.get("badmintonRawShots"));
   var shotsData = [];
 } else {
   var shotsData = [];
@@ -426,7 +431,7 @@ pitch.addEventListener("pointerup", function (event) {
       time: currentTime,
       player: currentPlayer,
     });
-    sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
+    store.set("badmintonRawShots", JSON.stringify(rawShots));
     startX = null;
     startY = null;
     endX = null;
@@ -546,26 +551,26 @@ function addShot(event, startX, startY, endX, endY, time, currentPlayer) {
     x2: wasDragged ? endX : "N/A",
     y2: wasDragged ? endY : "N/A",
   });
-  sessionStorage.setItem("badmintonShotsData", JSON.stringify(shotsData));
+  store.set("badmintonShotsData", JSON.stringify(shotsData));
 }
 
 function removeShot(deleteButton) {
   // Retrieve the DataTables row for the delete button
   var row = $(deleteButton).closest("tr");
-  var rowIndex = table.row(row).index();
+  var rowIndex = arrayPositionForRow(table, table.row(row));
   console.log("row: " + row);
   console.log("rowIndex: " + rowIndex);
 
   // Remove the shot from the shotsData array if storing shot data separately
   if (shotsData && rowIndex !== undefined) {
     shotsData.splice(rowIndex, 1);
-    sessionStorage.setItem("badmintonShotsData", JSON.stringify(shotsData));
+    store.set("badmintonShotsData", JSON.stringify(shotsData));
     console.log(shotsData);
   }
 
   if (rawShots && rowIndex !== undefined) {
     rawShots.splice(rowIndex, 1);
-    sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
+    store.set("badmintonRawShots", JSON.stringify(rawShots));
     console.log("Updated rawShots: ", rawShots);
   }
   // Remove the row from the DataTable
@@ -694,47 +699,11 @@ function createArrow(x1, y1, x2, y2, id) {
 }
 
 function downloadCSV() {
-  console.log("Downloading CSV...");
-  fetch("/badminton/download_csv", {
-    method: "POST",
-    body: JSON.stringify(shotsData),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.blob())
-    .then((blob) => {
-      const csvUrl = window.URL.createObjectURL(blob);
-      const csvLink = document.createElement("a");
-      csvLink.href = csvUrl;
-      csvLink.download = "shots_data.csv";
-      document.body.appendChild(csvLink);
-      csvLink.click();
-      csvLink.remove();
-    })
-    .catch((error) => console.error("Error downloading CSV:", error));
+  downloadExport("/badminton/download_csv", shotsData, "shots_data.csv", "CSV");
 }
 
 function downloadPDF() {
-  console.log("Downloading PDF...");
-  fetch("/badminton/download_pdf", {
-    method: "POST",
-    body: JSON.stringify(shotsData),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.blob())
-    .then((blob) => {
-      const pdfUrl = window.URL.createObjectURL(blob);
-      const pdfLink = document.createElement("a");
-      pdfLink.href = pdfUrl;
-      pdfLink.download = "report.pdf";
-      document.body.appendChild(pdfLink);
-      pdfLink.click();
-      pdfLink.remove();
-    })
-    .catch((error) => console.error("Error downloading PDF:", error));
+  downloadExport("/badminton/download_pdf", shotsData, "report.pdf", "PDF");
 }
 
 // Keyboard Shortcuts
@@ -835,7 +804,7 @@ document.addEventListener("keydown", function (event) {
         time: currentTime,
         player: currentPlayer,
       });
-      sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
+      store.set("badmintonRawShots", JSON.stringify(rawShots));
       
       // Clear selections
       currentActionType = "";
@@ -865,19 +834,19 @@ document.addEventListener("keydown", function (event) {
     var visibleCount = visibleRows.count();
     if (visibleCount > 0) {
       var lastVisibleRow = visibleRows.nodes()[visibleCount - 1];
-      var rowIndex = table.row(lastVisibleRow).index();
+      var rowIndex = arrayPositionForRow(table, table.row(lastVisibleRow));
       var lastRow = table.row(lastVisibleRow);
       
       // Remove from shotsData
       if (shotsData && shotsData.length > 0) {
         shotsData.splice(rowIndex, 1);
-        sessionStorage.setItem("badmintonShotsData", JSON.stringify(shotsData));
+        store.set("badmintonShotsData", JSON.stringify(shotsData));
       }
       
       // Remove from rawShots
       if (rawShots && rawShots.length > 0) {
         rawShots.splice(rowIndex, 1);
-        sessionStorage.setItem("badmintonRawShots", JSON.stringify(rawShots));
+        store.set("badmintonRawShots", JSON.stringify(rawShots));
       }
       
       // Remove the row from DataTable
@@ -957,9 +926,9 @@ let defaultEventNames = [
   "Net Shot", "Lift", "Kill", "Block"
 ];
 
-// Load event names from sessionStorage if available
+// Load event names from storage if available
 function initializeEventNames() {
-  let storedEventNames = sessionStorage.getItem('badmintonEventNames');
+  let storedEventNames = store.get('badmintonEventNames');
   if (storedEventNames) {
     try {
       const parsed = JSON.parse(storedEventNames);
@@ -1015,7 +984,7 @@ function displayEventNames() {
   }
 }
 
-// Save event names from modal into sessionStorage
+// Save event names from modal into storage
 function saveEventNames() {
   const textarea = document.getElementById('eventNamesTextarea');
   let eventLines = textarea.value
@@ -1029,7 +998,7 @@ function saveEventNames() {
     eventNames = eventLines;
   }
 
-  sessionStorage.setItem('badmintonEventNames', JSON.stringify(eventNames));
+  store.set('badmintonEventNames', JSON.stringify(eventNames));
   
   // Update buttons with new event names
   displayEventNames();
