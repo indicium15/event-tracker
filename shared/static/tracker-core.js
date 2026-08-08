@@ -27,6 +27,8 @@
 //   pdfFilename: "report.pdf",
 //   buildPdfPayload: (shotsData) => payload,               // default: shotsData itself
 //   requireActionAndPlayerOnEnter: true,
+//   enterGuard: () => boolean,                              // optional extra Enter condition, ANDed with the
+//                                                             //   above (badminton/tennis: grip+outcome selected)
 //   buildRowData: (shot) => [...],                         // table.row.add() array, sport owns column order
 //   buildShot: (base) => shot,                              // base = {time,player,playerName,action,x,y,x2,y2}; default identity
 //   cumulativeStats: (visibleRowsData) => void | null,       // null if the sport has no cumulative-stats table
@@ -500,6 +502,11 @@
 
       if (event.key === "Enter") {
         if (config.requireActionAndPlayerOnEnter && (currentActionType === "" || currentPlayer === "")) {
+          return;
+        }
+        // Extra per-sport condition (badminton/tennis: grip+outcome must
+        // also be selected) — ANDed with the guard above, not a replacement.
+        if (config.enterGuard && !config.enterGuard()) {
           return;
         }
         var currentTime = getCurrentTime();
