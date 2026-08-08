@@ -1,462 +1,230 @@
-<!doctype html>
-<html lang="en">
+{% extends "tracker_base.html" %}
 
-<head>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('futsal.static', filename='index.css') }}" />
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
-  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.min.css" />
-  <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.min.js"></script>
-  <title>Futsal Event Tracker</title>
-</head>
+{% block keyboard_toast_body %}
+Use keyboard shortcuts to quickly select events and players. Press Enter to add an event without
+coordinates, or Backspace to remove the last event.
+{% endblock %}
 
-<body>
-  <div class="container-fluid">
-    <div class="row">
-      <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Futsal Event Tracker</a>
-        <form class="form-inline">
-          <button type="button" class="btn btn-outline-light instructions-button" data-bs-toggle="modal"
-            data-bs-target="#helpModal">Help</button>
-        </form>
-      </nav>
+{% block help_modal_body %}
+<p>Thanks for using this web app! Here's how to get started with collecting futsal event data:</p>
+<hr>
+<h5>Quickstart</h5>
+<ol>
+  <li>Select a pitch length and width using the dimension dropdowns.</li>
+  <li>Select an event from the events menu via mouse or keyboard shortcuts in brackets.</li>
+  <li>Select a player from the player menu via mouse or keyboard shortcuts.</li>
+  <li>Click the area of the pitch where the action occurred.</li>
+  <li>To record start and end points of an action, click and drag across the pitch.</li>
+  <li>Press Enter to add an event without coordinates.</li>
+  <li>Press Backspace to remove the last event.</li>
+</ol>
+<hr>
+<h5>Pitch Dimensions</h5>
+<p>Select the pitch length (38-42 m) and width (20-25 m) to match your venue. Coordinates are recorded
+  in metres relative to the selected dimensions.</p>
+<hr>
+<h5>Customize Event and Player Details</h5>
+<p>Click <strong>Edit</strong> next to the Event, Home Player, or Away Player headings to customise
+  labels. Jersey numbers and player names appear in exported CSV and PDF files.</p>
+<hr>
+<h5>Generate CSV and PDF Reports</h5>
+<p>Click <strong>Download CSV</strong> or <strong>Download Report</strong> to export data.</p>
+{% endblock %}
+
+{% block home_player_rows %}
+{% for i in range(1, 17) %}
+<tr>
+  <td><input type="text" class="form-control" id="homeJersey{{ i }}" placeholder="A{{ '%02d' % i }}"></td>
+  <td><input type="text" class="form-control" id="homePlayer{{ i }}" placeholder="Player{{ i }}"></td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block away_player_rows %}
+{% for i in range(1, 17) %}
+<tr>
+  <td><input type="text" class="form-control" id="awayJersey{{ i }}" placeholder="B{{ '%02d' % i }}"></td>
+  <td><input type="text" class="form-control" id="awayPlayer{{ i }}" placeholder="Player{{ i }}"></td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block pitch_section %}
+<div class="row-container">
+  <div class="row mt-1 w-100">
+    <div class="col-auto d-flex align-items-center">
+      <h5 class="pitch-heading mb-0">Pitch</h5>
     </div>
-
-    <!-- Keyboard shortcut toast -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
-      <div id="keyboardShortcutToast" class="toast align-items-center text-bg-dark border-0" role="alert"
-        aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            Use keyboard shortcuts to quickly select events and players. Press Enter to add an event without
-            coordinates, or Backspace to remove the last event.
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-            aria-label="Close"></button>
-        </div>
-      </div>
+    <div class="col-auto">
+      <p class="arrow-container mt-2 mb-0">
+        Direction of Attack <span class="right-arrow"></span>
+      </p>
     </div>
-
-    <!-- Help modal -->
-    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="helpModalLabel">Help</h4>
-          </div>
-          <div class="modal-body">
-            <p>Thanks for using this web app! Here's how to get started with collecting futsal event data:</p>
-            <hr>
-            <h5>Quickstart</h5>
-            <ol>
-              <li>Select a pitch length and width using the dimension dropdowns.</li>
-              <li>Select an event from the events menu via mouse or keyboard shortcuts in brackets.</li>
-              <li>Select a player from the player menu via mouse or keyboard shortcuts.</li>
-              <li>Click the area of the pitch where the action occurred.</li>
-              <li>To record start and end points of an action, click and drag across the pitch.</li>
-              <li>Press Enter to add an event without coordinates.</li>
-              <li>Press Backspace to remove the last event.</li>
-            </ol>
-            <hr>
-            <h5>Pitch Dimensions</h5>
-            <p>Select the pitch length (38-42 m) and width (20-25 m) to match your venue. Coordinates are recorded
-              in metres relative to the selected dimensions.</p>
-            <hr>
-            <h5>Customize Event and Player Details</h5>
-            <p>Click <strong>Edit</strong> next to the Event, Home Player, or Away Player headings to customise
-              labels. Jersey numbers and player names appear in exported CSV and PDF files.</p>
-            <hr>
-            <h5>Generate CSV and PDF Reports</h5>
-            <p>Click <strong>Download CSV</strong> or <strong>Download Report</strong> to export data.</p>
-            <hr>
-            <h5>Feedback</h5>
-            <p>Send feedback to <a href="mailto:chaitanya.jadhav15@hotmail.com">chaitanya.jadhav15@hotmail.com</a>
-              or <a href="mailto:john.komar@nie.edu.sg">john.komar@nie.edu.sg</a>.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Event Names modal -->
-    <div class="modal fade" id="editEventNamesModal" tabindex="-1" aria-labelledby="editEventNamesModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editEventNamesModalLabel">Edit Event Names</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="editEventNamesForm">
-              <div class="mb-3">
-                <label for="eventNamesTextarea" class="form-label">Enter Event Names (one per line)</label>
-                <textarea class="form-control" id="eventNamesTextarea" rows="12"
-                  placeholder="Shot - Goal&#10;Shot - Save&#10;Pass"></textarea>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" onclick="saveEventNames()">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Home Player Names modal -->
-    <div class="modal fade" id="editHomePlayerNamesModal" tabindex="-1" aria-labelledby="editHomePlayerNamesModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editHomePlayerNamesModalLabel">Edit Home Team Player Names</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="editHomePlayerNamesForm">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Jersey Number</th>
-                    <th>Player Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for i in range(1, 17) %}
-                  <tr>
-                    <td><input type="text" class="form-control" id="homeJersey{{ i }}"
-                        placeholder="A{{ '%02d' % i }}"></td>
-                    <td><input type="text" class="form-control" id="homePlayer{{ i }}"
-                        placeholder="Player{{ i }}"></td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" onclick="updatePlayerNames('home')">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Away Player Names modal -->
-    <div class="modal fade" id="editAwayPlayerNamesModal" tabindex="-1" aria-labelledby="editAwayPlayerNamesModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editAwayPlayerNamesModalLabel">Edit Away Team Player Names</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="editAwayPlayerNamesForm">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Jersey Number</th>
-                    <th>Player Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for i in range(1, 17) %}
-                  <tr>
-                    <td><input type="text" class="form-control" id="awayJersey{{ i }}"
-                        placeholder="B{{ '%02d' % i }}"></td>
-                    <td><input type="text" class="form-control" id="awayPlayer{{ i }}"
-                        placeholder="Player{{ i }}"></td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" onclick="updatePlayerNames('away')">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main content row -->
-    <div class="row">
-
-      <!-- Left column: timer + pitch -->
-      <div class="col-12 col-sm-12 col-md-12 col-lg-6">
-
-        <!-- Timer -->
-        <div class="row align-items-center">
-          <div class="row mt-2">
-            <h5 class="heading">Timer</h5>
-          </div>
-          <div class="col-md-6 mt-1">
-            <h4 id="timerDisplay">00:00:00</h4>
-          </div>
-          <div class="col-md-6 text-end mt-1">
-            <button class="btn btn-success me-1" onclick="startTimer()">Start</button>
-            <button class="btn btn-warning me-1" onclick="pauseTimer()">Pause</button>
-            <button class="btn btn-danger" onclick="stopTimer()">Stop</button>
-          </div>
-        </div>
-        <hr />
-
-        <!-- Pitch heading + controls -->
-        <div class="row-container">
-          <div class="row mt-1 w-100">
-            <div class="col-auto d-flex align-items-center">
-              <h5 class="pitch-heading mb-0">Pitch</h5>
-            </div>
-            <div class="col-auto">
-              <p class="arrow-container mt-2 mb-0">
-                Direction of Attack <span class="right-arrow"></span>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dimension selectors -->
-        <div class="dimension-controls mt-2">
-          <div class="d-flex align-items-center gap-2">
-            <label for="pitchLengthSelect" class="mb-0">Length (m):</label>
-            <select id="pitchLengthSelect" class="form-select form-select-sm" style="width:auto"
-              onchange="updatePitchDimensions()">
-              <option value="38">38</option>
-              <option value="39">39</option>
-              <option value="40" selected>40</option>
-              <option value="41">41</option>
-              <option value="42">42</option>
-            </select>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <label for="pitchWidthSelect" class="mb-0">Width (m):</label>
-            <select id="pitchWidthSelect" class="form-select form-select-sm" style="width:auto"
-              onchange="updatePitchDimensions()">
-              <option value="20" selected>20</option>
-              <option value="21">21</option>
-              <option value="22">22</option>
-              <option value="23">23</option>
-              <option value="24">24</option>
-              <option value="25">25</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Zoom controls -->
-        <div class="row mt-1">
-          <div class="zoom-controls">
-            <button class="btn btn-outline-primary" onclick="zoomIn()">Zoom In (+)</button>
-            <button class="btn btn-outline-primary" onclick="zoomOut()">Zoom Out (-)</button>
-          </div>
-        </div>
-
-        <!-- Pitch canvas -->
-        <div class="pitch-container mt-3">
-          <div class="pitch-area">
-            <div id="goal-left" class="goal-zone">
-              <div id="goal-mouth-left" class="goal-mouth"></div>
-            </div>
-            <div class="pitch-wrapper">
-              <div id="pitch">
-                <!-- SVG injected by drawPitch() in index.js -->
-              </div>
-            </div>
-            <div id="goal-right" class="goal-zone">
-              <div id="goal-mouth-right" class="goal-mouth"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Right column: events + players -->
-      <div class="button-container col-sm-12 col-md-12 col-lg-6">
-
-        <!-- Event buttons -->
-        <div class="row mt-2">
-          <div class="col-auto align-items-center d-flex">
-            <h5 class="heading">Event</h5>
-          </div>
-          <div class="col-auto">
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
-              data-bs-target="#editEventNamesModal">Edit</button>
-          </div>
-        </div>
-        <div class="event-buttons-scroll mt-2">
-          <div id="eventButtonsGrid" class="event-buttons-grid" role="group" aria-label="Event selection buttons">
-          </div>
-        </div>
-
-        <!-- Home players -->
-        <div class="row align-items-center mt-2">
-          <div class="col-auto d-flex align-items-center">
-            <h5 class="heading mb-0">Home Player</h5>
-          </div>
-          <div class="col-auto">
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
-              data-bs-target="#editHomePlayerNamesModal">Edit</button>
-          </div>
-        </div>
-        <div class="btn-group button-container" role="group">
-          {% for i in range(1, 9) %}
-          <button id="homePlayerButton{{ i }}" class="btn btn-outline-primary player-button"
-            onclick="setPlayer('home', {{ i }});">
-            A{{ '%02d' % i }} ({{ i }})
-          </button>
-          {% endfor %}
-        </div>
-        <div class="btn-group button-container" role="group">
-          {% set homeKeys2 = ['9', '0', 'Q', 'W', 'E', 'R', 'T', 'Y'] %}
-          {% for i in range(9, 17) %}
-          <button id="homePlayerButton{{ i }}" class="btn btn-outline-primary player-button"
-            onclick="setPlayer('home', {{ i }});">
-            A{{ '%02d' % i }} ({{ homeKeys2[i - 9] }})
-          </button>
-          {% endfor %}
-        </div>
-
-        <!-- Away players -->
-        <div class="row align-items-center mt-2">
-          <div class="col-auto d-flex align-items-center">
-            <h5 class="heading mb-0">Away Player</h5>
-          </div>
-          <div class="col-auto">
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
-              data-bs-target="#editAwayPlayerNamesModal">Edit</button>
-          </div>
-        </div>
-        {% set awayKeys1 = ['U', 'I', 'O', 'P', '[', ']', 'A', 'S'] %}
-        {% set awayKeys2 = ['D', 'F', 'G', 'H', 'J', 'K', 'L', ';'] %}
-        <div class="btn-group button-container" role="group">
-          {% for i in range(1, 9) %}
-          <button id="awayPlayerButton{{ i }}" class="btn btn-outline-primary player-button"
-            onclick="setPlayer('away', {{ i }});">
-            B{{ '%02d' % i }} ({{ awayKeys1[i - 1] }})
-          </button>
-          {% endfor %}
-        </div>
-        <div class="btn-group button-container" role="group">
-          {% for i in range(9, 17) %}
-          <button id="awayPlayerButton{{ i }}" class="btn btn-outline-primary player-button"
-            onclick="setPlayer('away', {{ i }});">
-            B{{ '%02d' % i }} ({{ awayKeys2[i - 9] }})
-          </button>
-          {% endfor %}
-        </div>
-
-      </div>
-    </div>
-
-    <hr />
-
-    <!-- Cumulative stats -->
-    <div class="row tracked-events flex-fill">
-      <div class="col-12">
-        <h5>Cumulative Statistics</h5>
-        <table id="cumulative-table" class="table table-sm table-bordered">
-          <thead class="table-dark">
-            <tr>
-              <th>Goals</th>
-              <th>Saves</th>
-              <th>Shots</th>
-              <th>Passes</th>
-              <th>Corners</th>
-              <th>Free Kicks</th>
-              <th>Tackles</th>
-              <th>Turnovers</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td id="cumulative-goals">0</td>
-              <td id="cumulative-saves">0</td>
-              <td id="cumulative-shots">0</td>
-              <td id="cumulative-passes">0</td>
-              <td id="cumulative-corners">0</td>
-              <td id="cumulative-free-kicks">0</td>
-              <td id="cumulative-tackles">0</td>
-              <td id="cumulative-turnovers">0</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <hr />
-
-        <!-- Events table -->
-        <h5>Tracked Events</h5>
-        <div class="table-responsive">
-          <table id="event-table" class="table table-sm table-hover table-bordered dt-responsive">
-            <thead class="table-dark">
-              <tr>
-                <th>Time</th>
-                <th>Shirt Number</th>
-                <th>Event</th>
-                <th>X1</th>
-                <th>Y1</th>
-                <th>X2</th>
-                <th>Y2</th>
-                <th>X</th>
-              </tr>
-            </thead>
-            <tbody class="events">
-              <!-- Rows added by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Download buttons -->
-    <div class="row mb-3 mt-3 justify-content-center">
-      <div class="col-6">
-        <button id="download-csv" class="btn btn-primary w-100" onclick="downloadCSV()" type="button">
-          Download CSV
-        </button>
-      </div>
-      <div class="col-6">
-        <button id="download-pdf" class="btn btn-primary w-100" onclick="downloadPDF()" type="button">
-          Download Report
-        </button>
-      </div>
-    </div>
-
   </div>
+</div>
 
-  <footer class="bg-dark text-center text-lg-start footer">
-    <div class="container p-4">
-      <div class="row">
-        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-          <h5 class="text-uppercase text-white">Author</h5>
-          <p class="text-white">Developed by <strong>Chaitanya Jadhav</strong> and <strong>John Komar</strong></p>
-        </div>
-        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-          <h5 class="text-uppercase text-white">Contact Information</h5>
-          <p class="text-white">
-            <a href="mailto:chaitanya.jadhav15@hotmail.com" class="text-white">chaitanya.jadhav15@hotmail.com</a>
-            /
-            <a href="mailto:john.komar@nie.edu.sg" class="text-white">john.komar@nie.edu.sg</a>
-          </p>
-        </div>
+<div class="dimension-controls mt-2">
+  <div class="d-flex align-items-center gap-2">
+    <label for="pitchLengthSelect" class="mb-0">Length (m):</label>
+    <select id="pitchLengthSelect" class="form-select form-select-sm" style="width:auto"
+      onchange="updatePitchDimensions()">
+      <option value="38">38</option>
+      <option value="39">39</option>
+      <option value="40" selected>40</option>
+      <option value="41">41</option>
+      <option value="42">42</option>
+    </select>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <label for="pitchWidthSelect" class="mb-0">Width (m):</label>
+    <select id="pitchWidthSelect" class="form-select form-select-sm" style="width:auto"
+      onchange="updatePitchDimensions()">
+      <option value="20" selected>20</option>
+      <option value="21">21</option>
+      <option value="22">22</option>
+      <option value="23">23</option>
+      <option value="24">24</option>
+      <option value="25">25</option>
+    </select>
+  </div>
+</div>
+
+<div class="row mt-1">
+  <div class="zoom-controls">
+    <button class="btn btn-outline-primary" onclick="zoomIn()">Zoom In (+)</button>
+    <button class="btn btn-outline-primary" onclick="zoomOut()">Zoom Out (-)</button>
+  </div>
+</div>
+
+<div class="pitch-container mt-3">
+  <div class="pitch-area">
+    <div id="goal-left" class="goal-zone">
+      <div id="goal-mouth-left" class="goal-mouth"></div>
+    </div>
+    <div class="pitch-wrapper">
+      <div id="pitch">
+        <!-- SVG injected by drawPitch() in index.js -->
       </div>
     </div>
-  </footer>
+    <div id="goal-right" class="goal-zone">
+      <div id="goal-mouth-right" class="goal-mouth"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-  <script src="{{ url_for('static', filename='js/tracker-storage.js') }}"></script>
-  <script src="{{ url_for('futsal.static', filename='index.js') }}"></script>
-</body>
+{% block action_selection %}
+<div class="row mt-2">
+  <div class="col-auto align-items-center d-flex">
+    <h5 class="heading">Event</h5>
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+      data-bs-target="#editEventNamesModal">Edit</button>
+  </div>
+</div>
+<div class="event-buttons-scroll mt-2">
+  <div id="eventButtonsGrid" class="event-buttons-grid" role="group" aria-label="Event selection buttons">
+  </div>
+</div>
+{% endblock %}
 
-</html>
+{% block home_player_buttons %}
+<div class="row align-items-center mt-2">
+  <div class="col-auto d-flex align-items-center">
+    <h5 class="heading mb-0">Home Player</h5>
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+      data-bs-target="#editHomePlayerNamesModal">Edit</button>
+  </div>
+</div>
+<div class="btn-group button-container" role="group">
+  {% for i in range(1, 9) %}
+  <button id="homePlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('home', {{ i }});">
+    A{{ '%02d' % i }} ({{ i }})
+  </button>
+  {% endfor %}
+</div>
+<div class="btn-group button-container" role="group">
+  {% set homeKeys2 = ['9', '0', 'Q', 'W', 'E', 'R', 'T', 'Y'] %}
+  {% for i in range(9, 17) %}
+  <button id="homePlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('home', {{ i }});">
+    A{{ '%02d' % i }} ({{ homeKeys2[i - 9] }})
+  </button>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block away_player_buttons %}
+<div class="row align-items-center mt-2">
+  <div class="col-auto d-flex align-items-center">
+    <h5 class="heading mb-0">Away Player</h5>
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+      data-bs-target="#editAwayPlayerNamesModal">Edit</button>
+  </div>
+</div>
+{% set awayKeys1 = ['U', 'I', 'O', 'P', '[', ']', 'A', 'S'] %}
+{% set awayKeys2 = ['D', 'F', 'G', 'H', 'J', 'K', 'L', ';'] %}
+<div class="btn-group button-container" role="group">
+  {% for i in range(1, 9) %}
+  <button id="awayPlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('away', {{ i }});">
+    B{{ '%02d' % i }} ({{ awayKeys1[i - 1] }})
+  </button>
+  {% endfor %}
+</div>
+<div class="btn-group button-container" role="group">
+  {% for i in range(9, 17) %}
+  <button id="awayPlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('away', {{ i }});">
+    B{{ '%02d' % i }} ({{ awayKeys2[i - 9] }})
+  </button>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block cumulative_stats %}
+<h5>Cumulative Statistics</h5>
+<table id="cumulative-table" class="table table-sm table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>Goals</th>
+      <th>Saves</th>
+      <th>Shots</th>
+      <th>Passes</th>
+      <th>Corners</th>
+      <th>Free Kicks</th>
+      <th>Tackles</th>
+      <th>Turnovers</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="cumulative-goals">0</td>
+      <td id="cumulative-saves">0</td>
+      <td id="cumulative-shots">0</td>
+      <td id="cumulative-passes">0</td>
+      <td id="cumulative-corners">0</td>
+      <td id="cumulative-free-kicks">0</td>
+      <td id="cumulative-tackles">0</td>
+      <td id="cumulative-turnovers">0</td>
+    </tr>
+  </tbody>
+</table>
+<hr />
+{% endblock %}
+
+{% block event_table_columns %}
+<th>Shirt Number</th>
+<th>Event</th>
+<th>X1</th>
+<th>Y1</th>
+<th>X2</th>
+<th>Y2</th>
+<th>X</th>
+{% endblock %}

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  {% if sport.has_favicon %}
+  <link rel="icon" type="image/x-icon" href="{{ url_for(sport.slug + '.static', filename='favicon.ico') }}">
+  {% endif %}
+  <!-- tracker-common.css first, sport index.css second: lets a sport's own
+       rules (e.g. football's fixed-height #pitch/.pitch-wrapper) override
+       the shared defaults instead of being silently overridden by them. -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('shared.static', filename='tracker-common.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for(sport.slug + '.static', filename='index.css') }}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
+  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.min.css" />
+  <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.min.js"></script>
+  <title>{{ sport.display_name }} Event Tracker</title>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">{{ sport.display_name }} Event Tracker</a>
+        <form class="form-inline">
+          <button type="button" class="btn btn-outline-light instructions-button" data-bs-toggle="modal"
+            data-bs-target="#helpModal">Help</button>
+        </form>
+      </nav>
+    </div>
+
+    <!-- Keyboard shortcut toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+      <div id="keyboardShortcutToast" class="toast align-items-center text-bg-dark border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {% block keyboard_toast_body %}
+            Use keyboard shortcuts to quickly select events and players. Press Enter to add an event without
+            coordinates, or Backspace to remove the last event.
+            {% endblock %}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="helpModalLabel">Help</h4>
+          </div>
+          <div class="modal-body">
+            {% block help_modal_body %}{% endblock %}
+            <hr>
+            <h5>Feedback</h5>
+            <p>Send feedback to <a href="mailto:chaitanya.jadhav15@hotmail.com">chaitanya.jadhav15@hotmail.com</a>
+              or <a href="mailto:john.komar@nie.edu.sg">john.komar@nie.edu.sg</a>.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Event Names modal -->
+    <div class="modal fade" id="editEventNamesModal" tabindex="-1" aria-labelledby="editEventNamesModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editEventNamesModalLabel">Edit Event Names</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editEventNamesForm">
+              <div class="mb-3">
+                <label for="eventNamesTextarea" class="form-label">Enter Event Names (one per line)</label>
+                <textarea class="form-control" id="eventNamesTextarea" rows="12"
+                  placeholder="{% block event_names_placeholder %}Shot - Goal&#10;Shot - Save&#10;Pass{% endblock %}"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="saveEventNames()">Save</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Home Player Names modal -->
+    <div class="modal fade" id="editHomePlayerNamesModal" tabindex="-1" aria-labelledby="editHomePlayerNamesModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editHomePlayerNamesModalLabel">Edit Home Team Player Names</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editHomePlayerNamesForm">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Jersey Number</th>
+                    <th>Player Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% block home_player_rows %}{% endblock %}
+                </tbody>
+              </table>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="updatePlayerNames('home')">Save</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Away Player Names modal -->
+    <div class="modal fade" id="editAwayPlayerNamesModal" tabindex="-1" aria-labelledby="editAwayPlayerNamesModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editAwayPlayerNamesModalLabel">Edit Away Team Player Names</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editAwayPlayerNamesForm">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Jersey Number</th>
+                    <th>Player Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% block away_player_rows %}{% endblock %}
+                </tbody>
+              </table>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="updatePlayerNames('away')">Save</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content row -->
+    <div class="row">
+
+      <!-- Left column: timer + pitch -->
+      <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+
+        <!-- Timer -->
+        <div class="row align-items-center">
+          <div class="row mt-2">
+            <h5 class="heading">Timer</h5>
+          </div>
+          <div class="col-md-6 mt-1">
+            <h4 id="timerDisplay">00:00:00</h4>
+          </div>
+          <div class="col-md-6 text-end mt-1">
+            <button class="btn btn-success me-1" onclick="startTimer()">Start</button>
+            <button class="btn btn-warning me-1" onclick="pauseTimer()">Pause</button>
+            <button class="btn btn-danger" onclick="stopTimer()">Stop</button>
+          </div>
+        </div>
+        <hr />
+
+        {% block pitch_section %}{% endblock %}
+
+      </div>
+
+      <!-- Right column: events + players -->
+      <div class="button-container col-sm-12 col-md-12 col-lg-6">
+
+        {% block action_selection %}{% endblock %}
+
+        {# Home/away sections include their own "Home Player"/"Away Player" +
+           Edit-button heading — some sports stack them as full-width rows,
+           others (tennis/badminton) lay them out side-by-side in col-6s, so
+           the heading can't be fixed base markup shared by both layouts. #}
+        {% block home_player_buttons %}{% endblock %}
+        {% block away_player_buttons %}{% endblock %}
+
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="row tracked-events flex-fill">
+      <div class="col-12">
+        {% block cumulative_stats %}{% endblock %}
+
+        <!-- Events table -->
+        <h5>Tracked Events</h5>
+        <div class="table-responsive">
+          <table id="event-table" class="table table-sm table-hover table-bordered dt-responsive">
+            <thead class="table-dark">
+              <tr>
+                <th>Time</th>
+                {% block event_table_columns %}{% endblock %}
+              </tr>
+            </thead>
+            <tbody class="events">
+              <!-- Rows added by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download buttons -->
+    <div class="row mb-3 mt-3 justify-content-center">
+      <div class="col-6">
+        <button id="download-csv" class="btn btn-primary w-100" onclick="downloadCSV()" type="button">
+          Download CSV
+        </button>
+      </div>
+      <div class="col-6">
+        <button id="download-pdf" class="btn btn-primary w-100" onclick="downloadPDF()" type="button">
+          Download Report
+        </button>
+      </div>
+    </div>
+    <div class="row mb-3 justify-content-center">
+      <div class="col-6">
+        <button id="save-session" class="btn btn-outline-primary w-100" onclick="saveSession()" type="button">
+          Save Session
+        </button>
+      </div>
+      <div class="col-6">
+        <button id="load-session" class="btn btn-outline-primary w-100" onclick="document.getElementById('load-session-input').click()" type="button">
+          Load Session
+        </button>
+        <input type="file" id="load-session-input" accept="application/json" class="d-none" onchange="loadSessionFile(this)">
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="bg-dark text-center text-lg-start footer">
+    <div class="container p-4">
+      <div class="row">
+        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+          <h5 class="text-uppercase text-white">Author</h5>
+          <p class="text-white">Developed by <strong>Chaitanya Jadhav</strong> and <strong>John Komar</strong></p>
+        </div>
+        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+          <h5 class="text-uppercase text-white">Contact Information</h5>
+          <p class="text-white">
+            <a href="mailto:chaitanya.jadhav15@hotmail.com" class="text-white">chaitanya.jadhav15@hotmail.com</a>
+            /
+            <a href="mailto:john.komar@nie.edu.sg" class="text-white">john.komar@nie.edu.sg</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/tracker-storage.js') }}"></script>
+  <script src="{{ url_for(sport.slug + '.static', filename='index.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,40 +1,11 @@
-body {
-  font-family: Arial, sans-serif;
-}
-
-.app-container {
-  display: inline-flex;
-  width: 100%;
-}
-
-.row-container {
-  display: flex;
-  align-items: center; /* Vertically center the content within the container */
-  justify-content: space-between; /* Add space between elements */
-}
-
-.github-link {
-  margin-right: 1rem;
-}
-
-.instructions-button {
-  margin-right: 0.75rem;
-}
-
-.navbar-brand {
-  margin-left: 0.75rem;
-}
-
-.pitch-heading {
-  margin-bottom: 0 !important;
-}
+/* Football-specific rules only — layout/button/table/footer rules shared
+   with every other sport now live in shared/static/tracker-common.css. */
 
 #pitch {
   /* Height needs to be a multiple of 68px */
   touch-action: none; /* Add this line to prevent default touch actions */
   height: 400px; /* Now taller */
   /* Width needs to be a multiple of 105px */
-  /* width: 620px; Now narrower */
   width: 100%;
   background: #228b22; /* Field green */
   position: relative;
@@ -42,12 +13,11 @@ body {
   transition: transform 0.2s ease;
 }
 
+/* Overrides shared/static/tracker-common.css's .pitch-wrapper — this pitch
+   has a fixed pixel height, so it scrolls on overflow rather than staying
+   visible unclipped. */
 .pitch-wrapper {
   overflow: auto;
-}
-
-.zoom-controls {
-  margin-top: 10px;
 }
 
 #pitch:before {
@@ -152,157 +122,4 @@ body {
   top: 49%; /* Positions the semi-circle correctly above the 18-yard box */
   left: 50%;
   transform: translateX(83%) translateY(-40%) rotate(90deg); /* Centers the semi-circle horizontally */
-}
-
-.arrow-container {
-  display: flex;
-  align-items: center;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-.right-arrow {
-  display: inline-block;
-  margin-left: 2.5rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-top: 2px solid black;
-  border-left: 2px solid black;
-  transform-origin: center;
-  transform: rotate(135deg);
-}
-
-.right-arrow::after {
-  content: "";
-  display: block;
-  width: 2px;
-  height: 45px;
-  background-color: black;
-  transform: rotate(-45deg) translate(15px, 4px);
-}
-
-.button-group {
-  margin: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-.button-container {
-  padding-top: 0.5rem;
-  width: 100%;
-}
-
-.button-group button {
-  padding: 5px 10px;
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-.event-button {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  width: 100%;
-}
-
-.player-button {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.remove-button {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.dot {
-  position: absolute;
-  width: 0.75rem;
-  height: 0.75rem;
-  background-color: white;
-  border-radius: 50%;
-  z-index: 1;
-  transform: translate(-50%, -50%);
-}
-
-#cumulative-table {
-  width: 100%;
-  margin-top: 20px;
-}
-
-#cumulative-table th,
-#cumulative-table td {
-  padding: 5px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-.dt-layout-table {
-  overflow-y: scroll !important;
-  max-height: 10rem !important;
-}
-
-#event-table {
-  width: 100%;
-  margin-top: 20px;
-}
-#event-table th,
-#event-table td {
-  padding: 5px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-#graphics-redirect {
-  margin-top: 1rem;
-}
-
-.footer {
-  margin-top: 1rem;
-}
-
-.tracked-events {
-  margin-top: 1rem !important;
-}
-
-.table-container {
-  overflow-y: scroll;
-  max-height: 25%;
-  height: 25%;
-}
-
-.table-scrollable {
-  display: inline-block;
-  width: 100%;
-  overflow-x: auto; /* Scroll on X-axis */
-  overflow-y: auto; /* Scroll on Y-axis */
-  max-height: 400px; /* Adjust based on your needs */
-}
-
-.event-buttons-scroll {
-  max-height: 24rem;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.event-buttons-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.event-buttons-grid .event-button {
-  margin: 0;
-}
-
-.event-buttons-grid .span-two {
-  grid-column: 1 / -1;
-}
-
-.dt-search {
-  text-align: left !important;
-}
-
-.footer a {
-  word-break: break-word;
-  white-space: normal;
 }

@@ -6,45 +6,40 @@ from tennis.routes import bp as tennis_bp
 from basketball.routes import bp as basketball_bp
 from badminton.routes import bp as badminton_bp
 from futsal.routes import bp as futsal_bp
+from shared.sport_config import SPORTS
+from shared.blueprint import shared_bp
+
+BLUEPRINTS = {
+    "football": football_bp,
+    "floorball": floorball_bp,
+    "tennis": tennis_bp,
+    "basketball": basketball_bp,
+    "badminton": badminton_bp,
+    "futsal": futsal_bp,
+}
 
 def create_app():
     app = Flask(__name__)
 
-    # Register blueprints
-    app.register_blueprint(football_bp)
-    app.register_blueprint(floorball_bp)
-    app.register_blueprint(tennis_bp)
-    app.register_blueprint(basketball_bp)
-    app.register_blueprint(badminton_bp)
-    app.register_blueprint(futsal_bp)
+    # Routeless blueprint exposing shared/templates and shared/static
+    # (tracker_base.html, tracker-common.css, tracker-core.js) to every sport.
+    app.register_blueprint(shared_bp)
 
-    @app.route("/football")
-    def football():
-        return redirect(url_for("football.index"))
+    # Register one blueprint per entry in the SPORTS registry.
+    for slug in SPORTS:
+        app.register_blueprint(BLUEPRINTS[slug])
 
-    @app.route("/floorball")
-    def floorball():
-        return redirect(url_for("floorball.index"))
-
-    @app.route("/tennis")
-    def tennis():
-        return redirect(url_for("tennis.index"))
-    
-    @app.route("/basketball")
-    def basketball():
-        return redirect(url_for("basketball.index"))
-    
-    @app.route("/badminton")
-    def badminton():
-        return redirect(url_for("badminton.index"))
-
-    @app.route("/futsal")
-    def futsal():
-        return redirect(url_for("futsal.index"))
+    # Legacy /<sport> -> /<sport>/ redirects, one per registry entry.
+    for slug in SPORTS:
+        app.add_url_rule(
+            f"/{slug}",
+            endpoint=f"redirect_{slug}",
+            view_func=lambda slug=slug: redirect(url_for(f"{slug}.index")),
+        )
 
     @app.route("/")
     def home():
-        return render_template("home.html")
+        return render_template("home.html", sports=SPORTS.values())
 
     @app.route("/robots.txt")
     def robots_txt():
@@ -65,13 +60,9 @@ def create_app():
         current_date = datetime.now().strftime('%Y-%m-%d')
         
         # Define all routes with their priorities and change frequencies
-        routes = [
-            {'loc': base_url, 'priority': '1.0', 'changefreq': 'daily'},
-            {'loc': f'{base_url}/football', 'priority': '0.8', 'changefreq': 'weekly'},
-            {'loc': f'{base_url}/floorball', 'priority': '0.8', 'changefreq': 'weekly'},
-            {'loc': f'{base_url}/tennis', 'priority': '0.8', 'changefreq': 'weekly'},
-            {'loc': f'{base_url}/basketball', 'priority': '0.8', 'changefreq': 'weekly'},
-            {'loc': f'{base_url}/badminton', 'priority': '0.8', 'changefreq': 'weekly'},
+        routes = [{'loc': base_url, 'priority': '1.0', 'changefreq': 'daily'}] + [
+            {'loc': f'{base_url}/{slug}', 'priority': '0.8', 'changefreq': 'weekly'}
+            for slug in SPORTS
         ]
         
         # Generate XML sitemap

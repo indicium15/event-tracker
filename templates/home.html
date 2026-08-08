@@ -89,115 +89,29 @@
     <section class="container my-4">
       <h2 class="h4 mb-2 mt-2">Supported Sports</h2>
       <div class="row g-4">
+        {% for sport in sports %}
         <div class="col-md-6">
           <div class="card h-100 shadow-sm">
-            <img 
-              src="{{ url_for('static', filename='img/tennis-preview.png') }}" 
-              class="card-img-top" 
-              alt="Tennis tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Tennis</h5>
-              <a
-                href="{{ url_for('tennis.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <img 
-              src="{{ url_for('static', filename='img/badminton-preview.png') }}" 
-              class="card-img-top" 
-              alt="Badminton tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Badminton</h5>
-              <a
-                href="{{ url_for('badminton.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
+            {% if sport.preview_image %}
             <img
-              src="{{ url_for('static', filename='img/football-preview.png') }}"
+              src="{{ url_for('static', filename='img/' + sport.preview_image) }}"
               class="card-img-top"
-              alt="Football tracking interface preview"
+              alt="{{ sport.display_name }} tracking interface preview"
               loading="lazy"
             >
+            {% endif %}
             <div class="card-body text-center">
-              <h5 class="card-title">Football</h5>
+              <h5 class="card-title">{{ sport.display_name }}</h5>
               <a
-                href="{{ url_for('football.index') }}"
+                href="{{ url_for(sport.slug + '.index') }}"
                 class="btn btn-outline-primary"
                 >Start Tracking</a
               >
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <img
-              src="{{ url_for('static', filename='img/futsal-preview.png') }}"
-              class="card-img-top"
-              alt="Futsal tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Futsal</h5>
-              <a
-                href="{{ url_for('futsal.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <img
-              src="{{ url_for('static', filename='img/floorball-preview.png') }}"
-              class="card-img-top"
-              alt="Floorball tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Floorball</h5>
-              <a
-                href="{{ url_for('floorball.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <img
-              src="{{ url_for('static', filename='img/basketball-preview.png') }}"
-              class="card-img-top"
-              alt="Basketball tracking interface preview"
-              loading="lazy"
-            >
-            <div class="card-body text-center">
-              <h5 class="card-title">Basketball</h5>
-              <a
-                href="{{ url_for('basketball.index') }}"
-                class="btn btn-outline-primary"
-                >Start Tracking</a
-              >
-            </div>
-          </div>
-        </div>
-        {# Add future sports here as more blueprints are enabled #}
+        {% endfor %}
+        {# New sports appear here automatically once added to shared/sport_config.py's SPORTS registry #}
       </div>
     </section>
 

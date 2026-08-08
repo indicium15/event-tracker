@@ -1,48 +1,23 @@
-body {
-  font-family: Arial, sans-serif;
-}
+/* Badminton-specific rules only — layout/button/table/footer rules shared
+   with every other sport now live in shared/static/tracker-common.css.
 
-.app-container {
-  display: inline-flex;
-  width: 100%;
-}
+   Dropped during this extraction (confirmed dead — not referenced by
+   badminton's own template): .center-spot and #videoPreview were an unused
+   copy-paste leftover from floorball's CSS. */
 
-.row-container {
-  display: flex;
-  align-items: center; /* Vertically center the content within the container */
-  justify-content: space-between; /* Add space between elements */
-}
-
-.github-link {
-  margin-right: 1rem;
-}
-
-.instructions-button {
-  margin-right: 0.75rem;
-}
-
-.navbar-brand {
-  margin-left: 0.75rem;
-}
-
-.pitch-heading {
-  margin-bottom: 0 !important;
-}
-
-/* === NEW: variables driven by JS === */
+/* These custom properties are set by JS so the aspect ratio and court
+   placement match the extended play surface (see static/index.js). */
 :root {
-  /* These will be set by JS so aspect ratio matches the extended surface */
   --aspect-w: 13.41; /* fallback - 13.41m width */
   --aspect-h: 6.10; /* fallback - 6.1m height */
 
-  /* Percentages (also set by JS) for placing the court inside the surface */
   --court-w-pct: 100%;
   --court-h-pct: 100%;
   --runoff-x-pct: 0%;
   --runoff-y-pct: 0%;
 }
 
-/* #pitch is now the full play surface (court + run-off) */
+/* #pitch is the full play surface (court + run-off) */
 #pitch {
   touch-action: none;
   width: 100%;
@@ -94,8 +69,6 @@ body {
 }
 
 /* Short service line (1.98m from net/center line) */
-/* Net is at center (50%). Court width is 13.41m, so net is at 6.705m from each side */
-/* Short service line is 1.98m from net: 6.705 - 1.98 = 4.725m from left = 35.23% */
 .court .service-line.short.top {
   left: 35.23%; /* 1.98m from center net line on left side */
 }
@@ -105,8 +78,6 @@ body {
 }
 
 /* Long service line (3.8m from short service line) */
-/* Short service line is 1.98m from net, so long service line is 1.98 + 3.8 = 5.78m from net */
-/* Long service line from left: 6.705 - 5.78 = 0.925m from left = 6.90% */
 .court .service-line.long.top {
   left: 6.90%; /* 5.78m from center net line on left side (3.8m from short service line) */
 }
@@ -116,7 +87,6 @@ body {
 }
 
 /* Center line (horizontal, dividing service courts) - extends through service area only */
-/* Court height is 6.1m, center line divides it in half at 50% */
 .court .center-line {
   position: absolute;
   top: 50%;
@@ -129,9 +99,6 @@ body {
 }
 
 /* Singles sidelines (inner horizontal lines) - only visible in doubles mode */
-/* Singles sidelines are positioned 420mm (0.42m) away from the doubles sideline (court boundary) */
-/* As percentage: 0.42 / 6.1 = 6.89% from top and bottom */
-/* These run horizontally, spanning full width of court */
 .court .singles-sideline {
   position: absolute;
   left: 0;
@@ -149,185 +116,7 @@ body {
   bottom: 6.89%; /* 420mm (0.42m) / 6.1m = 6.89% from bottom edge */
 }
 
-
-  
+/* Overrides shared/static/tracker-common.css's .pitch-wrapper. */
 .pitch-wrapper {
   overflow: auto;
 }
-
-.zoom-controls {
-  margin-top: 10px;
-}
-
-
-.arrow-container {
-  display: flex;
-  align-items: center;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-.right-arrow {
-  display: inline-block;
-  margin-left: 2.5rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-top: 2px solid black;
-  border-left: 2px solid black;
-  transform-origin: center;
-  transform: rotate(135deg);
-}
-
-.right-arrow::after {
-  content: "";
-  display: block;
-  width: 2px;
-  height: 45px;
-  background-color: black;
-  transform: rotate(-45deg) translate(15px, 4px);
-}
-
-.button-group {
-  margin: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-.button-container {
-  padding-top: 0.5rem;
-  width: 100%;
-}
-
-.button-group button {
-  padding: 5px 10px;
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-.event-button {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  width: 100%;
-}
-
-.player-button {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.remove-button {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.dot {
-  position: absolute;
-  width: 0.75rem;
-  height: 0.75rem;
-  background-color: white;
-  border-radius: 50%;
-  z-index: 1;
-  transform: translate(-50%, -50%);
-}
-
-#cumulative-table {
-  width: 100%;
-  margin-top: 20px;
-}
-
-#cumulative-table th,
-#cumulative-table td {
-  padding: 5px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-.dt-layout-table {
-  overflow-y: scroll !important;
-  max-height: 10rem !important;
-}
-
-#event-table {
-  width: 100%;
-  margin-top: 20px;
-}
-#event-table th,
-#event-table td {
-  padding: 5px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-#graphics-redirect {
-  margin-top: 1rem;
-}
-
-.footer {
-  margin-top: 1rem;
-}
-
-.tracked-events {
-  margin-top: 1rem !important;
-}
-
-.table-container {
-  overflow-y: scroll;
-  max-height: 25%;
-  height: 25%;
-}
-
-.table-scrollable {
-  display: inline-block;
-  width: 100%;
-  overflow-x: auto; /* Scroll on X-axis */
-  overflow-y: auto; /* Scroll on Y-axis */
-  max-height: 400px; /* Adjust based on your needs */
-}
-
-.event-buttons-scroll {
-  max-height: 24rem;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.event-buttons-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.event-buttons-grid .event-button {
-  margin: 0;
-}
-
-.event-buttons-grid .span-two {
-  grid-column: 1 / -1;
-}
-
-.dt-search {
-  text-align: left !important;
-}
-
-.center-spot {
-  position: absolute;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: #fff;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-}
-
-#videoPreview {
-  position: relative;
-  max-height: 400px;
-  width: 100%;
-  padding-bottom: 0.5rem;
-}
-
-.footer a {
-  word-break: break-word;
-  white-space: normal;
-}
-
