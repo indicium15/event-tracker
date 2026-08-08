@@ -280,6 +280,7 @@
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
   <script src="{{ url_for('static', filename='js/tracker-storage.js') }}"></script>
+  <script src="{{ url_for('shared.static', filename='tracker-core.js') }}"></script>
   <script src="{{ url_for(sport.slug + '.static', filename='index.js') }}"></script>
   {% block extra_scripts %}{% endblock %}
 </body>
