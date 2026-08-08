@@ -19,6 +19,10 @@
 //   storage: { prefix, extraKeys?, defaultsVersion? },
 //   rosterSize: 16,
 //   jerseyPrefixes: { home: "A", away: "B" },            // default A/B
+//   defaultLabels: { home: {1: "...", ...}, away: {...} } | null,  // TODO(revert-floorball-temp-changes):
+//                                                             //   overrides jerseyPrefixes-based defaults with an
+//                                                             //   arbitrary per-index label (used as both jersey and
+//                                                             //   name); floorball-only, leave unset elsewhere
 //   homeShortcutMap: { 1: "(1)", ... },                   // display suffix per player index
 //   awayShortcutMap: { 1: "(U)", ... },
 //   defaultEventNames: [...],
@@ -42,6 +46,12 @@
     const prefix = config.storage.prefix;
     const rosterSize = config.rosterSize;
     const jerseyPrefixes = config.jerseyPrefixes || { home: "A", away: "B" };
+    // TODO(revert-floorball-temp-changes): optional per-team {index: label}
+    // lookup, used verbatim as both jersey and name, in place of the
+    // jerseyPrefix+index / "Player${i}" scheme below. Only floorball sets
+    // this today (a temporary per-student request) — leave undefined for
+    // every other sport.
+    const defaultLabels = config.defaultLabels || null;
     const buildRowData = config.buildRowData;
     const buildShot = config.buildShot || function (base) { return base; };
     const buildPdfPayload = config.buildPdfPayload || function (shotsData) { return shotsData; };
@@ -63,7 +73,9 @@
         }
       } else {
         for (let i = 1; i <= rosterSize; i++) {
-          homePlayerMap[i] = { jersey: `${jerseyPrefixes.home}${i.toString().padStart(2, "0")}`, name: `HomePlayer${i}` };
+          homePlayerMap[i] = defaultLabels
+            ? { jersey: defaultLabels.home[i], name: defaultLabels.home[i] }
+            : { jersey: `${jerseyPrefixes.home}${i.toString().padStart(2, "0")}`, name: `HomePlayer${i}` };
         }
         store.set(prefix + "HomePlayerMap", JSON.stringify(homePlayerMap));
       }
@@ -76,7 +88,9 @@
         }
       } else {
         for (let i = 1; i <= rosterSize; i++) {
-          awayPlayerMap[i] = { jersey: `${jerseyPrefixes.away}${i.toString().padStart(2, "0")}`, name: `AwayPlayer${i}` };
+          awayPlayerMap[i] = defaultLabels
+            ? { jersey: defaultLabels.away[i], name: defaultLabels.away[i] }
+            : { jersey: `${jerseyPrefixes.away}${i.toString().padStart(2, "0")}`, name: `AwayPlayer${i}` };
         }
         store.set(prefix + "AwayPlayerMap", JSON.stringify(awayPlayerMap));
       }
@@ -88,15 +102,15 @@
       const shortcutMap = team === "home" ? config.homeShortcutMap : config.awayShortcutMap;
       const teamPrefix = team === "home" ? "home" : "away";
       const jp = team === "home" ? jerseyPrefixes.home : jerseyPrefixes.away;
+      const teamDefaultLabels = defaultLabels ? defaultLabels[team] : null;
 
       for (let i = 1; i <= rosterSize; i++) {
         const jerseyInput = document.getElementById(`${teamPrefix}Jersey${i}`);
         const playerInput = document.getElementById(`${teamPrefix}Player${i}`);
         if (jerseyInput && playerInput) {
-          playerMap[i] = {
-            jersey: jerseyInput.value || `${jp}${i.toString().padStart(2, "0")}`,
-            name: playerInput.value || `Player${i}`,
-          };
+          playerMap[i] = teamDefaultLabels
+            ? { jersey: jerseyInput.value || teamDefaultLabels[i], name: playerInput.value || teamDefaultLabels[i] }
+            : { jersey: jerseyInput.value || `${jp}${i.toString().padStart(2, "0")}`, name: playerInput.value || `Player${i}` };
         }
       }
 
