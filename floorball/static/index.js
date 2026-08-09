@@ -1,13 +1,4 @@
-// Floorball-specific tracker: centered coordinate system (fixed 40x20m
-// pitch, origin at center), zoom, and cumulative stats. Everything else —
-// storage, player maps, event names, the shot table pipeline, dot/arrow
-// rendering, timer, keyboard shortcuts, downloads, session save/load —
-// comes from shared/static/tracker-core.js.
-//
-// Dead code note: the original file also defined calculateDistance/
-// calculateAngle/distanceAnglexG (football's xG formula), but floorball
-// never called them — confirmed via grep before this migration, per the
-// plan's "Deleted, not migrated" list. Not carried over.
+// Floorball tracker: centered 40x20m pitch, zoom, cumulative stats.
 
 const PITCH_W = 40;
 const PITCH_H = 20;
@@ -131,8 +122,6 @@ function cumulativeStats(filteredData) {
 }
 
 const tracker = initTracker({
-  // Bump defaultsVersion when the default player/event labels below change; that
-  // resets the stored labels once instead of wiping them on every page load.
   storage: { prefix: "floorball", defaultsVersion: "2026-07-26-labels" },
   rosterSize: 16,
   defaultLabels: { home: homeDefaultLabels, away: awayDefaultLabels },
@@ -170,8 +159,6 @@ const tracker = initTracker({
   cumulativeStats,
   surfaceEl: function () { return document.getElementById("pitch"); },
 });
-
-// ── Pitch interaction (centered coordinate system) ──────────────────────────
 
 let isDragging = false;
 let startX = null;
@@ -229,9 +216,6 @@ pitch.addEventListener("pointerup", function (event) {
     startX = null; startY = null; endX = null; endY = null;
   }
 });
-
-// ── Zoom keyboard shortcuts ───────────────────────────────────────────────
-// Player/event/Enter/Backspace shortcuts come from tracker-core.js.
 
 document.addEventListener("keydown", function (event) {
   if (document.querySelector(".modal.show")) return;

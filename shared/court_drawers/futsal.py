@@ -1,12 +1,3 @@
-"""Moved verbatim from futsal/routes.py's draw_futsal_pitch_mpl — no math
-changed, just relocated so the shared PDF engine can call it via
-SportConfig.pdf.make_figure (wrapped through court_plot_helpers.make_ax_figure).
-
-Futsal is the only sport with runtime-adjustable pitch dimensions (chosen by
-the user in the UI, carried through the /download_pdf POST body) — see
-extract_shots on this sport's SportConfig entry.
-"""
-
 import matplotlib.patches as mpatches
 
 

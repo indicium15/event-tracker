@@ -1,12 +1,4 @@
-/* Floorball-specific rules only — layout/button/table/footer rules shared
-   with every other sport now live in shared/static/tracker-common.css.
-
-   Dropped during this extraction (not migrated — confirmed dead, unused by
-   floorball's own template): .center-circle and .eighteen-yard-box (+ its
-   left/right/::before variants) were a byte-identical unused copy of
-   football's pitch-marking CSS, and .center-spot was declared twice at two
-   different sizes (a dead 4px version and the live 0.5rem one below) —
-   only the live one is kept. */
+/* Floorball-specific court/pitch rules. */
 
 #pitch {
   touch-action: none; /* Add this line to prevent default touch actions */
@@ -65,9 +57,6 @@
   transform: translateX(-50%);
 }
 
-/* Overrides shared/static/tracker-common.css's .pitch-wrapper — this pitch
-   has a fixed pixel height, so it scrolls on overflow rather than staying
-   visible unclipped. */
 .pitch-wrapper {
   overflow: auto;
 }

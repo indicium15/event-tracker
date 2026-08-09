@@ -1,11 +1,3 @@
-"""Moved verbatim from badminton/routes.py's draw_badminton_court — no math
-changed. Court dimensions (meters): 13.40 x 6.10 (doubles), run-off 2.0m/1.5m.
-
-Badminton's JS sends coordinates in centimeters (its on-screen court uses cm
-as the working unit), so this sport is the only one using a scale_transform
-(cm -> m) rather than the identity transform.
-"""
-
 from matplotlib.patches import Rectangle
 
 COURT_LEN_M = 13.40

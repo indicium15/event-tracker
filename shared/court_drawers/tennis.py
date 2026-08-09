@@ -1,10 +1,3 @@
-"""Moved verbatim from tennis/routes.py's draw_tennis_court — no math changed.
-
-Court dimensions (meters): 23.77 x 10.97, run-off 6.40m/3.66m. Unlike
-badminton, tennis's JS already sends coordinates in meters (no cm->m
-conversion needed), so this sport uses the identity coord_transform.
-"""
-
 from matplotlib.patches import Rectangle
 
 COURT_LEN_M = 23.77

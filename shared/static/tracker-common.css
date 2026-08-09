@@ -1,10 +1,4 @@
-/* Rules shared by every sport's tracker page — layout, buttons, tables,
-   the recorded-event dot, DataTables search-box overrides, and the footer.
-   Extracted from futsal/static/index.css (the least sport-specific-cruft
-   version of these rules among the six). Anything that draws the actual
-   court/pitch surface (dimensions, background color, goal markings, etc.)
-   stays in each sport's own static/index.css — that part is genuinely
-   sport-specific, not duplication. */
+/* Shared tracker page rules — court/pitch surface styling stays per-sport. */
 
 body {
   font-family: Arial, sans-serif;
@@ -104,12 +98,6 @@ body {
   padding-bottom: 0 !important;
 }
 
-/* Recorded-event marker — byte-identical (or, for basketball, redundantly
-   declared twice with the same effective result) across all six sports'
-   index.css. This is unrelated to each sport's own `.center-spot` pitch
-   marking (a different, genuinely per-sport class used for a fixed visual
-   mark on the court itself, not a recorded event) — no naming collision
-   with this rule. */
 .dot {
   position: absolute;
   width: 0.75rem;

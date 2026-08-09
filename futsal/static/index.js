@@ -1,7 +1,4 @@
-// Futsal-specific tracker: dynamic SVG pitch (runtime-adjustable dimensions)
-// and goal-mouth click zones. Everything else — storage, player maps, event
-// names, the shot table pipeline, dot/arrow rendering, timer, keyboard
-// shortcuts, downloads, session save/load — comes from shared/static/tracker-core.js.
+// Futsal tracker: dynamic SVG pitch and goal-mouth click zones.
 
 let zoomLevel = 1;
 let pitchLength = 40;
@@ -196,9 +193,6 @@ const tracker = initTracker({
   endpoints: { csv: "/futsal/download_csv", pdf: "/futsal/download_pdf" },
   csvFilename: "shots_data.csv",
   pdfFilename: "report.pdf",
-  // Futsal's backend expects {shots, pitchLength, pitchWidth} for PDF export
-  // (its pitch size is chosen at request time), not the flat shot list every
-  // other sport sends.
   buildPdfPayload: function (shotsData) {
     return { shots: shotsData, pitchLength, pitchWidth };
   },
@@ -222,8 +216,6 @@ const tracker = initTracker({
     setupGoalZoneEvents();
   },
 });
-
-// ── Pitch interaction ──────────────────────────────────────────────────────
 
 const pitch = document.getElementById("pitch");
 
@@ -331,8 +323,6 @@ function setupGoalZoneEvents() {
 window.addEventListener("resize", function () {
   updateGoalZones(pitchLength, pitchWidth);
 });
-
-// ── Dimension persistence ──────────────────────────────────────────────────
 
 document.getElementById("pitchLengthSelect").addEventListener("change", function () {
   tracker.store.set("futsalPitchLength", this.value);

@@ -1,8 +1,4 @@
-// Tennis-specific tracker: centered coordinate system (court + run-off,
-// origin at court center), zoom, and grip/outcome shot classification.
-// Everything else — storage, player maps, event names, the shot table
-// pipeline, dot/arrow rendering, timer, keyboard shortcuts, downloads,
-// session save/load — comes from shared/static/tracker-core.js.
+// Tennis tracker: centered coords, zoom, grip/outcome.
 
 const COURT_W = 23.77; // length (baseline to baseline), meters
 const COURT_H = 10.97; // width (sideline to sideline), meters
@@ -123,8 +119,6 @@ const tracker = initTracker({
   csvFilename: "shots_data.csv",
   pdfFilename: "report.pdf",
   requireActionAndPlayerOnEnter: true,
-  // Every other sport only needs action+player for Enter; tennis also
-  // requires a grip and an outcome to be selected.
   enterGuard: function () { return currentGrip !== "" && currentOutcome !== ""; },
   buildRowData,
   dotPosition,
@@ -133,8 +127,6 @@ const tracker = initTracker({
   },
   surfaceEl: function () { return document.getElementById("pitch"); },
 });
-
-// ── Pitch interaction (centered coordinate system) ──────────────────────────
 
 let isDragging = false;
 let startX = null;
@@ -193,8 +185,6 @@ pitch.addEventListener("pointerup", function (event) {
   }
 });
 
-// ── Grip / outcome / zoom keyboard shortcuts ─────────────────────────────────
-// Player/event/Enter/Backspace shortcuts come from tracker-core.js; these
 // four extra shortcut groups are tennis-only.
 
 document.addEventListener("keydown", function (event) {

@@ -1,13 +1,4 @@
-"""Single registry of sports, replacing the three hardcoded lists that used to
-live in app.py (blueprint registration, legacy redirects, sitemap) plus the
-hand-copied card grid in templates/home.html — and, as each sport migrates
-onto shared/blueprint_factory.py, the CSV/PDF/dimension config that used to
-be duplicated by hand inside each sport's own routes.py.
-
-Sports not yet migrated only need slug/display_name/preview_image; the rest
-of SportConfig's fields default to None/empty and are filled in one sport at
-a time as shared/blueprint_factory.py takes over that sport's routes.py.
-"""
+"""Registry of sports used by app.py, home.html, and blueprint_factory."""
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
@@ -28,30 +19,18 @@ def _default_group_key(shot):
 
 
 def _default_group_label(group_key, shots):
-    """Text drawn under each image. Sports whose group_key encodes more than
-    just the action (basketball's compound action+courtType key) override
-    this to display just the action."""
     return group_key
 
 
 def _default_group_kwargs(group_key, shots):
-    """Extra per-group kwargs merged into that group's make_figure() call.
-    Basketball overrides this to pick the court_type carried on the group's
-    shots, since each action+courtType group needs its own Court instance."""
     return {}
 
 
 def _default_extract_shots(payload):
-    """Most sports POST the shot list directly. Sports with extra per-request
-    state (futsal's user-adjustable pitch dimensions) override this to pull
-    the list out of a wrapper dict and return the extra state as court_kwargs."""
     return payload, {}
 
 
 def _futsal_extract_shots(payload):
-    """Futsal's /download_pdf body is {shots, pitchLength, pitchWidth} (the
-    only sport whose pitch size is chosen at request time in the UI), not a
-    flat shot list like every other sport."""
     shots = payload.get("shots", [])
     extra = {
         "pitch_length": payload.get("pitchLength", 40),
@@ -62,7 +41,7 @@ def _futsal_extract_shots(payload):
 
 @dataclass
 class PdfConfig:
-    make_figure: Callable[[dict], tuple]  # (court_kwargs) -> (fig, plot_ctx)
+    make_figure: Callable[[dict], tuple]
     plot_point: Callable[[Any, float, float], None]
     plot_arrow: Callable[[Any, float, float, float, float], None]
     court_kwargs: dict = field(default_factory=dict)
@@ -75,29 +54,29 @@ class PdfConfig:
 
 @dataclass
 class SportConfig:
-    slug: str  # matches the Blueprint's name/url_prefix, e.g. "floorball" -> "/floorball"
-    display_name: str  # shown on the home page card, PDF titles, and page titles
-    preview_image: Optional[str] = None  # filename under static/img/, or None if not yet available
+    slug: str
+    display_name: str
+    preview_image: Optional[str] = None
 
-    template_name: Optional[str] = None  # "{sport}_index.html"
+    template_name: Optional[str] = None
 
     csv_fieldnames: Optional[list] = None
     csv_filename: str = "shots_data.csv"
-    csv_extrasaction: str = "raise"  # futsal overrides to "ignore"
+    csv_extrasaction: str = "raise"
     pdf_filename: str = "report.pdf"
 
     pdf: Optional[PdfConfig] = None
 
     storage_prefix: Optional[str] = None
-    storage_extra_keys: list = field(default_factory=list)  # e.g. basketball's "basketballCourtType"
+    storage_extra_keys: list = field(default_factory=list)
     roster_size: Optional[int] = None
     default_event_names: Optional[list] = None
-    cumulative_stats: Optional[dict] = None  # None for badminton/tennis
-    grip_outcome: bool = False  # True only for badminton/tennis
+    cumulative_stats: Optional[dict] = None
+    grip_outcome: bool = False
 
-    dimensions: Optional[dict] = None  # single source of truth for pitch/court size (feeds pdf.court_kwargs + JS)
+    dimensions: Optional[dict] = None
 
-    has_favicon: bool = True  # futsal has no static/favicon.ico yet
+    has_favicon: bool = True
 
 
 SPORTS: dict = {
@@ -138,8 +117,7 @@ SPORTS: dict = {
             make_figure=make_ax_figure(badminton_court.draw_badminton_court),
             plot_point=ax_plot_point,
             plot_arrow=ax_plot_arrow,
-            # badminton's JS works in centimeters; the drawer/every other sport works in meters.
-            coord_transform=coord_transforms.scale_transform(1.0 / 100.0),
+            coord_transform=coord_transforms.scale_transform(1.0 / 100.0),  # JS uses cm
         ),
     ),
     "football": SportConfig(
@@ -169,7 +147,7 @@ SPORTS: dict = {
         csv_extrasaction="ignore",
         pdf_filename="futsal_report.pdf",
         has_favicon=False,
-        dimensions={"length": 40, "width": 20},  # defaults; actual size is user-adjustable in the UI
+        dimensions={"length": 40, "width": 20},
         pdf=PdfConfig(
             make_figure=make_ax_figure(futsal_court.draw_futsal_pitch_mpl),
             plot_point=ax_plot_point,

@@ -5,9 +5,6 @@
   {% if sport.has_favicon %}
   <link rel="icon" type="image/x-icon" href="{{ url_for(sport.slug + '.static', filename='favicon.ico') }}">
   {% endif %}
-  <!-- tracker-common.css first, sport index.css second: lets a sport's own
-       rules (e.g. football's fixed-height #pitch/.pitch-wrapper) override
-       the shared defaults instead of being silently overridden by them. -->
   <link rel="stylesheet" type="text/css" href="{{ url_for('shared.static', filename='tracker-common.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ url_for(sport.slug + '.static', filename='index.css') }}" />
   <meta charset="UTF-8" />
@@ -20,6 +17,9 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.min.css" />
   <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.min.js"></script>
   <title>{{ sport.display_name }} Event Tracker</title>
+  <!-- Cloudflare Web Analytics -->
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "715ddf4da171483893be9d80580c412f"}'></script>
 </head>
 
 <body>

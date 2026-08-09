@@ -1,5 +1,4 @@
-/* Futsal-specific rules only — layout/button/table/footer rules shared with
-   every other sport now live in shared/static/tracker-common.css. */
+/* Futsal-specific court/pitch rules. */
 
 #pitch {
   touch-action: none;

@@ -1,31 +1,21 @@
 // Shared persistence and table helpers for the per-sport event trackers.
-//
-// Every sport's static/index.js keeps its recorded events in browser storage
-// and mirrors them into a DataTable. Both of those had the same two bugs in
-// every sport, so the fixes live here rather than in six near-identical copies.
-//
-// Load this before the sport's index.js:
+// Load before the sport's index.js:
 //   <script src="{{ url_for('static', filename='js/tracker-storage.js') }}"></script>
 (function (global) {
   "use strict";
 
-  // Keys every sport stores, minus its prefix. Sports with extra state (e.g.
-  // basketballCourtType) pass those through `extraKeys` so they migrate too.
   const STANDARD_SUFFIXES = [
-    "RawShots",
     "ShotsData",
     "HomePlayerMap",
     "AwayPlayerMap",
     "EventNames",
   ];
 
-  // Only label data may be reset when a sport ships new defaults. Recorded
-  // events (RawShots / ShotsData) are deliberately absent from this list.
+  // Label keys that may be reset when defaultsVersion bumps. ShotsData is omitted on purpose.
   const LABEL_SUFFIXES = ["HomePlayerMap", "AwayPlayerMap", "EventNames"];
+  const EVENT_SUFFIXES = STANDARD_SUFFIXES.filter((s) => !LABEL_SUFFIXES.includes(s));
 
-  // iOS private browsing gives localStorage a zero quota and throws on write,
-  // so probe it once and fall back to sessionStorage rather than losing every
-  // save. Shared across sports: the probe result can't differ between them.
+  // iOS private browsing can throw on localStorage writes; fall back once.
   const backingStore = (function () {
     try {
       const probe = "__trackerStorageProbe";
@@ -41,12 +31,7 @@
     }
   })();
 
-  // Match data belongs in localStorage, not sessionStorage. sessionStorage is
-  // scoped to a single browsing context, so it is thrown away whenever the tab
-  // is closed or the browser/webview process is killed — which is exactly what
-  // happens on a tablet when the page comes back after a crash. localStorage
-  // survives all of that, so an interrupted match keeps its recorded events.
-  //
+  // Prefer localStorage so match data survives a killed tab/webview.
   // config: { prefix, extraKeys?, defaultsVersion? }
   function createTrackerStore(config) {
     const prefix = config.prefix;
@@ -78,10 +63,12 @@
           console.error(`Could not remove ${key}`, error);
         }
       },
+      ownedKeys,
+      eventKeys: EVENT_SUFFIXES.map((s) => prefix + s),
+      prefix,
     };
 
-    // Carry over anything an earlier version left in sessionStorage so a match
-    // already in progress isn't lost when this build ships.
+    // Migrate any leftovers from sessionStorage into localStorage.
     if (backingStore !== sessionStorage) {
       ownedKeys.forEach(function (key) {
         const legacy = sessionStorage.getItem(key);
@@ -92,8 +79,6 @@
       });
     }
 
-    // Fresh labels when the defaults shipped with the app change. Bumping
-    // defaultsVersion resets them once, rather than on every page load.
     if (config.defaultsVersion) {
       const versionKey = prefix + "DefaultsVersion";
       if (store.get(versionKey) !== config.defaultsVersion) {
@@ -105,10 +90,7 @@
     return store;
   }
 
-  // DataTables row indexes are stable ids, not positions: once a row has been
-  // removed the remaining ids no longer line up with the shotsData/rawShots
-  // arrays. Map an id back to a position by walking rows in insertion order.
-  // Returns -1 when the row can't be located.
+  // DataTables row indexes are stable ids, not array positions after deletions.
   function arrayPositionForRow(table, row) {
     const rowIndex = row.index();
     if (rowIndex === undefined) {
@@ -117,9 +99,6 @@
     return table.rows({ order: "index" }).indexes().toArray().indexOf(rowIndex);
   }
 
-  // Hand a blob to the browser as a download. The object URL is revoked once
-  // the click has been dispatched — leaving them alive pins the whole blob in
-  // memory, which matters on a tablet where an export can be several MB.
   function saveBlob(blob, filename) {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -131,9 +110,6 @@
     setTimeout(() => window.URL.revokeObjectURL(url), 10000);
   }
 
-  // Exports must never take the recorded events down with them: the data is
-  // already in storage before this runs, and a failed request reports the error
-  // instead of downloading the server's error page as if it were a report.
   function downloadExport(url, payload, filename, label) {
     console.log(`Downloading ${label}...`);
     return fetch(url, {
@@ -159,8 +135,84 @@
       });
   }
 
+  function exportSessionData(store) {
+    const data = {};
+    store.ownedKeys.forEach(function (key) {
+      const value = store.get(key);
+      if (value !== null) {
+        data[key] = value;
+      }
+    });
+    return data;
+  }
+
+  function downloadSessionData(store, filename) {
+    const blob = new Blob([JSON.stringify(exportSessionData(store), null, 2)], {
+      type: "application/json",
+    });
+    saveBlob(blob, filename);
+  }
+
+  function importSessionData(store, file) {
+    return file.text().then(function (text) {
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (error) {
+        throw new Error("That file isn't valid session JSON");
+      }
+      store.ownedKeys.forEach(function (key) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          store.set(key, data[key]);
+        }
+      });
+      return data;
+    });
+  }
+
+  function saveTrackerSession(store, getCurrentDateTime) {
+    downloadSessionData(
+      store,
+      `${store.prefix}_session_${getCurrentDateTime().replace(/[/: ]/g, "-")}.json`
+    );
+  }
+
+  function loadTrackerSessionFile(store, fileInput) {
+    const file = fileInput.files[0];
+    if (!file) {
+      return;
+    }
+    importSessionData(store, file)
+      .then(() => location.reload())
+      .catch((error) => alert(`Could not load session: ${error.message}`));
+    fileInput.value = "";
+  }
+
+  function clearTrackedEvents(store, table, shotsData) {
+    table.clear().draw();
+    shotsData.length = 0;
+    store.eventKeys.forEach((key) => store.remove(key));
+  }
+
+  function updateTrackerButtonStates(table) {
+    const isEmpty = table.rows().count() === 0;
+    ["save-session", "clear-all-events"].forEach(function (id) {
+      const button = document.getElementById(id);
+      if (button) {
+        button.disabled = isEmpty;
+      }
+    });
+  }
+
   global.createTrackerStore = createTrackerStore;
   global.arrayPositionForRow = arrayPositionForRow;
   global.saveBlob = saveBlob;
   global.downloadExport = downloadExport;
+  global.exportSessionData = exportSessionData;
+  global.downloadSessionData = downloadSessionData;
+  global.importSessionData = importSessionData;
+  global.saveTrackerSession = saveTrackerSession;
+  global.loadTrackerSessionFile = loadTrackerSessionFile;
+  global.clearTrackedEvents = clearTrackedEvents;
+  global.updateTrackerButtonStates = updateTrackerButtonStates;
 })(window);

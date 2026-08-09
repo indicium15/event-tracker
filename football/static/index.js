@@ -1,8 +1,4 @@
-// Football-specific tracker: fixed-origin 105x68m pitch, zoom, and xG/xSave
-// calculation from shot coordinates. Everything else — storage, player maps,
-// event names, the shot table pipeline, dot/arrow rendering, timer, keyboard
-// shortcuts, downloads, session save/load — comes from
-// shared/static/tracker-core.js.
+// Football tracker: fixed-origin 105x68m pitch, zoom, xG/xSave.
 
 let zoomLevel = 1;
 const pitch = document.getElementById("pitch");
@@ -20,8 +16,6 @@ function zoomOut() {
     pitch.style.transform = `scale(${zoomLevel})`;
   }
 }
-
-// ── xG / xSave ────────────────────────────────────────────────────────────
 
 function calculateDistance(pos_x, pos_y) {
   const midGoalX = 0.0;
@@ -149,8 +143,6 @@ const tracker = initTracker({
   surfaceEl: function () { return document.getElementById("pitch"); },
 });
 
-// ── Pitch interaction (fixed-origin 105x68m) ─────────────────────────────────
-
 let isDragging = false;
 let startX = null;
 let startY = null;
@@ -205,9 +197,6 @@ pitch.addEventListener("pointerup", function (event) {
     startX = null; startY = null; endX = null; endY = null;
   }
 });
-
-// ── Zoom keyboard shortcuts ───────────────────────────────────────────────
-// Player/event/Enter/Backspace shortcuts come from tracker-core.js.
 
 document.addEventListener("keydown", function (event) {
   if (document.querySelector(".modal.show")) return;

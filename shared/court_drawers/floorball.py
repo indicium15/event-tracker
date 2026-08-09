@@ -1,7 +1,3 @@
-"""Moved verbatim from floorball/routes.py's draw_floorball_pitch — no math
-changed, just relocated so the shared PDF engine can call it via
-SportConfig.pdf.court_drawer."""
-
 from matplotlib.patches import FancyBboxPatch, Rectangle
 
 

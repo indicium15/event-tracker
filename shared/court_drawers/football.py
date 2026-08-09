@@ -1,12 +1,3 @@
-"""mplsoccer wrapper for football's PDF pitch — moved from football/routes.py.
-
-Unlike the hand-drawn court sports, mplsoccer.Pitch owns figure creation and
-exposes its own scatter()/arrows() plotting methods bound to the pitch's
-coordinate system, so this supplies make_figure/plot_point/plot_arrow
-directly rather than going through shared/court_plot_helpers.py's
-plain-Axes helpers.
-"""
-
 from mplsoccer import Pitch
 
 

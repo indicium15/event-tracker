@@ -1,9 +1,4 @@
-/* Tennis-specific rules only — layout/button/table/footer rules shared with
-   every other sport now live in shared/static/tracker-common.css.
-
-   Dropped during this extraction (confirmed dead — not referenced by
-   tennis's own template): .center-spot and #videoPreview were an unused
-   copy-paste leftover from floorball's CSS. */
+/* Tennis-specific court/pitch rules. */
 
 /* These custom properties are set by JS so the aspect ratio and court
    placement match the extended play surface (see static/index.js). */
@@ -76,7 +71,6 @@
   background: #fff;
 }
 
-/* Overrides shared/static/tracker-common.css's .pitch-wrapper. */
 .pitch-wrapper {
   overflow: auto;
 }

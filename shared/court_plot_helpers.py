@@ -1,18 +1,9 @@
-"""Generic PdfConfig.make_figure/plot_point/plot_arrow implementations for the
-common case: a plain matplotlib Axes drawn on by a `drawer(ax, **kwargs)`
-function (floorball/badminton/tennis/futsal). Sports built on a plotting
-library with its own draw API (football's mplsoccer.Pitch, basketball's
-mplbasketball.Court) supply their own make_figure/plot_point/plot_arrow
-instead of using these — see shared/court_drawers/football.py.
-"""
+"""Axes helpers for sports that draw with plain matplotlib (not mplsoccer/mplbasketball)."""
 
 import matplotlib.pyplot as plt
 
 
 def make_ax_figure(drawer):
-    """Wrap a `drawer(ax, **kwargs)` function into a
-    `make_figure(kwargs) -> (fig, ax)` for PdfConfig.make_figure."""
-
     def make_figure(kwargs):
         fig, ax = plt.subplots(figsize=(4, 3))
         drawer(ax, **kwargs)

@@ -1,9 +1,4 @@
-// Basketball-specific tracker: court-type switching (NBA/WNBA/NCAA/FIBA,
-// each with its own dimensions and pre-rendered court image) and
-// bottom-left-origin (RHCS) coordinate capture off #court. Everything else —
-// storage, player maps, event names, the shot table pipeline, dot/arrow
-// rendering, timer, keyboard shortcuts, downloads, session save/load —
-// comes from shared/static/tracker-core.js.
+// Basketball tracker: court-type switching and bottom-left (RHCS) coords.
 
 const courtConfig = {
   nba: { width: 28.6512, height: 15.24, name: "NBA" },
@@ -18,7 +13,6 @@ function getCurrentCourtDimensions() {
   return courtConfig[currentCourtType];
 }
 
-// Referenced by the court-type <select>'s inline onchange in the template.
 function changeCourtType() {
   const select = document.getElementById("courtTypeSelect");
   const newCourtType = select.value;
@@ -48,9 +42,7 @@ function buildRowData(shot) {
   ];
 }
 
-// Court is bottom-left origin (RHCS), but tracker-core's dot rendering
-// assumes top-left-origin percentages — flip y here so the dot lands in the
-// right spot on screen.
+// Flip y: court is bottom-left origin; dots use top-left percentages.
 function dotPosition(shot) {
   const dimensions = getCurrentCourtDimensions();
   const wasDragged =
@@ -67,16 +59,29 @@ function dotPosition(shot) {
   return pos;
 }
 
+function fgPercent(made, attempted) {
+  return attempted > 0 ? ((made / attempted) * 100).toFixed(1) : "0.0";
+}
+
 function cumulativeStats(filteredData) {
-  var totalGoals = 0, totalSaves = 0, totalFieldGoals = 0;
+  var totalGoals = 0, totalFieldGoals = 0;
   var totalAssists = 0, totalRebounds = 0, totalSteals = 0, totalBlocks = 0;
+  var homeMade = 0, homeAttempted = 0, awayMade = 0, awayAttempted = 0;
 
   filteredData.each(function (value) {
+    const player = value[1] || "";
     const ev = value[2];
     if (ev.includes("Field Goal")) {
       totalFieldGoals++;
-      if (ev === "Field Goal") totalGoals++;
-      else if (ev === "Field Goal - Miss") totalSaves++;
+      const made = ev === "Field Goal";
+      if (made) totalGoals++;
+      if (player.startsWith("A")) {
+        homeAttempted++;
+        if (made) homeMade++;
+      } else if (player.startsWith("B")) {
+        awayAttempted++;
+        if (made) awayMade++;
+      }
     } else if (ev === "Assist") {
       totalAssists++;
     } else if (ev === "Rebound") {
@@ -89,7 +94,8 @@ function cumulativeStats(filteredData) {
   });
 
   $("#cumulative-goals").text(totalGoals);
-  $("#cumulative-saves").text(totalSaves);
+  $("#cumulative-home-fg-pct").text(fgPercent(homeMade, homeAttempted) + "%");
+  $("#cumulative-away-fg-pct").text(fgPercent(awayMade, awayAttempted) + "%");
   $("#cumulative-field-goals").text(totalFieldGoals);
   $("#cumulative-assists").text(totalAssists);
   $("#cumulative-rebounds").text(totalRebounds);
@@ -125,8 +131,6 @@ const tracker = initTracker({
     loadCourtType();
   },
 });
-
-// ── Court interaction (bottom-left origin / RHCS) ───────────────────────────
 
 const court = document.getElementById("court");
 

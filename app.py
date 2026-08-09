@@ -7,20 +7,12 @@ from shared.blueprint import shared_bp
 
 def create_app():
     app = Flask(__name__)
-
-    # Routeless blueprint exposing shared/templates and shared/static
-    # (tracker_base.html, tracker-common.css, tracker-core.js) to every sport.
     app.register_blueprint(shared_bp)
-
-    # Register one blueprint per entry in the SPORTS registry. Imported
-    # dynamically (rather than a top-of-file `from X.routes import bp`
-    # per sport) so adding a new sport is genuinely a SPORTS-dict-only
-    # change, with no second hardcoded list here to keep in sync.
+    
     for slug in SPORTS:
         module = importlib.import_module(f"{slug}.routes")
         app.register_blueprint(module.bp)
-
-    # Legacy /<sport> -> /<sport>/ redirects, one per registry entry.
+    
     for slug in SPORTS:
         app.add_url_rule(
             f"/{slug}",
@@ -74,8 +66,9 @@ def create_app():
     return app
 
 
-# --- WSGI entrypoint ---
+# PythonAnywhere entrypoint
 app = create_app()
 
+# For local development
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

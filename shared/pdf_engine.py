@@ -1,17 +1,4 @@
-"""One shared PDF report builder for every sport.
-
-This is the extraction of what used to be a byte-for-byte-identical
-~150-200 line `create_pdf_report` in each sport's routes.py: Vera font
-registration, A4 page size, group-by-player/group_key, and a 2-column image
-grid with page breaks every 6 images. The only per-sport pieces are supplied
-via SportConfig.pdf: which function draws the court/pitch, how a shot's raw
-coordinates map into that drawer's coordinate space, and how shots are
-grouped onto separate images.
-
-Aspect ratio is always preserved when embedding the matplotlib PNG (previously
-only badminton/tennis did this — the other four sports stretched to a fixed
-250x200, which is normalized here for all sports).
-"""
+"""Shared PDF report builder parameterized by SportConfig.pdf."""
 
 import io
 
@@ -40,8 +27,7 @@ def _has_valid_coord(value):
 
 
 def build_pdf_report(payload, config):
-    """payload: the raw JSON body of POST /<sport>/download_pdf. Returns a
-    seeked-to-0 io.BytesIO containing the PDF."""
+    """Build a PDF from POST /<sport>/download_pdf JSON. Returns a seeked BytesIO."""
     pdf_cfg = config.pdf
     _ensure_font_registered()
 
@@ -112,12 +98,9 @@ def build_pdf_report(payload, config):
             image = ImageReader(img_buffer)
 
             max_w, max_h = 250.0, 200.0
-            try:
-                img_w, img_h = image.getSize()
-                scale = min(max_w / img_w, max_h / img_h)
-                draw_w, draw_h = img_w * scale, img_h * scale
-            except Exception:
-                draw_w, draw_h = max_w, max_h
+            img_w, img_h = image.getSize()
+            scale = min(max_w / img_w, max_h / img_h)
+            draw_w, draw_h = img_w * scale, img_h * scale
             x_center = x_pos + (max_w - draw_w) / 2.0
             y_center = y_pos + (max_h - draw_h) / 2.0
 

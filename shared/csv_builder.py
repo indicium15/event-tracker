@@ -1,6 +1,4 @@
-"""Shared CSV export — identical skeleton across every sport, parameterized
-by SportConfig's fieldnames/filename/extrasaction.
-"""
+"""CSV export parameterized by SportConfig fieldnames/filename/extrasaction."""
 
 import csv
 import io

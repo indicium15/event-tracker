@@ -1,11 +1,4 @@
-// Netball-specific tracker: centered coordinate system (fixed 30.5x15.25m
-// court, origin at center), zoom, and cumulative stats. Everything else —
-// storage, player maps, event names, the shot table pipeline, dot/arrow
-// rendering, timer, keyboard shortcuts, downloads, session save/load —
-// comes from shared/static/tracker-core.js. New sport, built directly
-// against the shared engine per .cursor/plans/Netball 12 players and
-// events-2f79ccb8.plan.md (12-player roster, event names, cumulative
-// stats logic) — no legacy per-sport index.js existed to migrate from.
+// Netball tracker: centered 30.5x15.25m court, zoom, cumulative stats.
 
 const COURT_W = 30.5;
 const COURT_H = 15.25;
@@ -52,9 +45,6 @@ function dotPosition(shot) {
   return pos;
 }
 
-// Goals = "Shot (Scored)" count. Attempts = all three shot outcomes.
-// Turnovers = "Turnover" count. No Intercepts column — the event set has no
-// intercept event.
 function cumulativeStats(filteredData) {
   var totalGoals = 0, totalAttempts = 0, totalTurnovers = 0;
 
@@ -105,8 +95,6 @@ const tracker = initTracker({
   cumulativeStats,
   surfaceEl: function () { return document.getElementById("pitch"); },
 });
-
-// ── Court interaction (centered coordinate system) ──────────────────────────
 
 let isDragging = false;
 let startX = null;
@@ -164,9 +152,6 @@ pitch.addEventListener("pointerup", function (event) {
     startX = null; startY = null; endX = null; endY = null;
   }
 });
-
-// ── Zoom keyboard shortcuts ───────────────────────────────────────────────
-// Player/event/Enter/Backspace shortcuts come from tracker-core.js.
 
 document.addEventListener("keydown", function (event) {
   if (document.querySelector(".modal.show")) return;

@@ -1,18 +1,3 @@
-"""mplbasketball wrapper for basketball's PDF court — moved from
-basketball/routes.py. Court.draw() returns a plain Axes (no bound
-scatter()/arrows() methods like mplsoccer), so plotting happens directly on
-the Axes, but the arrow styling (ax.annotate with arrowstyle='->') differs
-from the other hand-drawn sports' ax.arrow() so it's kept sport-specific here
-rather than reused from court_plot_helpers.
-
-Basketball also needs its own grouping: each shot carries its own courtType
-(nba/wnba/ncaa/fiba), so shots are grouped by action+courtType (one Court
-instance per group) while the image label displayed is just the action.
-The dead court_widths/court_heights lookup dicts and unused `from mplsoccer
-import Pitch` import from the original routes.py were dropped — they were
-computed but never read.
-"""
-
 from mplbasketball import Court
 
 

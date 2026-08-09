@@ -1,43 +1,5 @@
-// Shared click-to-record engine, extracted from the ~850-1150 line
-// per-sport index.js files (futsal was the reference — the shortest and
-// least encumbered of the six). Persistence primitives (createTrackerStore,
-// downloadExport, session save/load) come from tracker-storage.js, loaded
-// before this file.
-//
-// A sport's own (much shorter) index.js calls initTracker(config) once,
-// supplying: roster/shortcut layout, default event names, storage keys,
-// download endpoints, and a handful of hooks for the genuinely per-sport
-// pieces this engine can't own — coordinate capture off the pitch/court
-// (each sport's coordinate system and click/drag surface differ too much
-// to share), how a shot becomes a table row, and how it becomes a stored
-// shot object. Sport-owned extras (grip/outcome, xG, court-type switching,
-// goal-mouth zones, a dynamically-drawn pitch) stay in the sport's own file
-// entirely and call back into the object initTracker() returns.
-//
-// config shape:
-// {
-//   storage: { prefix, extraKeys?, defaultsVersion? },
-//   rosterSize: 16,
-//   jerseyPrefixes: { home: "A", away: "B" },            // default A/B
-//   defaultLabels: { home: {1: "...", ...}, away: {...} } | null,  // TODO(revert-floorball-temp-changes):
-//                                                             //   overrides jerseyPrefixes-based defaults with an
-//                                                             //   arbitrary per-index label (used as both jersey and
-//                                                             //   name); floorball-only, leave unset elsewhere
-//   homeShortcutMap: { 1: "(1)", ... },                   // display suffix per player index
-//   awayShortcutMap: { 1: "(U)", ... },
-//   defaultEventNames: [...],
-//   endpoints: { csv: "/futsal/download_csv", pdf: "/futsal/download_pdf" },
-//   csvFilename: "shots_data.csv",
-//   pdfFilename: "report.pdf",
-//   buildPdfPayload: (shotsData) => payload,               // default: shotsData itself
-//   requireActionAndPlayerOnEnter: true,
-//   enterGuard: () => boolean,                              // optional extra Enter condition, ANDed with the
-//                                                             //   above (badminton/tennis: grip+outcome selected)
-//   buildRowData: (shot) => [...],                         // table.row.add() array, sport owns column order
-//   buildShot: (base) => shot,                              // base = {time,player,playerName,action,x,y,x2,y2}; default identity
-//   cumulativeStats: (visibleRowsData) => void | null,       // null if the sport has no cumulative-stats table
-//   onReady: (api) => void,                                  // sport's own post-init: draw pitch, restore shots, wire click handlers
-// }
+// Shared click-to-record engine. Sport index.js calls initTracker(config);
+// persistence helpers come from tracker-storage.js (load that first).
 (function (global) {
   "use strict";
 
@@ -47,16 +9,11 @@
     const rosterSize = config.rosterSize;
     const jerseyPrefixes = config.jerseyPrefixes || { home: "A", away: "B" };
     // TODO(revert-floorball-temp-changes): optional per-team {index: label}
-    // lookup, used verbatim as both jersey and name, in place of the
-    // jerseyPrefix+index / "Player${i}" scheme below. Only floorball sets
-    // this today (a temporary per-student request) — leave undefined for
-    // every other sport.
+    // used as both jersey and name. Only floorball sets this today.
     const defaultLabels = config.defaultLabels || null;
     const buildRowData = config.buildRowData;
     const buildShot = config.buildShot || function (base) { return base; };
     const buildPdfPayload = config.buildPdfPayload || function (shotsData) { return shotsData; };
-
-    // ── Player maps ────────────────────────────────────────────────────────
 
     let homePlayerMap = {};
     let awayPlayerMap = {};
@@ -128,8 +85,6 @@
       }
     }
 
-    // ── Event names ────────────────────────────────────────────────────────
-
     const eventShortcutKeys = ["Z", "X", "C", "V", "B", "<", "N", "M", ",", ".", "?", ">"];
     const eventKeyMap = eventShortcutKeys.reduce((map, key, index) => {
       map[key.toUpperCase()] = index;
@@ -160,8 +115,6 @@
       renderEventButtons();
       $("#editEventNamesModal").modal("hide");
     }
-
-    // ── State ──────────────────────────────────────────────────────────────
 
     var currentActionType = "";
     var currentPlayer = "";
@@ -211,8 +164,6 @@
       if (activeBtn) activeBtn.classList.add("active");
     }
 
-    // ── Time helpers ───────────────────────────────────────────────────────
-
     function getCurrentDateTime() {
       let now = new Date();
       return (
@@ -236,11 +187,6 @@
       return getCurrentDateTime();
     }
 
-    // ── Shot pipeline ──────────────────────────────────────────────────────
-
-    // Renders one shot (already in shotsData's shape) into the table/pitch.
-    // Used both for a freshly-recorded shot and for replaying stored shots
-    // on load, so it never touches the shotsData array or storage itself.
     function renderShotRow(shot) {
       var rowIndex = table.row.add(buildRowData(shot)).draw().index();
       var rowData = table.row(rowIndex).data();
@@ -259,11 +205,6 @@
       $(table.row(rowIndex).node()).mouseenter();
     }
 
-    // startX/startY/endX/endY: raw sport-space coordinates (already in the
-    // sport's own units — meters, cm, whatever the pitch surface uses), or
-    // null for a coordinate-less Enter-key add. extra: any additional
-    // per-shot fields the sport wants stored (grip/outcome, xG/xSave,
-    // courtType) — merged into the shot object via config.buildShot.
     function addShot(actionType, startX, startY, endX, endY, time, player, extra) {
       let wasDragged =
         startX !== null && startY !== null && endX !== null && endY !== null &&
@@ -314,10 +255,6 @@
       removeDot();
       table.row(row).remove().draw();
     }
-
-    // ── Dot / arrow visualization ──────────────────────────────────────────
-    // Pixel-space helpers — the sport supplies pixel coordinates (already
-    // converted from its own coordinate system via dotPosition/showDot).
 
     function createDot(x, y, id, container) {
       var dot = document.createElement("div");
@@ -402,8 +339,6 @@
       }
     }
 
-    // ── Download ───────────────────────────────────────────────────────────
-
     function downloadCSV() {
       downloadExport(config.endpoints.csv, shotsData, config.csvFilename, "CSV");
     }
@@ -425,8 +360,6 @@
       if (!confirm("Delete all tracked events? This cannot be undone.")) return;
       clearTrackedEvents(store, table, shotsData);
     }
-
-    // ── Timer ──────────────────────────────────────────────────────────────
 
     var elapsedTime = 0;
     var timerInterval = null;
@@ -464,8 +397,6 @@
       document.getElementById("timerDisplay").textContent = `${h}:${m}:${s}`;
     }
 
-    // ── Keyboard shortcut toast ────────────────────────────────────────────
-
     function initKeyboardShortcutToast() {
       if (!localStorage.getItem(keyboardShortcutToastKey)) {
         var toastEl = document.getElementById("keyboardShortcutToast");
@@ -477,10 +408,7 @@
       }
     }
 
-    // ── Keyboard shortcuts ─────────────────────────────────────────────────
-    // Player key -> index maps are derived from home/awayShortcutMap's
-    // "(K)" display strings rather than duplicated as a separate config
-    // field — one source of truth for which key selects which player.
+    // Derive player key maps from "(K)" display strings in home/awayShortcutMap.
     function deriveKeyMap(shortcutMap) {
       const map = {};
       Object.keys(shortcutMap).forEach(function (indexStr) {
@@ -518,8 +446,6 @@
         if (config.requireActionAndPlayerOnEnter && (currentActionType === "" || currentPlayer === "")) {
           return;
         }
-        // Extra per-sport condition (badminton/tennis: grip+outcome must
-        // also be selected) — ANDed with the guard above, not a replacement.
         if (config.enterGuard && !config.enterGuard()) {
           return;
         }
@@ -528,10 +454,6 @@
         return;
       }
 
-      // Remove the most recent entry. Works off the last *visible* row so it
-      // stays correct while the table is filtered, and maps that row back to
-      // an array position rather than assuming display order matches
-      // insertion order.
       if (event.key === "Backspace") {
         event.preventDefault();
 
@@ -560,8 +482,6 @@
         config.cumulativeStats(table.rows({ search: "applied" }).data());
       }
     }
-
-    // ── DataTable init + ready ─────────────────────────────────────────────
 
     $(document).ready(function () {
       table = $("#event-table").DataTable({
@@ -595,9 +515,6 @@
         getCurrentTime, getCurrentDateTime,
       };
 
-      // Sport-owned setup (draw pitch/court, restore dimension selects, wire
-      // click/drag listeners, goal zones, etc), then replay stored shots —
-      // after the sport's own pitch is drawn so dot positions land correctly.
       if (config.onReady) config.onReady(api);
       if (shotsData.length > 0) {
         for (var i = 0; i < shotsData.length; i++) {
@@ -606,7 +523,6 @@
       }
     });
 
-    // Functions referenced by inline onclick="" in the shared base template.
     global.setPlayer = setPlayer;
     global.saveEventNames = saveEventNames;
     global.updatePlayerNames = updatePlayerNames;
