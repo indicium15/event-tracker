@@ -1,0 +1,78 @@
+/* Netball-specific rules only — layout/button/table/footer rules shared
+   with every other sport live in shared/static/tracker-common.css.
+
+   Court is 30.5m x 15.25m (an exact 2:1 aspect ratio), drawn with
+   percentage-positioned divs rather than an SVG/image, following the same
+   approach as floorball's CSS-only pitch markings. Because the court's
+   aspect ratio is exactly 2:1, a shape's height-percent (relative to
+   #pitch's height) is always exactly 2x its width-percent (relative to
+   #pitch's width) for the same real-world size in meters — that factor is
+   used throughout below instead of independently re-deriving each value. */
+
+#pitch {
+  touch-action: none;
+  height: 400px;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  background: #2e7d32;
+  position: relative;
+  border: 1px solid #fff;
+  transition: transform 0.2s ease;
+  overflow: hidden;
+}
+
+.pitch-wrapper {
+  overflow: auto;
+}
+
+.third-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #fff;
+}
+
+/* 10.1667m / 30.5m */
+#thirdLineLeft {
+  left: 33.33%;
+}
+
+/* 20.333m / 30.5m */
+#thirdLineRight {
+  left: 66.67%;
+}
+
+/* Center circle: 1.8m diameter -> 5.90% of width, 11.80% of height */
+.center-circle {
+  position: absolute;
+  width: 5.9%;
+  height: 11.8%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+}
+
+/* Goal circle: 9.8m diameter (4.9m radius) -> 32.13% of width, 64.26% of
+   height. Centered exactly on the goal line so #pitch's overflow:hidden
+   clips it to a semicircle bulging into the court. */
+.goal-circle {
+  position: absolute;
+  width: 32.13%;
+  height: 64.26%;
+  top: 50%;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+}
+
+.goal-circle.left {
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+
+.goal-circle.right {
+  right: 0;
+  transform: translate(50%, -50%);
+}

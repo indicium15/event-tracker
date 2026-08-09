@@ -1,0 +1,190 @@
+{% extends "tracker_base.html" %}
+
+{% block keyboard_toast_body %}
+New: Use keyboard shortcuts to quickly select events and players. Use Enter and Backspace to add and remove events.
+{% endblock %}
+
+{% block help_modal_body %}
+<p>Thanks for using this web app! Here's how to get started with collecting event data:</p>
+<hr>
+<h5>Quickstart</h5>
+<ol type="1">
+  <li>Select an event from the events menu via the mouse or keyboard shortcuts in brackets.</li>
+  <li>Select a player from the player menu via the mouse or keyboard shortcuts in brackets.</li>
+  <li>Click the area of the court where the action occured.</li>
+  <li>To record the start and end points of an action, click and drag the mouse across the court.</li>
+  <li>Press Enter to add an event without coordinates.</li>
+  <li>Press Backspace to remove the last event.</li>
+</ol>
+<hr>
+<h5>Customize Player Details</h5>
+<p>Click on the "Edit" button next to the Home Player or Away Player heading to open a pop-up. Add
+  additional information
+  (jersey numbers, player names) to customize the exported CSV and PDF files.</p>
+<hr>
+<h5>Generate CSV and PDF Reports</h5>
+<p> After tagging the events, click on the "Download CSV" or
+    "Download Report" button to obtain a CSV file of the table or
+    a PDF report that details the actions taken by each player.
+</p>
+{% endblock %}
+
+{% block event_names_placeholder %}Shot (Scored)&#10;Shot (Attempted)&#10;Shot (Missed){% endblock %}
+
+{% block home_player_rows %}
+{% for i in range(1, 13) %}
+<tr>
+  <td><input type="text" class="form-control" id="homeJersey{{ i }}" placeholder="A{{ '%02d' % i }}"></td>
+  <td><input type="text" class="form-control" id="homePlayer{{ i }}" placeholder="Player{{ i }}"></td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block away_player_rows %}
+{% for i in range(1, 13) %}
+<tr>
+  <td><input type="text" class="form-control" id="awayJersey{{ i }}" placeholder="B{{ '%02d' % i }}"></td>
+  <td><input type="text" class="form-control" id="awayPlayer{{ i }}" placeholder="Player{{ i }}"></td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block pitch_section %}
+<div class="row-container">
+  <div class="row mt-1">
+    <h5 class="pitch-heading">Court</h5>
+    <p class="arrow-container mt-2">
+      Direction of Attack <span class="right-arrow"></span>
+    </p>
+  </div>
+  <div class="row">
+    <div class="zoom-controls">
+      <button class="btn btn-outline-primary" onclick="zoomIn()">Zoom In (+)</button>
+      <button class="btn btn-outline-primary" onclick="zoomOut()">Zoom Out (-)</button>
+    </div>
+  </div>
+</div>
+<div class="pitch-container mt-3">
+  <div class="pitch-wrapper">
+    <div id="pitch">
+      <div class="third-line" id="thirdLineLeft"></div>
+      <div class="third-line" id="thirdLineRight"></div>
+      <div class="center-circle"></div>
+      <div class="goal-circle left"></div>
+      <div class="goal-circle right"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block action_selection %}
+<div class="row">
+  <div class="col-auto align-items-center d-flex">
+    <h5 class="heading">Event</h5>
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-outline-secondary edit-event-button" data-bs-toggle="modal" data-bs-target="#editEventNamesModal">
+      Edit
+    </button>
+  </div>
+</div>
+<div class="event-buttons-scroll mt-2">
+  <div id="eventButtonsGrid" class="event-buttons-grid" role="group" aria-label="Event selection buttons"></div>
+</div>
+{% endblock %}
+
+{% block home_player_buttons %}
+{% set home_keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='] %}
+<div class="row align-items-center mt-2">
+  <div class="col-auto align-items-center d-flex">
+    <h5 class="heading mb-0">Home Player</h5>
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
+      data-bs-target="#editHomePlayerNamesModal">
+      Edit
+    </button>
+  </div>
+</div>
+<div class="btn-group button-container" role="group">
+  {% for i in range(1, 7) %}
+  <button id="homePlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('home', {{ i }});">
+    A{{ '%02d' % i }} ({{ home_keys[i - 1] }})
+  </button>
+  {% endfor %}
+</div>
+<div class="btn-group button-container" role="group">
+  {% for i in range(7, 13) %}
+  <button id="homePlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('home', {{ i }});">
+    A{{ '%02d' % i }} ({{ home_keys[i - 1] }})
+  </button>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block away_player_buttons %}
+{% set away_keys = ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F'] %}
+<div class="row align-items-center">
+  <div class="col-auto align-items-center d-flex">
+    <h5 class="heading mb-0">Away Player</h5>
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-outline-secondary edit-player-button" data-bs-toggle="modal"
+      data-bs-target="#editAwayPlayerNamesModal">
+      Edit
+    </button>
+  </div>
+</div>
+<div class="btn-group button-container" role="group">
+  {% for i in range(1, 7) %}
+  <button id="awayPlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('away', {{ i }});">
+    B{{ '%02d' % i }} ({{ away_keys[i - 1] }})
+  </button>
+  {% endfor %}
+</div>
+<div class="btn-group button-container" role="group">
+  {% for i in range(7, 13) %}
+  <button id="awayPlayerButton{{ i }}" class="btn btn-outline-primary player-button"
+    onclick="setPlayer('away', {{ i }});">
+    B{{ '%02d' % i }} ({{ away_keys[i - 1] }})
+  </button>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block cumulative_stats %}
+<h5>Cumulative Statistics</h5>
+<table id="cumulative-table" class="table table-sm table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th scope="col">Goals</th>
+      <th scope="col">Attempts</th>
+      <th scope="col">Turnovers</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="cumulative-goals">0</td>
+      <td id="cumulative-attempts">0</td>
+      <td id="cumulative-turnovers">0</td>
+    </tr>
+  </tbody>
+</table>
+<hr />
+{% endblock %}
+
+{% block event_table_columns %}
+<th scope="col">Shirt Number</th>
+<th scope="col">
+  Event
+  <!--TODO: Add filtering-->
+</th>
+<th scope="col">X1</th>
+<th scope="col">Y1</th>
+<th scope="col">X2</th>
+<th scope="col">Y2</th>
+<th scope="col">X</th>
+{% endblock %}

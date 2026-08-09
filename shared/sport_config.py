@@ -19,6 +19,7 @@ from shared.court_drawers import futsal as futsal_court
 from shared.court_drawers import basketball as basketball_court
 from shared.court_drawers import tennis as tennis_court
 from shared.court_drawers import badminton as badminton_court
+from shared.court_drawers import netball as netball_court
 from shared.court_plot_helpers import ax_plot_arrow, ax_plot_point, make_ax_figure
 
 
@@ -218,6 +219,23 @@ SPORTS: dict = {
             group_key=basketball_court.group_key,
             group_label=basketball_court.group_label,
             group_kwargs=basketball_court.group_kwargs,
+        ),
+    ),
+    "netball": SportConfig(
+        slug="netball",
+        display_name="Netball",
+        template_name="netball_index.html",
+        csv_fieldnames=["time", "player", "playerName", "action", "x", "y", "x2", "y2"],
+        csv_filename="shots_data.csv",
+        pdf_filename="report.pdf",
+        has_favicon=False,
+        dimensions={"length": 30.5, "width": 15.25},
+        pdf=PdfConfig(
+            make_figure=make_ax_figure(netball_court.draw_netball_court),
+            plot_point=ax_plot_point,
+            plot_arrow=ax_plot_arrow,
+            court_kwargs={"court_length": 30.5, "court_width": 15.25},
+            coord_transform=coord_transforms.identity_transform,
         ),
     ),
 }

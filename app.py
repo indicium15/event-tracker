@@ -1,22 +1,9 @@
+import importlib
+
 from flask import Flask, redirect, url_for, render_template, Response, request
 from datetime import datetime
-from football.routes import bp as football_bp
-from floorball.routes import bp as floorball_bp
-from tennis.routes import bp as tennis_bp
-from basketball.routes import bp as basketball_bp
-from badminton.routes import bp as badminton_bp
-from futsal.routes import bp as futsal_bp
 from shared.sport_config import SPORTS
 from shared.blueprint import shared_bp
-
-BLUEPRINTS = {
-    "football": football_bp,
-    "floorball": floorball_bp,
-    "tennis": tennis_bp,
-    "basketball": basketball_bp,
-    "badminton": badminton_bp,
-    "futsal": futsal_bp,
-}
 
 def create_app():
     app = Flask(__name__)
@@ -25,9 +12,13 @@ def create_app():
     # (tracker_base.html, tracker-common.css, tracker-core.js) to every sport.
     app.register_blueprint(shared_bp)
 
-    # Register one blueprint per entry in the SPORTS registry.
+    # Register one blueprint per entry in the SPORTS registry. Imported
+    # dynamically (rather than a top-of-file `from X.routes import bp`
+    # per sport) so adding a new sport is genuinely a SPORTS-dict-only
+    # change, with no second hardcoded list here to keep in sync.
     for slug in SPORTS:
-        app.register_blueprint(BLUEPRINTS[slug])
+        module = importlib.import_module(f"{slug}.routes")
+        app.register_blueprint(module.bp)
 
     # Legacy /<sport> -> /<sport>/ redirects, one per registry entry.
     for slug in SPORTS:
